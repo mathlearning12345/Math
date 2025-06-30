@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One-Step Equations Practice</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .equation-display {
+            background: #f8f9fa;
+            border: 3px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .step {
+            background: #e8f5e8;
+            border-left: 5px solid #48bb78;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 1.1em;
+        }
+
+        .step-number {
+            font-weight: bold;
+            color: #2f855a;
+            margin-bottom: 8px;
+        }
+
+        .operation-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .op-button {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .op-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            background: linear-gradient(45deg, #3182ce, #2c5aa0);
+        }
+
+        .op-button.addition {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+        }
+
+        .op-button.subtraction {
+            background: linear-gradient(45deg, #ed8936, #dd6b20);
+        }
+
+        .op-button.multiplication {
+            background: linear-gradient(45deg, #9f7aea, #805ad5);
+        }
+
+        .op-button.division {
+            background: linear-gradient(45deg, #38b2ac, #319795);
+        }
+
+        .solution-area {
+            background: #fff5f5;
+            border: 2px solid #fed7d7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 200px;
+        }
+
+        .key-concept {
+            background: #ebf8ff;
+            border: 2px solid #bee3f8;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .key-concept h3 {
+            color: #2b6cb0;
+            margin-top: 0;
+        }
+
+        .answer {
+            background: #f0fff4;
+            border: 3px solid #9ae6b4;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2f855a;
+        }
+
+        .new-problem-btn {
+            background: linear-gradient(45deg, #e53e3e, #c53030);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+
+        .new-problem-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 One-Step Equations Practice</h1>
+        
+        <div class="key-concept">
+            <h3>🎯 Goal: Isolate the variable (x) on one side</h3>
+            <p><strong>Key Rule:</strong> Whatever you do to one side of the equation, you must do to the other side!</p>
+        </div>
+
+        <div class="operation-buttons">
+            <button class="op-button addition" onclick="showExample('addition')">
+                ➕ Addition Problems<br><small>x + a = b</small>
+            </button>
+            <button class="op-button subtraction" onclick="showExample('subtraction')">
+                ➖ Subtraction Problems<br><small>x - a = b</small>
+            </button>
+            <button class="op-button multiplication" onclick="showExample('multiplication')">
+                ✖️ Multiplication Problems<br><small>ax = b</small>
+            </button>
+            <button class="op-button division" onclick="showExample('division')">
+                ➗ Division Problems<br><small>x/a = b</small>
+            </button>
+        </div>
+
+        <div id="problemArea" class="solution-area">
+            <h2 style="text-align: center; color: #4a5568;">👆 Click a button above to see a worked example!</h2>
+            <p style="text-align: center; color: #718096;">Each example will show you step-by-step how to solve that type of equation.</p>
+        </div>
+    </div>
+
+    <script>
+        const examples = {
+            addition: {
+                problems: [
+                    { equation: "x + 7 = 15", variable: "x", constant: 7, result: 15, answer: 8 },
+                    { equation: "x + 12 = 25", variable: "x", constant: 12, result: 25, answer: 13 },
+                    { equation: "x + 9 = 20", variable: "x", constant: 9, result: 20, answer: 11 },
+                    { equation: "x + 6 = 18", variable: "x", constant: 6, result: 18, answer: 12 }
+                ],
+                operation: "subtract",
+                operationSymbol: "−",
+                explanation: "To isolate x, we need to get rid of the number being added to x.",
+                rule: "Subtract the same number from both sides"
+            },
+            subtraction: {
+                problems: [
+                    { equation: "x - 5 = 12", variable: "x", constant: 5, result: 12, answer: 17 },
+                    { equation: "x - 8 = 15", variable: "x", constant: 8, result: 15, answer: 23 },
+                    { equation: "x - 3 = 14", variable: "x", constant: 3, result: 14, answer: 17 },
+                    { equation: "x - 6 = 9", variable: "x", constant: 6, result: 9, answer: 15 }
+                ],
+                operation: "add",
+                operationSymbol: "+",
+                explanation: "To isolate x, we need to get rid of the number being subtracted from x.",
+                rule: "Add the same number to both sides"
+            },
+            multiplication: {
+                problems: [
+                    { equation: "4x = 20", variable: "x", constant: 4, result: 20, answer: 5 },
+                    { equation: "6x = 42", variable: "x", constant: 6, result: 42, answer: 7 },
+                    { equation: "3x = 21", variable: "x", constant: 3, result: 21, answer: 7 },
+                    { equation: "5x = 35", variable: "x", constant: 5, result: 35, answer: 7 }
+                ],
+                operation: "divide",
+                operationSymbol: "÷",
+                explanation: "To isolate x, we need to get rid of the number multiplying x.",
+                rule: "Divide both sides by the same number"
+            },
+            division: {
+                problems: [
+                    { equation: "x/3 = 8", variable: "x", constant: 3, result: 8, answer: 24 },
+                    { equation: "x/4 = 7", variable: "x", constant: 4, result: 7, answer: 28 },
+                    { equation: "x/5 = 6", variable: "x", constant: 5, result: 6, answer: 30 },
+                    { equation: "x/2 = 9", variable: "x", constant: 2, result: 9, answer: 18 }
+                ],
+                operation: "multiply",
+                operationSymbol: "×",
+                explanation: "To isolate x, we need to get rid of the division.",
+                rule: "Multiply both sides by the same number"
+            }
+        };
+
+        let currentType = '';
+        let currentProblemIndex = 0;
+
+        function showExample(type) {
+            currentType = type;
+            currentProblemIndex = 0;
+            displayProblem();
+        }
+
+        function displayProblem() {
+            const data = examples[currentType];
+            const problem = data.problems[currentProblemIndex];
+            
+            let html = `
+                <div class="equation-display">
+                    ${problem.equation}
+                </div>
+                
+                <div class="key-concept">
+                    <h3>Strategy: ${data.explanation}</h3>
+                    <p><strong>Rule:</strong> ${data.rule}</p>
+                </div>
+            `;
+
+            // Generate steps based on operation type
+            if (currentType === 'addition') {
+                html += `
+                    <div class="step">
+                        <div class="step-number">Step 1: Identify what to do</div>
+                        We have x + ${problem.constant} = ${problem.result}. To isolate x, we need to subtract ${problem.constant} from both sides.
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">Step 2: Subtract ${problem.constant} from both sides</div>
+                        x + ${problem.constant} ${data.operationSymbol} ${problem.constant} = ${problem.result} ${data.operationSymbol} ${problem.constant}
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">Step 3: Simplify</div>
+                        x + 0 = ${problem.result - problem.constant}<br>
+                        x = ${problem.answer}
+                    </div>
+                `;
+            } else if (currentType === 'subtraction') {
+                html += `
+                    <div class="step">
+                        <div class="step-number">Step 1: Identify what to do</div>
+                        We have x - ${problem.constant} = ${problem.result}. To isolate x, we need to add ${problem.constant} to both sides.
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">Step 2: Add ${problem.constant} to both sides</div>
+                        x - ${problem.constant} ${data.operationSymbol} ${problem.constant} = ${problem.result} ${data.operationSymbol} ${problem.constant}
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">Step 3: Simplify</div>
+                        x - 0 = ${problem.result + problem.constant}<br>
+                        x = ${problem.answer}
+                    </div>
+                `;
+            } else if (currentType === 'multiplication') {
+                html += `
+                    <div class="step">
+                        <div class="step-number">Step 1: Identify what to do</div>
+                        We have ${problem.constant}x = ${problem.result}. To isolate x, we need to divide both sides by ${problem.constant}.
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">Step 2: Divide both sides by ${problem.constant}</div>
+                        ${problem.constant}x ${data.operationSymbol} ${problem.constant} = ${problem.result} ${data.operationSymbol} ${problem.constant}
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">Step 3: Simplify</div>
+                        1x = ${problem.result}/${problem.constant} = ${problem.answer}<br>
+                        x = ${problem.answer}
+                    </div>
+                `;
+            } else if (currentType === 'division') {
+                html += `
+                    <div class="step">
+                        <div class="step-number">Step 1: Identify what to do</div>
+                        We have x/${problem.constant} = ${problem.result}. To isolate x, we need to multiply both sides by ${problem.constant}.
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">Step 2: Multiply both sides by ${problem.constant}</div>
+                        x/${problem.constant} ${data.operationSymbol} ${problem.constant} = ${problem.result} ${data.operationSymbol} ${problem.constant}
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">Step 3: Simplify</div>
+                        x = ${problem.result} × ${problem.constant} = ${problem.answer}
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="answer">
+                    ✅ Answer: x = ${problem.answer}
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">Step 4: Check your answer</div>
+                    Substitute x = ${problem.answer} back into the original equation:<br>
+                    ${problem.equation.replace('x', problem.answer)} ✓
+                </div>
+                
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="new-problem-btn" onclick="nextProblem()">
+                        🔄 Next ${currentType.charAt(0).toUpperCase() + currentType.slice(1)} Problem
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('problemArea').innerHTML = html;
+        }
+
+        function nextProblem() {
+            if (currentType) {
+                currentProblemIndex = (currentProblemIndex + 1) % examples[currentType].problems.length;
+                displayProblem();
+            }
+        }
+    </script>
+</body>
+</html>
