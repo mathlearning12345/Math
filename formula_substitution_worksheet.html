@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formula Substitution and Solving - Practice Worksheet</title>
+    <style>
+        /* PDF-optimized print styles */
+        @media print {
+            body {
+                margin: 0.5in;
+                font-size: 12pt;
+                line-height: 1.4;
+                color: black !important;
+                background: white !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            .problem-row {
+                break-inside: avoid;
+                margin-bottom: 15pt;
+            }
+        }
+
+        /* Screen styles */
+        body {
+            font-family: 'Times New Roman', serif;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .worksheet-container {
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 24pt;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+
+        .header .subtitle {
+            font-size: 14pt;
+            font-style: italic;
+            color: #555;
+        }
+
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .student-info div {
+            flex: 1;
+            margin-right: 30px;
+        }
+
+        .student-info div:last-child {
+            margin-right: 0;
+        }
+
+        .info-line {
+            border-bottom: 1px solid #333;
+            min-height: 20px;
+            margin-top: 5px;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            background: #34495e;
+            color: white;
+            padding: 8px 15px;
+            margin-bottom: 20px;
+            font-size: 16pt;
+            font-weight: bold;
+        }
+
+        .worked-example {
+            background: #e8f5e8;
+            border: 2px solid #27ae60;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .worked-example h4 {
+            margin-top: 0;
+            color: #2f855a;
+            font-size: 14pt;
+        }
+
+        .worked-example .problem-context {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .worked-example .formula-line {
+            font-family: 'Courier New', monospace;
+            font-size: 14pt;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+            background: #f8fff8;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .worked-example .given-values {
+            background: #fff2cd;
+            border: 1px solid #fbbf24;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        .worked-example .solution-step {
+            background: #f8fff8;
+            border: 1px solid #c6f6d5;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .worked-example .step-label {
+            font-weight: bold;
+            color: #2f855a;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .worked-example .final-answer {
+            background: #27ae60;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .problem {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 25px;
+            background: #fafafa;
+        }
+
+        .problem-number {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 14pt;
+        }
+
+        .problem-context {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 11pt;
+        }
+
+        .formula-box {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 14pt;
+            font-weight: bold;
+        }
+
+        .given-section {
+            background: #fff2cd;
+            border: 1px solid #fbbf24;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .given-section h5 {
+            margin-top: 0;
+            color: #92400e;
+        }
+
+        .find-section {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .find-section h5 {
+            margin-top: 0;
+            color: #92400e;
+        }
+
+        .work-space {
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+            min-height: 120px;
+        }
+
+        .work-space .step {
+            margin-bottom: 12px;
+            border-bottom: 1px dotted #ccc;
+            min-height: 20px;
+        }
+
+        .step-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 10pt;
+        }
+
+        .answer-line {
+            border: 2px solid #27ae60;
+            border-radius: 3px;
+            padding: 8px 15px;
+            margin-top: 15px;
+            background: #f8fff8;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .print-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 14pt;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+
+        .print-button:hover {
+            background: #2980b9;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media screen {
+            .worksheet-container {
+                min-height: 11in;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button class="print-button" onclick="window.print()">🖨️ Print Worksheet</button>
+    </div>
+
+    <div class="worksheet-container">
+        <div class="header">
+            <h1>Formula Substitution and Solving</h1>
+            <div class="subtitle">Practice Worksheet</div>
+        </div>
+
+        <div class="student-info">
+            <div>
+                <strong>Name:</strong>
+                <div class="info-line"></div>
+            </div>
+            <div>
+                <strong>Date:</strong>
+                <div class="info-line"></div>
+            </div>
+            <div>
+                <strong>Class Period:</strong>
+                <div class="info-line"></div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📝 Instructions</h3>
+            <p><strong>Follow these steps for each problem:</strong></p>
+            <ol>
+                <li><strong>Read the problem</strong> carefully and identify what you know and what you need to find</li>
+                <li><strong>Write the formula</strong> that relates the variables in the problem</li>
+                <li><strong>Substitute the known values</strong> into the formula</li>
+                <li><strong>Solve for the unknown</strong> using inverse operations</li>
+                <li><strong>Include units</strong> in your final answer</li>
+                <li><strong>Check your work</strong> by substituting your answer back into the original formula</li>
+            </ol>
+        </div>
+
+        <!-- Section A: Geometry Problems -->
+        <div class="section">
+            <div class="section-title">Part A: Geometry Problems</div>
+            
+            <div class="worked-example problem-row">
+                <h4>📖 Worked Example #1:</h4>
+                <div class="problem-context">A rectangular garden has an area of 24 square meters and a length of 8 meters. What is the width?</div>
+                
+                <div class="formula-line">Formula: A = l × w</div>
+                
+                <div class="given-values">
+                    <strong>Given:</strong> A = 24 m², l = 8 m
+                </div>
+                
+                <div class="given-values">
+                    <strong>Find:</strong> w (width)
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 1 - Substitute:</span> 24 = 8 × w
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 2 - Solve:</span> 24 ÷ 8 = w → w = 3
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 3 - Check:</span> A = 8 × 3 = 24 m² ✓
+                </div>
+                
+                <div class="final-answer">Answer: w = 3 meters</div>
+            </div>
+
+            <div class="two-column">
+                <div class="problem problem-row">
+                    <div class="problem-number">2.</div>
+                    <div class="problem-context">A rectangular pool has an area of 32 square meters and a width of 4 meters. What is the length?</div>
+                    
+                    <div class="formula-box">Formula: A = l × w</div>
+                    
+                    <div class="given-section">
+                        <h5>Given:</h5>
+                        <p>A = _____ m², w = _____ m</p>
+                    </div>
+                    
+                    <div class="find-section">
+                        <h5>Find:</h5>
+                        <p>l = _____ (length)</p>
+                    </div>
+                    
+                    <div class="work-space">
+                        <div class="step"><span class="step-label">Step 1 - Substitute:</span></div>
+                        <div class="step"><span class="step-label">Step 2 - Solve:</span></div>
+                        <div class="step"><span class="step-label">Step 3 - Check:</span></div>
+                        <div class="answer-line">l = _____ meters</div>
+                    </div>
+                </div>
+
+                <div class="problem problem-row">
+                    <div class="problem-number">3.</div>
+                    <div class="problem-context">A circle has an area of 78.5 square cm. What is the radius? (Use A = πr², π ≈ 3.14)</div>
+                    
+                    <div class="formula-box">Formula: A = πr²</div>
+                    
+                    <div class="given-section">
+                        <h5>Given:</h5>
+                        <p>A = _____ cm², π = _____</p>
+                    </div>
+                    
+                    <div class="find-section">
+                        <h5>Find:</h5>
+                        <p>r = _____ (radius)</p>
+                    </div>
+                    
+                    <div class="work-space">
+                        <div class="step"><span class="step-label">Step 1 - Substitute:</span></div>
+                        <div class="step"><span class="step-label">Step 2 - Solve for r²:</span></div>
+                        <div class="step"><span class="step-label">Step 3 - Take square root:</span></div>
+                        <div class="answer-line">r = _____ cm</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="problem problem-row">
+                <div class="problem-number">4.</div>
+                <div class="problem-context">A rectangular storage box has a volume of 0.18 cubic meters, length of 0.9 meters, and width of 0.5 meters. What is the height?</div>
+                
+                <div class="formula-box">Formula: V = l × w × h</div>
+                
+                <div class="given-section">
+                    <h5>Given:</h5>
+                    <p>V = _____ m³, l = _____ m, w = _____ m</p>
+                </div>
+                
+                <div class="find-section">
+                    <h5>Find:</h5>
+                    <p>h = _____ (height)</p>
+                </div>
+                
+                <div class="work-space">
+                    <div class="step"><span class="step-label">Step 1 - Substitute:</span></div>
+                    <div class="step"><span class="step-label">Step 2 - Simplify:</span></div>
+                    <div class="step"><span class="step-label">Step 3 - Solve:</span></div>
+                    <div class="step"><span class="step-label">Step 4 - Check:</span></div>
+                    <div class="answer-line">h = _____ meters</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section B: Physics Problems -->
+        <div class="section">
+            <div class="section-title">Part B: Physics Problems</div>
+            
+            <div class="worked-example problem-row">
+                <h4>📖 Worked Example #5:</h4>
+                <div class="problem-context">A car travels 240 kilometers in 3 hours. What is its average speed?</div>
+                
+                <div class="formula-line">Formula: v = d/t</div>
+                
+                <div class="given-values">
+                    <strong>Given:</strong> d = 240 km, t = 3 hours
+                </div>
+                
+                <div class="given-values">
+                    <strong>Find:</strong> v (speed)
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 1 - Substitute:</span> v = 240/3
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 2 - Calculate:</span> v = 80
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 3 - Add units:</span> v = 80 km/h
+                </div>
+                
+                <div class="final-answer">Answer: v = 80 km/h</div>
+            </div>
+
+            <div class="two-column">
+                <div class="problem problem-row">
+                    <div class="problem-number">6.</div>
+                    <div class="problem-context">A cyclist travels 36 kilometers at an average speed of 12 km/h. How long did the trip take?</div>
+                    
+                    <div class="formula-box">Formula: v = d/t</div>
+                    
+                    <div class="given-section">
+                        <h5>Given:</h5>
+                        <p>d = _____ km, v = _____ km/h</p>
+                    </div>
+                    
+                    <div class="find-section">
+                        <h5>Find:</h5>
+                        <p>t = _____ (time)</p>
+                    </div>
+                    
+                    <div class="work-space">
+                        <div class="step"><span class="step-label">Step 1 - Substitute:</span></div>
+                        <div class="step"><span class="step-label">Step 2 - Rearrange:</span></div>
+                        <div class="step"><span class="step-label">Step 3 - Calculate:</span></div>
+                        <div class="answer-line">t = _____ hours</div>
+                    </div>
+                </div>
+
+                <div class="problem problem-row">
+                    <div class="problem-number">7.</div>
+                    <div class="problem-context">What force is needed to accelerate a 20 kg object at 5 m/s²?</div>
+                    
+                    <div class="formula-box">Formula: F = m × a</div>
+                    
+                    <div class="given-section">
+                        <h5>Given:</h5>
+                        <p>m = _____ kg, a = _____ m/s²</p>
+                    </div>
+                    
+                    <div class="find-section">
+                        <h5>Find:</h5>
+                        <p>F = _____ (force)</p>
+                    </div>
+                    
+                    <div class="work-space">
+                        <div class="step"><span class="step-label">Step 1 - Substitute:</span></div>
+                        <div class="step"><span class="step-label">Step 2 - Calculate:</span></div>
+                        <div class="step"><span class="step-label">Step 3 - Add units:</span></div>
+                        <div class="answer-line">F = _____ N</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="problem problem-row">
+                <div class="problem-number">8.</div>
+                <div class="problem-context">A 120 N force causes an object to accelerate at 4 m/s². What is the mass of the object?</div>
+                
+                <div class="formula-box">Formula: F = m × a</div>
+                
+                <div class="given-section">
+                    <h5>Given:</h5>
+                    <p>F = _____ N, a = _____ m/s²</p>
+                </div>
+                
+                <div class="find-section">
+                    <h5>Find:</h5>
+                    <p>m = _____ (mass)</p>
+                </div>
+                
+                <div class="work-space">
+                    <div class="step"><span class="step-label">Step 1 - Substitute:</span></div>
+                    <div class="step"><span class="step-label">Step 2 - Rearrange:</span></div>
+                    <div class="step"><span class="step-label">Step 3 - Calculate:</span></div>
+                    <div class="step"><span class="step-label">Step 4 - Check:</span></div>
+                    <div class="answer-line">m = _____ kg</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section C: Finance Problems -->
+        <div class="section">
+            <div class="section-title">Part C: Finance Problems</div>
+            
+            <div class="worked-example problem-row">
+                <h4>📖 Worked Example #9:</h4>
+                <div class="problem-context">How much interest is earned on €600 invested at 5% annual rate for 3 years?</div>
+                
+                <div class="formula-line">Formula: I = P × R × T</div>
+                
+                <div class="given-values">
+                    <strong>Given:</strong> P = €600, R = 5% = 0.05, T = 3 years
+                </div>
+                
+                <div class="given-values">
+                    <strong>Find:</strong> I (interest)
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 1 - Convert %:</span> 5% = 0.05
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 2 - Substitute:</span> I = 600 × 0.05 × 3
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 3 - Calculate:</span> I = 30 × 3 = 90
+                </div>
+                
+                <div class="final-answer">Answer: I = €90</div>
+            </div>
+
+            <div class="two-column">
+                <div class="problem problem-row">
+                    <div class="problem-number">10.</div>
+                    <div class="problem-context">A store buys items for €12 each and sells them for €20 each. What is the profit per item?</div>
+                    
+                    <div class="formula-box">Formula: Profit = Selling Price - Cost Price</div>
+                    
+                    <div class="given-section">
+                        <h5>Given:</h5>
+                        <p>Selling Price = €_____, Cost Price = €_____</p>
+                    </div>
+                    
+                    <div class="find-section">
+                        <h5>Find:</h5>
+                        <p>Profit = €_____ per item</p>
+                    </div>
+                    
+                    <div class="work-space">
+                        <div class="step"><span class="step-label">Step 1 - Substitute:</span></div>
+                        <div class="step"><span class="step-label">Step 2 - Calculate:</span></div>
+                        <div class="step"><span class="step-label">Step 3 - Check:</span></div>
+                        <div class="answer-line">Profit = €_____ per item</div>
+                    </div>
+                </div>
+
+                <div class="problem problem-row">
+                    <div class="problem-number">11.</div>
+                    <div class="problem-context">What principal amount is needed to earn €72 interest at 6% annual rate for 2 years?</div>
+                    
+                    <div class="formula-box">Formula: I = P × R × T</div>
+                    
+                    <div class="given-section">
+                        <h5>Given:</h5>
+                        <p>I = €_____, R = _____ = _____, T = _____ years</p>
+                    </div>
+                    
+                    <div class="find-section">
+                        <h5>Find:</h5>
+                        <p>P = €_____ (principal)</p>
+                    </div>
+                    
+                    <div class="work-space">
+                        <div class="step"><span class="step-label">Step 1 - Convert %:</span></div>
+                        <div class="step"><span class="step-label">Step 2 - Substitute:</span></div>
+                        <div class="step"><span class="step-label">Step 3 - Rearrange:</span></div>
+                        <div class="step"><span class="step-label">Step 4 - Calculate:</span></div>
+                        <div class="answer-line">P = €_____</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section D: Science Problems -->
+        <div class="section">
+            <div class="section-title">Part D: Science Problems</div>
+            
+            <div class="worked-example problem-row">
+                <h4>📖 Worked Example #12:</h4>
+                <div class="problem-context">A metal block has a mass of 180 grams and a volume of 20 cm³. What is its density?</div>
+                
+                <div class="formula-line">Formula: D = m/V</div>
+                
+                <div class="given-values">
+                    <strong>Given:</strong> m = 180 g, V = 20 cm³
+                </div>
+                
+                <div class="given-values">
+                    <strong>Find:</strong> D (density)
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 1 - Substitute:</span> D = 180/20
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 2 - Calculate:</span> D = 9
+                </div>
+                
+                <div class="solution-step">
+                    <span class="step-label">Step 3 - Add units:</span> D = 9 g/cm³
+                </div>
+                
+                <div class="final-answer">Answer: D = 9 g/cm³</div>
+            </div>
+
+            <div class="two-column">
+                <div class="problem problem-row">
+                    <div class="problem-number">13.</div>
+                    <div class="problem-context">A substance has a density of 2.5 g/cm³ and a mass of 75 grams. What is its volume?</div>
+                    
+                    <div class="formula-box">Formula: D = m/V</div>
+                    
+                    <div class="given-section">
+                        <h5>Given:</h5>
+                        <p>D = _____ g/cm³, m = _____ g</p>
+                    </div>
+                    
+                    <div class="find-section">
+                        <h5>Find:</h5>
+                        <p>V = _____ (volume)</p>
+                    </div>
+                    
+                    <div class="work-space">
+                        <div class="step"><span class="step-label">Step 1 - Substitute:</span></div>
+                        <div class="step"><span class="step-label">Step 2 - Rearrange:</span></div>
+                        <div class="step"><span class="step-label">Step 3 - Calculate:</span></div>
+                        <div class="answer-line">V = _____ cm³</div>
+                    </div>
+                </div>
+
+                <div class="problem problem-row">
+                    <div class="problem-number">14.</div>
+                    <div class="problem-context">If 1.2 moles of salt are dissolved in 3 liters of water, what is the concentration?</div>
+                    
+                    <div class="formula-box">Formula: C = n/V</div>
+                    
+                    <div class="given-section">
+                        <h5>Given:</h5>
+                        <p>n = _____ mol, V = _____ L</p>
+                    </div>
+                    
+                    <div class="find-section">
+                        <h5>Find:</h5>
+                        <p>C = _____ (concentration)</p>
+                    </div>
+                    
+                    <div class="work-space">
+                        <div class="step"><span class="step-label">Step 1 - Substitute:</span></div>
+                        <div class="step"><span class="step-label">Step 2 - Calculate:</span></div>
+                        <div class="step"><span class="step-label">Step 3 - Add units:</span></div>
+                        <div class="answer-line">C = _____ mol/L</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666;">
+            <p><strong>Teacher Use:</strong> Part A ___/4 | Part B ___/4 | Part C ___/3 | Part D ___/3</p>
+            <p><strong>Total Score: ___/14</strong></p>
+        </div>
+    </div>
+
+    <script>
+        // Add smooth print functionality
+        function printWorksheet() {
+            window.print();
+        }
+        
+        // Ensure proper page breaks for printing
+        window.addEventListener('beforeprint', function() {
+            document.body.style.fontSize = '12pt';
+        });
+    </script>
+</body>
+</html>
