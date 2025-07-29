@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Step Equation Practice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .equation-display {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            border: 2px solid #e0e6ff;
+        }
+
+        .step-container {
+            margin: 30px 0;
+            padding: 25px;
+            background: #fafbff;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .step-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .choices {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .choice {
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #e0e6ff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .choice:hover {
+            background: #f0f4ff;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .choice.correct {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .choice.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .choice.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .feedback {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .next-btn, .new-problem-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 10px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .next-btn:hover, .new-problem-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .progress-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #e0e6ff;
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background: #667eea;
+            transform: scale(1.2);
+        }
+
+        .progress-dot.completed {
+            background: #28a745;
+        }
+
+        .score {
+            font-size: 1.2em;
+            color: #333;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+
+        .celebration {
+            animation: bounce 0.6s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Two-Step Equation Practice</h1>
+        
+        <div class="equation-display" id="equation">
+            2x + 5 = 13
+        </div>
+
+        <div class="progress" id="progress">
+            <div class="progress-dot active"></div>
+            <div class="progress-dot"></div>
+        </div>
+
+        <div class="score" id="score">Score: 0/0</div>
+
+        <!-- Step 1 -->
+        <div class="step-container" id="step1">
+            <div class="step-title">Step 1: Isolate the term with the variable</div>
+            <div class="choices" id="step1-choices">
+                <div class="choice" data-step="1" data-answer="A">2x = 13 - 5</div>
+                <div class="choice" data-step="1" data-answer="B">2x = 13 + 5</div>
+                <div class="choice" data-step="1" data-answer="C">x + 5 = 13 ÷ 2</div>
+                <div class="choice" data-step="1" data-answer="D">2x + 5 - 5 = 13 + 5</div>
+            </div>
+            <div class="feedback" id="step1-feedback"></div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-container hidden" id="step2">
+            <div class="step-title">Step 2: Solve for x</div>
+            <div class="choices" id="step2-choices">
+                <div class="choice" data-step="2" data-answer="A">x = 4</div>
+                <div class="choice" data-step="2" data-answer="B">x = 9</div>
+                <div class="choice" data-step="2" data-answer="C">x = 8</div>
+                <div class="choice" data-step="2" data-answer="D">x = 6</div>
+            </div>
+            <div class="feedback" id="step2-feedback"></div>
+        </div>
+
+        <button class="next-btn hidden" id="next-btn" disabled>Next Step</button>
+        <button class="new-problem-btn hidden" id="new-problem-btn">New Problem</button>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let currentProblem = {};
+        let totalProblems = 0;
+        let correctAnswers = 0;
+        let step1Correct = false;
+        let step2Correct = false;
+
+        // Problem templates
+        const problemTemplates = [
+            { a: 2, b: 5, c: 13, step1Correct: 'A', step2Correct: 'A' }, // 2x + 5 = 13
+            { a: 3, b: 7, c: 22, step1Correct: 'A', step2Correct: 'B' }, // 3x + 7 = 22
+            { a: 4, b: -3, c: 17, step1Correct: 'A', step2Correct: 'B' }, // 4x - 3 = 17
+            { a: 5, b: 8, c: 23, step1Correct: 'A', step2Correct: 'A' }, // 5x + 8 = 23
+            { a: 2, b: -4, c: 8, step1Correct: 'A', step2Correct: 'C' }  // 2x - 4 = 8
+        ];
+
+        function generateProblem() {
+            const template = problemTemplates[Math.floor(Math.random() * problemTemplates.length)];
+            currentProblem = { ...template };
+            
+            // Calculate correct answer
+            const x = (currentProblem.c - currentProblem.b) / currentProblem.a;
+            currentProblem.solution = x;
+            
+            displayProblem();
+            resetSteps();
+        }
+
+        function displayProblem() {
+            const { a, b, c } = currentProblem;
+            const sign = b >= 0 ? '+' : '-';
+            const bValue = Math.abs(b);
+            document.getElementById('equation').textContent = `${a}x ${sign} ${bValue} = ${c}`;
+            
+            updateStep1Choices();
+            updateStep2Choices();
+        }
+
+        function updateStep1Choices() {
+            const { a, b, c } = currentProblem;
+            const correctResult = c - b; // Calculate the simplified result
+            const wrongSign = b >= 0 ? '+' : '-';
+            const bValue = Math.abs(b);
+            
+            const choices = [
+                `${a}x = ${correctResult}`, // Correct - simplified result
+                `${a}x = ${c + b}`, // Wrong operation (added instead of subtracted)
+                `x = ${correctResult} ÷ ${a}`, // Wrong approach - jumped to final step
+                `${a}x ${b >= 0 ? '+' : '-'} ${bValue} = ${c} ${b >= 0 ? '-' : '+'} ${bValue}` // Incomplete - showed work but didn't simplify
+            ];
+            
+            const choiceElements = document.querySelectorAll('#step1-choices .choice');
+            choiceElements.forEach((choice, index) => {
+                choice.textContent = choices[index];
+            });
+        }
+
+        function updateStep2Choices() {
+            const correctAnswer = currentProblem.solution;
+            const choices = [
+                correctAnswer,
+                correctAnswer + Math.floor(Math.random() * 3) + 1,
+                correctAnswer + Math.floor(Math.random() * 5) + 2,
+                correctAnswer - Math.floor(Math.random() * 3) - 1
+            ];
+            
+            // Shuffle choices
+            for (let i = choices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [choices[i], choices[j]] = [choices[j], choices[i]];
+            }
+            
+            // Find where correct answer ended up
+            const correctIndex = choices.indexOf(correctAnswer);
+            const correctLetter = String.fromCharCode(65 + correctIndex); // A, B, C, D
+            currentProblem.step2Correct = correctLetter;
+            
+            const choiceElements = document.querySelectorAll('#step2-choices .choice');
+            choiceElements.forEach((choice, index) => {
+                choice.textContent = `x = ${choices[index]}`;
+            });
+        }
+
+        function resetSteps() {
+            currentStep = 1;
+            step1Correct = false;
+            step2Correct = false;
+            
+            // Reset UI
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('new-problem-btn').classList.add('hidden');
+            
+            // Reset choices
+            document.querySelectorAll('.choice').forEach(choice => {
+                choice.classList.remove('correct', 'incorrect', 'disabled');
+            });
+            
+            // Reset feedback
+            document.querySelectorAll('.feedback').forEach(feedback => {
+                feedback.style.display = 'none';
+            });
+            
+            // Reset progress
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const dots = document.querySelectorAll('.progress-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.remove('active', 'completed');
+                if (index + 1 < currentStep) {
+                    dot.classList.add('completed');
+                } else if (index + 1 === currentStep) {
+                    dot.classList.add('active');
+                }
+            });
+        }
+
+        function updateScore() {
+            const percentage = totalProblems > 0 ? Math.round((correctAnswers / (totalProblems * 2)) * 100) : 0;
+            document.getElementById('score').textContent = `Score: ${correctAnswers}/${totalProblems * 2} (${percentage}%)`;
+        }
+
+        function handleChoice(choice) {
+            const step = parseInt(choice.dataset.step);
+            const answer = choice.dataset.answer;
+            const stepChoices = document.querySelectorAll(`#step${step}-choices .choice`);
+            const feedback = document.getElementById(`step${step}-feedback`);
+            
+            // Disable all choices for this step
+            stepChoices.forEach(c => c.classList.add('disabled'));
+            
+            const correctAnswer = currentProblem[`step${step}Correct`];
+            const isCorrect = answer === correctAnswer;
+            
+            if (isCorrect) {
+                choice.classList.add('correct');
+                feedback.textContent = '✓ Correct! Great job!';
+                feedback.className = 'feedback correct';
+                if (step === 1) step1Correct = true;
+                if (step === 2) step2Correct = true;
+                correctAnswers++;
+            } else {
+                choice.classList.add('incorrect');
+                // Highlight the correct answer
+                stepChoices.forEach(c => {
+                    if (c.dataset.answer === correctAnswer) {
+                        c.classList.add('correct');
+                    }
+                });
+                feedback.textContent = '✗ Not quite right. The correct answer is highlighted above.';
+                feedback.className = 'feedback incorrect';
+            }
+            
+            if (step === 1) {
+                document.getElementById('next-btn').classList.remove('hidden');
+                document.getElementById('next-btn').disabled = false;
+            } else if (step === 2) {
+                totalProblems++;
+                updateScore();
+                document.getElementById('new-problem-btn').classList.remove('hidden');
+                if (step1Correct && step2Correct) {
+                    document.querySelector('.container').classList.add('celebration');
+                    setTimeout(() => {
+                        document.querySelector('.container').classList.remove('celebration');
+                    }, 600);
+                }
+            }
+        }
+
+        function nextStep() {
+            if (currentStep === 1) {
+                currentStep = 2;
+                document.getElementById('step2').classList.remove('hidden');
+                document.getElementById('next-btn').classList.add('hidden');
+                updateProgress();
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('choice') && !e.target.classList.contains('disabled')) {
+                handleChoice(e.target);
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', nextStep);
+        document.getElementById('new-problem-btn').addEventListener('click', generateProblem);
+
+        // Initialize
+        generateProblem();
+    </script>
+</body>
+</html>
