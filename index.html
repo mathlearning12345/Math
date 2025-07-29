@@ -63,6 +63,21 @@
         a:hover {
             background: #2980b9;
         }
+        .activity {
+            background: #e8f4fd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .activity h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        .activity a {
+            display: inline-block;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -82,8 +97,43 @@
                 <div class="subject-image">📊</div>
                 <div class="subject-title">Algebra</div>
                 <div class="subject-links">
-                    <a href="algebra.html">Algebra</a>
+                    <a href="#" onclick="showAlgebraActivities()">Algebra</a>
                     <a href="one_step_equations.html">Equations</a>
+                </div>
+                <div id="algebra-activities" style="display: none; margin-top: 20px; text-align: left;">
+                    <div class="activity">
+                        <h3>📊 One-Step Equations</h3>
+                        <p>Practice solving basic algebraic equations with step-by-step guidance.</p>
+                        <a href="one_step_equations.html">Start Practice →</a>
+                    </div>
+                    <div class="activity">
+                        <h3>🔢 Brackets Equations</h3>
+                        <p>Learn to solve equations involving brackets and parentheses with interactive exercises.</p>
+                        <a href="brackets_equations_applet.html">Start Practice →</a>
+                    </div>
+                    <div class="activity">
+                        <h3>➗ Fraction Equations</h3>
+                        <p>Master solving equations with fractions and decimals through guided practice.</p>
+                        <a href="fraction_equations_applet.html">Start Practice →</a>
+                    </div>
+                    <div class="activity">
+                        <h3>🔄 Formula Rearrangement</h3>
+                        <p>Practice rearranging formulas to solve for different variables in scientific contexts.</p>
+                        <a href="formula_rearrangement_applet.html">Start Practice →</a>
+                    </div>
+                    <div class="activity">
+                        <h3>📝 Formula Substitution</h3>
+                        <p>Interactive worksheet for substituting values into formulas and calculating results.</p>
+                        <a href="formula_substitution_worksheet.html">Start Worksheet →</a>
+                    </div>
+                    <div class="activity">
+                        <h3>🎯 Algebra Revision Quiz</h3>
+                        <p>Test your algebra knowledge with this comprehensive revision quiz covering key concepts.</p>
+                        <a href="algebra_revision_quiz.html">Take Quiz →</a>
+                    </div>
+                    <p style="text-align: center; margin-top: 30px; color: #7f8c8d;">
+                        <small>Interactive math activities for classroom learning</small>
+                    </p>
                 </div>
             </div>
 
