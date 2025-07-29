@@ -98,9 +98,19 @@
                 <div class="subject-title">Algebra</div>
                 <div class="subject-links">
                     <a href="#" onclick="showAlgebraActivities()">Algebra</a>
-                    <a href="one_step_equations.html">Equations</a>
+                    <a href="#" onclick="showEquationsActivities()">Equations</a>
                 </div>
                 <div id="algebra-activities" style="display: none; margin-top: 20px; text-align: left;">
+                    <div class="activity">
+                        <h3>🎯 Algebra Revision Quiz</h3>
+                        <p>Test your algebra knowledge with this comprehensive revision quiz covering key concepts.</p>
+                        <a href="algebra_revision_quiz.html">Take Quiz →</a>
+                    </div>
+                    <p style="text-align: center; margin-top: 30px; color: #7f8c8d;">
+                        <small>Interactive math activities for classroom learning</small>
+                    </p>
+                </div>
+                <div id="equations-activities" style="display: none; margin-top: 20px; text-align: left;">
                     <div class="activity">
                         <h3>📊 One-Step Equations</h3>
                         <p>Practice solving basic algebraic equations with step-by-step guidance.</p>
@@ -125,11 +135,6 @@
                         <h3>📝 Formula Substitution</h3>
                         <p>Interactive worksheet for substituting values into formulas and calculating results.</p>
                         <a href="formula_substitution_worksheet.html">Start Worksheet →</a>
-                    </div>
-                    <div class="activity">
-                        <h3>🎯 Algebra Revision Quiz</h3>
-                        <p>Test your algebra knowledge with this comprehensive revision quiz covering key concepts.</p>
-                        <a href="algebra_revision_quiz.html">Take Quiz →</a>
                     </div>
                     <p style="text-align: center; margin-top: 30px; color: #7f8c8d;">
                         <small>Interactive math activities for classroom learning</small>
@@ -162,5 +167,29 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function showAlgebraActivities() {
+            const activities = document.getElementById('algebra-activities');
+            const equations = document.getElementById('equations-activities');
+            equations.style.display = 'none'; // Hide equations when showing algebra
+            if (activities.style.display === 'none') {
+                activities.style.display = 'block';
+            } else {
+                activities.style.display = 'none';
+            }
+        }
+
+        function showEquationsActivities() {
+            const activities = document.getElementById('algebra-activities');
+            const equations = document.getElementById('equations-activities');
+            activities.style.display = 'none'; // Hide algebra when showing equations
+            if (equations.style.display === 'none') {
+                equations.style.display = 'block';
+            } else {
+                equations.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
