@@ -3,98 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Activities Hub</title>
+    <title>Math Learning Hub</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            background-color: #f5f5f5;
         }
+
         .container {
+            max-width: 1200px;
+            margin: 0 auto;
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        h1 {
-            color: #2c3e50;
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
             text-align: center;
+            padding: 40px 20px;
         }
-        .activity {
-            background: #e8f4fd;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        .activity h3 {
-            margin-top: 0;
-            color: #2980b9;
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
         }
-        a {
-            display: inline-block;
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .subject-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            border-left: 6px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            opacity: 0.1;
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .number {
+            border-left-color: #e74c3c;
+        }
+        .number::before {
+            background: #e74c3c;
+        }
+
+        .algebra {
+            border-left-color: #3498db;
+        }
+        .algebra::before {
             background: #3498db;
+        }
+
+        .geometry {
+            border-left-color: #f39c12;
+        }
+        .geometry::before {
+            background: #f39c12;
+        }
+
+        .probability {
+            border-left-color: #9b59b6;
+        }
+        .probability::before {
+            background: #9b59b6;
+        }
+
+        .statistics {
+            border-left-color: #27ae60;
+        }
+        .statistics::before {
+            background: #27ae60;
+        }
+
+        .subject-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .subject-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .subject-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .activities-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .activities-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+
+        .activities-list li:last-child {
+            border-bottom: none;
+        }
+
+        .subject-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .subject-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .quick-start {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .quick-start h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .quick-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .quick-link {
+            background: rgba(255,255,255,0.2);
             color: white;
             padding: 10px 20px;
             text-decoration: none;
-            border-radius: 5px;
-            margin-top: 10px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
-        a:hover {
-            background: #2980b9;
+
+        .quick-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .quick-links {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🧮 Interactive Math Learning Center</h1>
-        
-        <div class="activity">
-            <h3>📊 One-Step Equations</h3>
-            <p>Practice solving basic algebraic equations with step-by-step guidance.</p>
-            <a href="one_step_equations.html">Start Practice →</a>
+        <div class="header">
+            <h1>🧮 Math Learning Hub</h1>
+            <p>Interactive mathematics learning for all levels</p>
         </div>
 
-        <div class="activity">
-            <h3>🔢 Brackets Equations</h3>
-            <p>Learn to solve equations involving brackets and parentheses with interactive exercises.</p>
-            <a href="brackets_equations_applet.html">Start Practice →</a>
+        <div class="main-content">
+            <div class="subjects-grid">
+                <!-- Number -->
+                <div class="subject-card number">
+                    <div class="subject-icon">🔢</div>
+                    <div class="subject-title">Number</div>
+                    <div class="subject-description">
+                        Master fundamental number concepts, operations, and properties. Build a strong foundation in arithmetic and number theory.
+                    </div>
+                    <ul class="activities-list">
+                        <li>Basic Operations & Order of Operations</li>
+                        <li>Fractions, Decimals & Percentages</li>
+                        <li>Number Properties & Prime Numbers</li>
+                        <li>Mental Math Strategies</li>
+                    </ul>
+                    <a href="number.html" class="subject-button">Explore Number →</a>
+                </div>
+
+                <!-- Algebra -->
+                <div class="subject-card algebra">
+                    <div class="subject-icon">📊</div>
+                    <div class="subject-title">Algebra</div>
+                    <div class="subject-description">
+                        Solve equations, work with variables, and understand algebraic relationships. From basic equations to advanced functions.
+                    </div>
+                    <ul class="activities-list">
+                        <li>One-Step & Two-Step Equations</li>
+                        <li>Brackets & Formula Rearrangement</li>
+                        <li>Linear Functions & Graphing</li>
+                        <li>Quadratic Equations</li>
+                    </ul>
+                    <a href="algebra.html" class="subject-button">Explore Algebra →</a>
+                </div>
+
+                <!-- Geometry -->
+                <div class="subject-card geometry">
+                    <div class="subject-icon">📐</div>
+                    <div class="subject-title">Geometry</div>
+                    <div class="subject-description">
+                        Explore shapes, angles, areas, and spatial relationships. Visual and interactive approach to geometric concepts.
+                    </div>
+                    <ul class="activities-list">
+                        <li>Angles & Parallel Lines</li>
+                        <li>Area & Perimeter Calculations</li>
+                        <li>Circle Properties & Theorems</li>
+                        <li>3D Shapes & Volume</li>
+                    </ul>
+                    <a href="geometry.html" class="subject-button">Explore Geometry →</a>
+                </div>
+
+                <!-- Probability -->
+                <div class="subject-card probability">
+                    <div class="subject-icon">🎲</div>
+                    <div class="subject-title">Probability</div>
+                    <div class="subject-description">
+                        Understand chance, likelihood, and uncertainty. Learn to calculate and interpret probabilities in real-world contexts.
+                    </div>
+                    <ul class="activities-list">
+                        <li>Basic Probability Concepts</li>
+                        <li>Tree Diagrams & Sample Spaces</li>
+                        <li>Conditional Probability</li>
+                        <li>Probability Distributions</li>
+                    </ul>
+                    <a href="probability.html" class="subject-button">Explore Probability →</a>
+                </div>
+
+                <!-- Statistics -->
+                <div class="subject-card statistics">
+                    <div class="subject-icon">📈</div>
+                    <div class="subject-title">Statistics</div>
+                    <div class="subject-description">
+                        Collect, analyze, and interpret data. Learn to make informed decisions based on statistical evidence.
+                    </div>
+                    <ul class="activities-list">
+                        <li>Data Collection & Representation</li>
+                        <li>Mean, Median & Mode</li>
+                        <li>Charts, Graphs & Distributions</li>
+                        <li>Correlation & Regression</li>
+                    </ul>
+                    <a href="statistics.html" class="subject-button">Explore Statistics →</a>
+                </div>
+            </div>
+
+            <div class="quick-start">
+                <h3>🚀 Quick Start Activities</h3>
+                <p>Jump straight into popular interactive exercises</p>
+                <div class="quick-links">
+                    <a href="two_step_equations.html" class="quick-link">Two-Step Equations</a>
+                    <a href="one_step_equations.html" class="quick-link">One-Step Equations</a>
+                    <a href="brackets_equations_applet.html" class="quick-link">Brackets Practice</a>
+                    <a href="formula_substitution_worksheet.html" class="quick-link">Formula Substitution</a>
+                    <a href="algebra_revision_quiz.html" class="quick-link">Algebra Quiz</a>
+                </div>
+            </div>
         </div>
 
-        <div class="activity">
-            <h3>➗ Fraction Equations</h3>
-            <p>Master solving equations with fractions and decimals through guided practice.</p>
-            <a href="fraction_equations_applet.html">Start Practice →</a>
+        <div class="footer">
+            <p>Interactive Mathematics Learning Platform • Designed for Students & Educators</p>
         </div>
-
-        <div class="activity">
-            <h3>🔄 Formula Rearrangement</h3>
-            <p>Practice rearranging formulas to solve for different variables in scientific contexts.</p>
-            <a href="formula_rearrangement_applet.html">Start Practice →</a>
-        </div>
-
-        <div class="activity">
-            <h3>📝 Formula Substitution</h3>
-            <p>Interactive worksheet for substituting values into formulas and calculating results.</p>
-            <a href="formula_substitution_worksheet.html">Start Worksheet →</a>
-        </div>
-
-        <div class="activity">
-            <h3>🎯 Algebra Revision Quiz</h3>
-            <p>Test your algebra knowledge with this comprehensive revision quiz covering key concepts.</p>
-            <a href="algebra_revision_quiz.html">Take Quiz →</a>
-        </div>
-        
-
-
-
-
-        
-        <p style="text-align: center; margin-top: 30px; color: #7f8c8d;">
-            <small>Interactive math activities for classroom learning</small>
-        </p>
     </div>
 </body>
 </html>
