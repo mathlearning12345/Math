@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra Revision Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #9f7aea 0%, #667eea 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .header h1 {
+            color: #4a5568;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .setup-section {
+            background: #f7fafc;
+            border: 2px solid #805ad5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .setup-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .control-group {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e0;
+        }
+        
+        .control-group label {
+            font-weight: bold;
+            color: #2d3748;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .topic-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .topic-option {
+            background: #e2e8f0;
+            border: 2px solid #cbd5e0;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        
+        .topic-option.selected {
+            background: #d6bcfa;
+            border-color: #805ad5;
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .difficulty-option {
+            background: #e2e8f0;
+            border: 2px solid #cbd5e0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .difficulty-option.selected {
+            background: #d6bcfa;
+            border-color: #805ad5;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 2px solid #cbd5e0;
+            font-size: 1em;
+            background: white;
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #805ad5 0%, #667eea 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 20px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .rule-box {
+            background: #f0fff4;
+            border: 2px solid #68d391;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .rule-box h3 {
+            color: #2d3748;
+            margin-top: 0;
+        }
+        
+        .algebra-rules {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 10px 0;
+        }
+        
+        .rule-section {
+            background: #fff5f5;
+            border: 1px solid #fc8181;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .rule-section h4 {
+            margin: 0 0 8px 0;
+            color: #742a2a;
+        }
+        
+        .quiz-section {
+            display: none;
+        }
+        
+        .question {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #805ad5;
+            display: none;
+        }
+        
+        .question.active {
+            display: block;
+        }
+        
+        .question-type-badge {
+            display: inline-block;
+            background: #805ad5;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .algebra-problem {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #553c9a;
+            text-align: center;
+            margin: 25px 0;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            border: 2px dashed #805ad5;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .option {
+            background: #edf2f7;
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .option:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+        
+        .option.selected {
+            background: #d6bcfa;
+            border-color: #805ad5;
+        }
+        
+        .option.correct {
+            background: #c6f6d5;
+            border-color: #38a169;
+        }
+        
+        .option.incorrect {
+            background: #fed7d7;
+            border-color: #e53e3e;
+        }
+        
+        .fill-blank-input {
+            width: 200px;
+            padding: 15px;
+            font-size: 1.3em;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: block;
+            margin: 20px auto;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #38a169;
+        }
+        
+        .feedback.incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #e53e3e;
+        }
+        
+        .step-explanation {
+            background: #ebf8ff;
+            border: 1px solid #4299e1;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #2c5282;
+        }
+        
+        .next-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .progress-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(135deg, #805ad5 0%, #667eea 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .question-counter {
+            text-align: center;
+            font-size: 1.1em;
+            color: #4a5568;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .score {
+            text-align: center;
+            font-size: 1.3em;
+            margin-top: 25px;
+            padding: 20px;
+            background: #f0fff4;
+            border-radius: 15px;
+            border: 2px solid #38a169;
+            display: none;
+        }
+        
+        .reset-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 15px auto;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Algebra Revision Quiz</h1>
+            <p>Practice adding, subtracting, multiplying, dividing, and expanding algebraic expressions!</p>
+        </div>
+        
+        <div class="setup-section">
+            <h3>Quiz Settings</h3>
+            <div class="setup-controls">
+                <div class="control-group">
+                    <label>Topics to Include:</label>
+                    <div class="topic-selector">
+                        <div class="topic-option selected" data-topic="add-subtract">Add/Subtract</div>
+                        <div class="topic-option selected" data-topic="multiply">Multiply</div>
+                        <div class="topic-option selected" data-topic="divide">Divide</div>
+                        <div class="topic-option selected" data-topic="expand">Expand Brackets</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Difficulty Level:</label>
+                    <div class="difficulty-selector">
+                        <div class="difficulty-option selected" data-difficulty="easy">Easy</div>
+                        <div class="difficulty-option" data-difficulty="medium">Medium</div>
+                        <div class="difficulty-option" data-difficulty="hard">Hard</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="setup-controls">
+                <div class="control-group">
+                    <label>Number of Questions:</label>
+                    <select id="questionCount">
+                        <option value="8">8 Questions</option>
+                        <option value="10" selected>10 Questions</option>
+                        <option value="12">12 Questions</option>
+                        <option value="15">15 Questions</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Question Type:</label>
+                    <select id="questionType">
+                        <option value="multiple-choice">Multiple Choice</option>
+                        <option value="fill-blank">Fill in the Answer</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="start-btn" onclick="startQuiz()">Start Revision</button>
+        </div>
+        
+        <div class="rule-box">
+            <h3>Algebra Rules Quick Reference:</h3>
+            <div class="algebra-rules">
+                <div class="rule-section">
+                    <h4>Adding/Subtracting</h4>
+                    <p>Only combine like terms:<br>
+                    3x + 2x = 5x<br>
+                    5y - 2y = 3y<br>
+                    3x + 2y cannot be simplified</p>
+                </div>
+                <div class="rule-section">
+                    <h4>Multiplying</h4>
+                    <p>Multiply coefficients and add powers:<br>
+                    3x × 2x = 6x²<br>
+                    4 × 3y = 12y<br>
+                    2x × 5 = 10x</p>
+                </div>
+                <div class="rule-section">
+                    <h4>Dividing</h4>
+                    <p>Divide coefficients and subtract powers:<br>
+                    6x ÷ 2 = 3x<br>
+                    8x ÷ 4x = 2<br>
+                    15y ÷ 3 = 5y</p>
+                </div>
+                <div class="rule-section">
+                    <h4>Expanding Brackets</h4>
+                    <p>Multiply everything inside:<br>
+                    3(x + 2) = 3x + 6<br>
+                    2(3x - 1) = 6x - 2<br>
+                    x(x + 4) = x² + 4x</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="question-counter">
+            <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="quiz-section" id="quizSection"></div>
+        
+        <div class="score" id="scoreDisplay"></div>
+        <button class="reset-btn" onclick="resetToSetup()">New Quiz</button>
+    </div>
+
+    <script>
+        let settings = {
+            topics: ['add-subtract', 'multiply', 'divide', 'expand'],
+            difficulty: 'easy',
+            questionCount: 10,
+            questionType: 'multiple-choice'
+        };
+        
+        let questions = [];
+        let userAnswers = {};
+        let currentQuestionNum = 1;
+        
+        // Setup event listeners
+        document.querySelectorAll('.topic-option').forEach(option => {
+            option.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                const topic = this.dataset.topic;
+                if (this.classList.contains('selected')) {
+                    if (!settings.topics.includes(topic)) {
+                        settings.topics.push(topic);
+                    }
+                } else {
+                    settings.topics = settings.topics.filter(t => t !== topic);
+                }
+            });
+        });
+        
+        document.querySelectorAll('.difficulty-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.difficulty-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                settings.difficulty = this.dataset.difficulty;
+            });
+        });
+        
+        document.getElementById('questionCount').addEventListener('change', function() {
+            settings.questionCount = parseInt(this.value);
+        });
+        
+        document.getElementById('questionType').addEventListener('change', function() {
+            settings.questionType = this.value;
+        });
+        
+        // Algebra problem generation
+        function generateTerm(difficulty, includeCoeff = true) {
+            const variables = ['x', 'y', 'a', 'b'];
+            const variable = variables[Math.floor(Math.random() * variables.length)];
+            
+            let coefficient = 1;
+            if (includeCoeff) {
+                switch(difficulty) {
+                    case 'easy': coefficient = Math.floor(Math.random() * 5) + 2; break; // 2-6
+                    case 'medium': coefficient = Math.floor(Math.random() * 8) + 2; break; // 2-9
+                    case 'hard': coefficient = Math.floor(Math.random() * 12) + 2; break; // 2-13
+                }
+            }
+            
+            return { coefficient, variable };
+        }
+        
+        function generateAddSubtractProblem(difficulty) {
+            const term1 = generateTerm(difficulty);
+            const term2 = generateTerm(difficulty);
+            const operation = Math.random() < 0.5 ? '+' : '-';
+            
+            // Same variable for like terms
+            term2.variable = term1.variable;
+            
+            const expression = `${term1.coefficient}${term1.variable} ${operation} ${term2.coefficient}${term2.variable}`;
+            const answer = operation === '+' 
+                ? `${term1.coefficient + term2.coefficient}${term1.variable}`
+                : `${term1.coefficient - term2.coefficient}${term1.variable}`;
+            
+            return {
+                type: 'Add/Subtract',
+                expression,
+                answer,
+                explanation: `Combine like terms: ${term1.coefficient} ${operation} ${term2.coefficient} = ${operation === '+' ? term1.coefficient + term2.coefficient : term1.coefficient - term2.coefficient}`
+            };
+        }
+        
+        function generateMultiplyProblem(difficulty) {
+            const term1 = generateTerm(difficulty);
+            const term2 = generateTerm(difficulty);
+            
+            // Choose between coefficient × term or term × term
+            if (Math.random() < 0.5) {
+                // coefficient × term (e.g., 3 × 4x = 12x)
+                const coefficient = Math.floor(Math.random() * 6) + 2;
+                const expression = `${coefficient} × ${term1.coefficient}${term1.variable}`;
+                const answer = `${coefficient * term1.coefficient}${term1.variable}`;
+                return {
+                    type: 'Multiply',
+                    expression,
+                    answer,
+                    explanation: `Multiply coefficients: ${coefficient} × ${term1.coefficient} = ${coefficient * term1.coefficient}`
+                };
+            } else {
+                // term × term (e.g., 2x × 3x = 6x²)
+                term2.variable = term1.variable;
+                const expression = `${term1.coefficient}${term1.variable} × ${term2.coefficient}${term2.variable}`;
+                const answer = `${term1.coefficient * term2.coefficient}${term1.variable}²`;
+                return {
+                    type: 'Multiply',
+                    expression,
+                    answer,
+                    explanation: `Multiply coefficients and add powers: ${term1.coefficient} × ${term2.coefficient} = ${term1.coefficient * term2.coefficient}, x¹ × x¹ = x²`
+                };
+            }
+        }
+        
+        function generateDivideProblem(difficulty) {
+            const dividend = generateTerm(difficulty);
+            let divisor;
+            
+            if (Math.random() < 0.5) {
+                // term ÷ coefficient (e.g., 12x ÷ 3 = 4x)
+                divisor = Math.floor(dividend.coefficient / 2) + 1;
+                while (dividend.coefficient % divisor !== 0) {
+                    divisor = Math.floor(Math.random() * dividend.coefficient) + 1;
+                }
+                const expression = `${dividend.coefficient}${dividend.variable} ÷ ${divisor}`;
+                const answer = `${dividend.coefficient / divisor}${dividend.variable}`;
+                return {
+                    type: 'Divide',
+                    expression,
+                    answer,
+                    explanation: `Divide coefficient: ${dividend.coefficient} ÷ ${divisor} = ${dividend.coefficient / divisor}`
+                };
+            } else {
+                // term ÷ term (e.g., 8x ÷ 2x = 4)
+                divisor = generateTerm(difficulty);
+                divisor.variable = dividend.variable;
+                while (dividend.coefficient % divisor.coefficient !== 0) {
+                    divisor.coefficient = Math.floor(Math.random() * dividend.coefficient) + 1;
+                }
+                const expression = `${dividend.coefficient}${dividend.variable} ÷ ${divisor.coefficient}${divisor.variable}`;
+                const answer = `${dividend.coefficient / divisor.coefficient}`;
+                return {
+                    type: 'Divide',
+                    expression,
+                    answer,
+                    explanation: `Divide coefficients: ${dividend.coefficient} ÷ ${divisor.coefficient} = ${dividend.coefficient / divisor.coefficient}, x ÷ x = 1`
+                };
+            }
+        }
+        
+        function generateExpandProblem(difficulty) {
+            const outside = Math.floor(Math.random() * 5) + 2; // 2-6
+            const term1 = generateTerm(difficulty, false);
+            const term2 = Math.floor(Math.random() * 8) + 1; // 1-8
+            const operation = Math.random() < 0.5 ? '+' : '-';
+            
+            const expression = `${outside}(${term1.variable} ${operation} ${term2})`;
+            const answer = operation === '+' 
+                ? `${outside}${term1.variable} + ${outside * term2}`
+                : `${outside}${term1.variable} - ${outside * term2}`;
+            
+            return {
+                type: 'Expand Brackets',
+                expression,
+                answer,
+                explanation: `Multiply each term: ${outside} × ${term1.variable} = ${outside}${term1.variable}, ${outside} × ${operation}${term2} = ${operation}${outside * term2}`
+            };
+        }
+        
+        function generateWrongAnswers(correct, problemType, expression) {
+            const wrong = new Set();
+            
+            // Extract numbers from correct answer for variations
+            const numbers = correct.match(/\d+/g) || [];
+            const hasVariable = /[a-z]/i.test(correct);
+            
+            // Generate common mistakes based on problem type
+            switch(problemType) {
+                case 'Add/Subtract':
+                    if (numbers.length > 0) {
+                        const num = parseInt(numbers[0]);
+                        wrong.add(`${num + 1}x`);
+                        wrong.add(`${num - 1}x`);
+                        wrong.add(`${num}y`);
+                    }
+                    break;
+                case 'Multiply':
+                    if (numbers.length > 0) {
+                        const num = parseInt(numbers[0]);
+                        wrong.add(`${num + 2}x`);
+                        wrong.add(`${Math.floor(num / 2)}x²`);
+                        wrong.add(`${num}x`);
+                    }
+                    break;
+                case 'Divide':
+                    if (numbers.length > 0) {
+                        const num = parseInt(numbers[0]);
+                        wrong.add(`${num * 2}x`);
+                        wrong.add(`${num + 1}`);
+                        wrong.add(`${num}x`);
+                    }
+                    break;
+                case 'Expand Brackets':
+                    if (numbers.length >= 2) {
+                        const [first, second] = numbers.map(n => parseInt(n));
+                        wrong.add(`${first}x + ${second}`);
+                        wrong.add(`${first + second}x`);
+                        wrong.add(`${first}x - ${second - 1}`);
+                    }
+                    break;
+            }
+            
+            // Add more generic wrong answers
+            while (wrong.size < 3) {
+                if (hasVariable) {
+                    const randomNum = Math.floor(Math.random() * 20) + 1;
+                    const randomVar = ['x', 'y'][Math.floor(Math.random() * 2)];
+                    wrong.add(`${randomNum}${randomVar}`);
+                } else {
+                    wrong.add(`${Math.floor(Math.random() * 20) + 1}`);
+                }
+            }
+            
+            return Array.from(wrong).filter(ans => ans !== correct).slice(0, 3);
+        }
+        
+        function generateQuestions() {
+            questions = [];
+            const problemGenerators = {
+                'add-subtract': generateAddSubtractProblem,
+                'multiply': generateMultiplyProblem,
+                'divide': generateDivideProblem,
+                'expand': generateExpandProblem
+            };
+            
+            const selectedTopics = settings.topics.length > 0 ? settings.topics : ['add-subtract'];
+            
+            for (let i = 0; i < settings.questionCount; i++) {
+                const topic = selectedTopics[Math.floor(Math.random() * selectedTopics.length)];
+                const problemData = problemGenerators[topic](settings.difficulty);
+                const wrongAnswers = generateWrongAnswers(problemData.answer, problemData.type, problemData.expression);
+                const allAnswers = [problemData.answer, ...wrongAnswers];
+                
+                // Shuffle answers
+                for (let j = allAnswers.length - 1; j > 0; j--) {
+                    const k = Math.floor(Math.random() * (j + 1));
+                    [allAnswers[j], allAnswers[k]] = [allAnswers[k], allAnswers[j]];
+                }
+                
+                questions.push({
+                    id: i + 1,
+                    type: problemData.type,
+                    expression: problemData.expression,
+                    correctAnswer: problemData.answer,
+                    explanation: problemData.explanation,
+                    options: allAnswers
+                });
+            }
+        }
+        
+        function startQuiz() {
+            if (settings.topics.length === 0) {
+                alert('Please select at least one topic!');
+                return;
+            }
+            
+            document.querySelector('.setup-section').style.display = 'none';
+            document.querySelector('.rule-box').style.display = 'block';
+            document.querySelector('.question-counter').style.display = 'block';
+            document.querySelector('.progress-bar').style.display = 'block';
+            document.querySelector('.quiz-section').style.display = 'block';
+            
+            generateQuestions();
+            document.getElementById('totalQuestions').textContent = settings.questionCount;
+            
+            userAnswers = {};
+            currentQuestionNum = 1;
+            
+            const quizSection = document.getElementById('quizSection');
+            quizSection.innerHTML = '';
+            
+            questions.forEach((question, index) => {
+                let questionHTML = `
+                    <div class="question ${index === 0 ? 'active' : ''}" data-question="${question.id}">
+                        <div class="question-type-badge">${question.type}</div>
+                        <h3>Question ${question.id}</h3>
+                        <div class="algebra-problem">${question.expression}</div>
+                `;
+                
+                if (settings.questionType === 'multiple-choice') {
+                    questionHTML += `<div class="options">`;
+                    question.options.forEach(option => {
+                        questionHTML += `<div class="option" data-answer="${option}">${option}</div>`;
+                    });
+                    questionHTML += `</div>`;
+                } else {
+                    questionHTML += `
+                        <div style="text-align: center;">
+                            <p>Enter your answer:</p>
+                            <input type="text" class="fill-blank-input" placeholder="e.g. 5x or 12">
+                        </div>
+                    `;
+                }
+                
+                questionHTML += `
+                        <div class="feedback"></div>
+                        <button class="next-btn" onclick="nextQuestion()">${index === questions.length - 1 ? 'Finish Quiz' : 'Next Question'}</button>
+                    </div>
+                `;
+                
+                quizSection.innerHTML += questionHTML;
+            });
+            
+            // Add event listeners
+            if (settings.questionType === 'multiple-choice') {
+                document.querySelectorAll('.option').forEach(option => {
+                    option.addEventListener('click', handleMultipleChoice);
+                });
+            } else {
+                document.querySelectorAll('.fill-blank-input').forEach(input => {
+                    input.addEventListener('input', handleFillBlank);
+                });
+            }
+            
+            updateProgress();
+        }
+        
+        function handleMultipleChoice() {
+            const question = this.closest('.question');
+            const questionNum = question.dataset.question;
+            
+            question.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            userAnswers[questionNum] = this.dataset.answer;
+            checkCurrentAnswer(question, questionNum);
+        }
+        
+        function handleFillBlank() {
+            const question = this.closest('.question');
+            const questionNum = question.dataset.question;
+            const userAnswer = this.value.trim().replace(/\s+/g, '');
+            
+            if (userAnswer) {
+                userAnswers[questionNum] = userAnswer;
+                checkCurrentAnswer(question, questionNum);
+            }
+        }
+        
+        function normalizeAnswer(answer) {
+            return answer.replace(/\s+/g, '').toLowerCase();
+        }
+        
+        function checkCurrentAnswer(question, questionNum) {
+            const questionData = questions.find(q => q.id == questionNum);
+            const userAnswer = userAnswers[questionNum];
+            const correctAnswer = questionData.correctAnswer;
+            const feedback = question.querySelector('.feedback');
+            const nextBtn = question.querySelector('.next-btn');
+            
+            if (settings.questionType === 'multiple-choice') {
+                question.querySelectorAll('.option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+            }
+            
+            const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(correctAnswer);
+            
+            if (isCorrect) {
+                if (settings.questionType === 'multiple-choice') {
+                    question.querySelector(`[data-answer="${correctAnswer}"]`).classList.add('correct');
+                }
+                
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `✅ Correct! The answer is ${correctAnswer}`;
+                
+                feedback.innerHTML += `<div class="step-explanation">
+                    <strong>Explanation:</strong> ${questionData.explanation}
+                </div>`;
+                
+                feedback.style.display = 'block';
+            } else {
+                if (settings.questionType === 'multiple-choice') {
+                    const incorrectOption = question.querySelector(`[data-answer="${userAnswer}"]`);
+                    if (incorrectOption) incorrectOption.classList.add('incorrect');
+                    question.querySelector(`[data-answer="${correctAnswer}"]`).classList.add('correct');
+                }
+                
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `❌ The correct answer is ${correctAnswer}`;
+                
+                feedback.innerHTML += `<div class="step-explanation">
+                    <strong>Explanation:</strong> ${questionData.explanation}
+                </div>`;
+                
+                feedback.style.display = 'block';
+            }
+            
+            nextBtn.style.display = 'inline-block';
+        }
+        
+        function nextQuestion() {
+            document.querySelector(`[data-question="${currentQuestionNum}"]`).classList.remove('active');
+            
+            if (currentQuestionNum < questions.length) {
+                currentQuestionNum++;
+                document.querySelector(`[data-question="${currentQuestionNum}"]`).classList.add('active');
+                updateProgress();
+            } else {
+                showFinalScore();
+            }
+        }
+        
+        function updateProgress() {
+            const progress = (currentQuestionNum - 1) / questions.length * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('currentQuestion').textContent = currentQuestionNum;
+        }
+        
+        function showFinalScore() {
+            document.querySelectorAll('.question').forEach(q => q.classList.remove('active'));
+            
+            let score = 0;
+            let topicScores = {};
+            
+            // Initialize topic scores
+            settings.topics.forEach(topic => {
+                topicScores[topic] = { correct: 0, total: 0 };
+            });
+            
+            questions.forEach(question => {
+                const isCorrect = normalizeAnswer(userAnswers[question.id] || '') === normalizeAnswer(question.correctAnswer);
+                if (isCorrect) {
+                    score++;
+                }
+                
+                // Track by topic
+                const topicKey = getTopicKey(question.type);
+                if (topicScores[topicKey]) {
+                    topicScores[topicKey].total++;
+                    if (isCorrect) {
+                        topicScores[topicKey].correct++;
+                    }
+                }
+            });
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            
+            let message = '';
+            if (percentage >= 90) message = 'Outstanding! You\'ve mastered algebra basics!';
+            else if (percentage >= 80) message = 'Great work! You understand algebraic operations well!';
+            else if (percentage >= 70) message = 'Good job! Keep practicing to improve!';
+            else if (percentage >= 60) message = 'Not bad! Review the rules and try again!';
+            else message = 'Keep practicing! Review each topic and try again!';
+            
+            // Create topic breakdown
+            let topicBreakdown = '<div style="margin-top: 15px; font-size: 0.9em;"><strong>Topic Breakdown:</strong><br>';
+            Object.keys(topicScores).forEach(topic => {
+                const topicData = topicScores[topic];
+                if (topicData.total > 0) {
+                    const topicPercentage = Math.round((topicData.correct / topicData.total) * 100);
+                    const topicName = getTopicDisplayName(topic);
+                    topicBreakdown += `${topicName}: ${topicData.correct}/${topicData.total} (${topicPercentage}%)<br>`;
+                }
+            });
+            topicBreakdown += '</div>';
+            
+            document.getElementById('scoreDisplay').innerHTML = `
+                <h3>Quiz Complete!</h3>
+                <h2>Score: ${score}/${questions.length} (${percentage}%)</h2>
+                <p>${message}</p>
+                ${topicBreakdown}
+            `;
+            document.getElementById('scoreDisplay').style.display = 'block';
+            document.querySelector('.reset-btn').style.display = 'block';
+            document.getElementById('progressFill').style.width = '100%';
+        }
+        
+        function getTopicKey(displayName) {
+            const mapping = {
+                'Add/Subtract': 'add-subtract',
+                'Multiply': 'multiply',
+                'Divide': 'divide',
+                'Expand Brackets': 'expand'
+            };
+            return mapping[displayName] || displayName.toLowerCase();
+        }
+        
+        function getTopicDisplayName(key) {
+            const mapping = {
+                'add-subtract': 'Add/Subtract',
+                'multiply': 'Multiply',
+                'divide': 'Divide',
+                'expand': 'Expand Brackets'
+            };
+            return mapping[key] || key;
+        }
+        
+        function resetToSetup() {
+            document.querySelector('.setup-section').style.display = 'block';
+            document.querySelector('.rule-box').style.display = 'none';
+            document.querySelector('.question-counter').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+            document.querySelector('.quiz-section').style.display = 'none';
+            document.getElementById('scoreDisplay').style.display = 'none';
+            document.querySelector('.reset-btn').style.display = 'none';
+            document.getElementById('progressFill').style.width = '0%';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

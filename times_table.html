@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customizable Times Tables Practice (2-12)</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 650px;
+            text-align: center;
+        }
+        h1 {
+            color: #3498db;
+            margin-top: 0;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .question {
+            font-size: 32px;
+            margin: 20px 0;
+            color: #333;
+            line-height: 1.4;
+            min-height: 45px;
+        }
+        .timer {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .input-section {
+            margin: 20px 0;
+        }
+        input {
+            font-size: 24px;
+            padding: 10px;
+            width: 120px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .feedback {
+            font-size: 20px;
+            margin: 20px 0;
+            min-height: 30px;
+        }
+        .correct {
+            color: #2ecc71;
+        }
+        .incorrect {
+            color: #e74c3c;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .score {
+            font-weight: bold;
+            font-size: 24px;
+            color: #3498db;
+        }
+        .operation-buttons {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .operation-btn {
+            background-color: #95a5a6;
+            margin: 5px;
+            font-size: 16px;
+            min-width: 120px;
+        }
+        .operation-btn.active {
+            background-color: #3498db;
+        }
+        .tables-selection {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 15px 0;
+            max-width: 100%;
+        }
+        .table-btn {
+            width: 45px;
+            height: 45px;
+            margin: 5px;
+            padding: 0;
+            font-size: 16px;
+            background-color: #bdc3c7;
+            color: #333;
+        }
+        .table-btn.selected {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .tables-container {
+            margin-top: 20px;
+        }
+        .tables-toggle {
+            background-color: #9b59b6;
+            margin: 10px auto;
+            display: block;
+        }
+        .difficulty-buttons {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+        }
+        .difficulty-btn {
+            background-color: #95a5a6;
+            margin: 0 5px;
+            font-size: 16px;
+        }
+        .difficulty-btn.active {
+            background-color: #e67e22;
+        }
+        .reference-table {
+            margin-top: 20px;
+            overflow-x: auto;
+            display: none;
+        }
+        .ref-table {
+            border-collapse: collapse;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 500px;
+        }
+        .ref-table th, .ref-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .ref-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        .ref-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .show-table-btn {
+            background-color: #27ae60;
+            margin-top: 20px;
+        }
+        .options-panel {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .option-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .option-label {
+            min-width: 150px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .control-btn {
+            background-color: #34495e;
+            padding: 8px 15px;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .settings-btn {
+            background-color: #f39c12;
+            margin-top: 20px;
+        }
+        .quick-select {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .quick-select-btn {
+            background-color: #16a085;
+            font-size: 14px;
+            padding: 5px 10px;
+            margin: 5px;
+        }
+        .start-btn {
+            background-color: #2ecc71;
+            font-size: 20px;
+            padding: 12px 30px;
+            margin: 20px auto;
+            display: block;
+        }
+        .range-selection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .range-input {
+            width: 60px;
+            text-align: center;
+            margin: 0 10px;
+        }
+        .welcome-screen {
+            text-align: center;
+        }
+        .practice-screen {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome/Setup Screen -->
+        <div id="welcomeScreen" class="welcome-screen">
+            <h1>Times Tables Practice</h1>
+            <div class="subtitle">Customize your times tables practice from 2 to 12</div>
+            
+            <div class="options-panel">
+                <div class="option-row">
+                    <div class="option-label">Operation:</div>
+                    <button id="setupMultiplyBtn" class="operation-btn active">Multiplication</button>
+                    <button id="setupDivideBtn" class="operation-btn">Division</button>
+                    <button id="setupMixedBtn" class="operation-btn">Mixed</button>
+                </div>
+                
+                <div class="option-row">
+                    <div class="option-label">Times Tables:</div>
+                </div>
+                
+                <div class="quick-select">
+                    <button id="selectAllBtn" class="quick-select-btn">Select All</button>
+                    <button id="selectNoneBtn" class="quick-select-btn">Clear All</button>
+                    <button id="selectEvenBtn" class="quick-select-btn">Even (2,4,6...)</button>
+                    <button id="selectOddBtn" class="quick-select-btn">Odd (3,5,7...)</button>
+                </div>
+                
+                <div class="tables-selection" id="setupTablesSelection">
+                    <!-- Table buttons will be added here dynamically -->
+                </div>
+                
+                <div class="option-row">
+                    <div class="option-label">Number Range:</div>
+                    <div class="range-selection">
+                        <span>From:</span>
+                        <input type="number" id="minRange" class="range-input" value="1" min="1" max="12">
+                        <span>To:</span>
+                        <input type="number" id="maxRange" class="range-input" value="12" min="1" max="20">
+                    </div>
+                </div>
+            </div>
+            
+            <button id="startPracticeBtn" class="start-btn">Start Practice</button>
+            
+            <button id="setupShowTableBtn" class="show-table-btn">Show Times Tables</button>
+            <div class="reference-table" id="setupReferenceTable">
+                <table class="ref-table" id="setupRefTable">
+                    <!-- Reference table will be generated here -->
+                </table>
+            </div>
+        </div>
+        
+        <!-- Practice Screen -->
+        <div id="practiceScreen" class="practice-screen">
+            <h1>Times Tables Practice</h1>
+            <div id="practiceSummary" class="subtitle">Practicing the 2 times table</div>
+            
+            <div class="timer">Time: <span id="time">0</span> seconds</div>
+            <div class="question" id="question"></div>
+            <div class="input-section">
+                <input type="number" id="answer" placeholder="Answer">
+                <button id="check">Check</button>
+                <button id="next">Next Question</button>
+            </div>
+            <div class="feedback" id="feedback"></div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div>Correct</div>
+                    <div class="score" id="correct">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>Total</div>
+                    <div class="score" id="total">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>Accuracy</div>
+                    <div class="score" id="accuracy">0%</div>
+                </div>
+            </div>
+            
+            <button id="settingsBtn" class="settings-btn">Change Settings</button>
+            
+            <button id="practiceShowTableBtn" class="show-table-btn">Show Times Tables</button>
+            <div class="reference-table" id="practiceReferenceTable">
+                <table class="ref-table" id="practiceRefTable">
+                    <!-- Reference table will be generated here -->
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elements - Welcome/Setup Screen
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const setupMultiplyBtn = document.getElementById('setupMultiplyBtn');
+        const setupDivideBtn = document.getElementById('setupDivideBtn');
+        const setupMixedBtn = document.getElementById('setupMixedBtn');
+        const setupTablesSelection = document.getElementById('setupTablesSelection');
+        const minRangeInput = document.getElementById('minRange');
+        const maxRangeInput = document.getElementById('maxRange');
+        const startPracticeBtn = document.getElementById('startPracticeBtn');
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        const selectNoneBtn = document.getElementById('selectNoneBtn');
+        const selectEvenBtn = document.getElementById('selectEvenBtn');
+        const selectOddBtn = document.getElementById('selectOddBtn');
+        const setupShowTableBtn = document.getElementById('setupShowTableBtn');
+        const setupReferenceTable = document.getElementById('setupReferenceTable');
+        const setupRefTable = document.getElementById('setupRefTable');
+        
+        // Elements - Practice Screen
+        const practiceScreen = document.getElementById('practiceScreen');
+        const practiceSummary = document.getElementById('practiceSummary');
+        const questionElement = document.getElementById('question');
+        const answerInput = document.getElementById('answer');
+        const checkButton = document.getElementById('check');
+        const nextButton = document.getElementById('next');
+        const feedbackElement = document.getElementById('feedback');
+        const correctElement = document.getElementById('correct');
+        const totalElement = document.getElementById('total');
+        const accuracyElement = document.getElementById('accuracy');
+        const timeElement = document.getElementById('time');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const practiceShowTableBtn = document.getElementById('practiceShowTableBtn');
+        const practiceReferenceTable = document.getElementById('practiceReferenceTable');
+        const practiceRefTable = document.getElementById('practiceRefTable');
+
+        // Variables
+        let currentQuestion;
+        let correctAnswers = 0;
+        let totalQuestions = 0;
+        let startTime;
+        let timerInterval;
+        let currentOperation = 'multiply'; // 'multiply', 'divide', or 'mixed'
+        let selectedTables = []; // Tables selected for practice
+        let minRange = 1; // Min number for factors/divisors
+        let maxRange = 12; // Max number for factors/divisors
+
+        // Initialize tables selection
+        function initializeTablesSelection() {
+            setupTablesSelection.innerHTML = '';
+            
+            // Create buttons for tables 2-12
+            for (let i = 2; i <= 12; i++) {
+                const tableBtn = document.createElement('button');
+                tableBtn.textContent = i;
+                tableBtn.classList.add('table-btn');
+                tableBtn.dataset.table = i;
+                
+                // Initially select tables 2-5
+                if (i >= 2 && i <= 5) {
+                    tableBtn.classList.add('selected');
+                    if (!selectedTables.includes(i)) {
+                        selectedTables.push(i);
+                    }
+                }
+                
+                tableBtn.addEventListener('click', function() {
+                    // Toggle selection
+                    this.classList.toggle('selected');
+                    
+                    // Update selected tables array
+                    const tableNumber = parseInt(this.dataset.table);
+                    if (this.classList.contains('selected')) {
+                        if (!selectedTables.includes(tableNumber)) {
+                            selectedTables.push(tableNumber);
+                            selectedTables.sort((a, b) => a - b);
+                        }
+                    } else {
+                        selectedTables = selectedTables.filter(num => num !== tableNumber);
+                    }
+                });
+                
+                setupTablesSelection.appendChild(tableBtn);
+            }
+        }
+
+        // Generate a new question
+        function generateQuestion() {
+            if (selectedTables.length === 0) {
+                questionElement.textContent = "Please select at least one times table.";
+                return;
+            }
+            
+            let table, number, operation;
+            
+            // Determine operation
+            if (currentOperation === 'mixed') {
+                operation = Math.random() < 0.5 ? 'multiply' : 'divide';
+            } else {
+                operation = currentOperation;
+            }
+            
+            // Select a random times table from selected tables
+            table = selectedTables[Math.floor(Math.random() * selectedTables.length)];
+            
+            // Select a random number within the range
+            number = Math.floor(Math.random() * (maxRange - minRange + 1)) + minRange;
+            
+            // For division, ensure we have a clean division (product of table * number)
+            if (operation === 'divide') {
+                // Create a division problem from the multiplication
+                const product = table * number;
+                
+                // Division: product ÷ table = number
+                currentQuestion = {
+                    table: table,
+                    number: number,
+                    firstNumber: product,
+                    secondNumber: table,
+                    operation: operation,
+                    answer: number
+                };
+                
+                questionElement.textContent = `${product} ÷ ${table} = ?`;
+            } else {
+                // Multiplication: table × number = product
+                currentQuestion = {
+                    table: table,
+                    number: number,
+                    firstNumber: table,
+                    secondNumber: number,
+                    operation: operation,
+                    answer: table * number
+                };
+                
+                questionElement.textContent = `${table} × ${number} = ?`;
+            }
+            
+            answerInput.value = '';
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+            answerInput.focus();
+        }
+
+        // Start timer
+        function startTimer() {
+            clearInterval(timerInterval); // Clear any existing timer
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Update timer
+        function updateTimer() {
+            const currentTime = new Date();
+            const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+            timeElement.textContent = elapsedSeconds;
+        }
+
+        // Check the answer
+        function checkAnswer() {
+            const userAnswer = parseInt(answerInput.value);
+            
+            if (isNaN(userAnswer)) {
+                feedbackElement.textContent = 'Please enter a number.';
+                feedbackElement.className = 'feedback incorrect';
+                return;
+            }
+            
+            totalQuestions++;
+            totalElement.textContent = totalQuestions;
+            
+            if (userAnswer === currentQuestion.answer) {
+                correctAnswers++;
+                correctElement.textContent = correctAnswers;
+                feedbackElement.textContent = 'Correct! 👍';
+                feedbackElement.className = 'feedback correct';
+                
+                // Generate new question after correct answer
+                setTimeout(generateQuestion, 1000);
+            } else {
+                feedbackElement.textContent = `Incorrect. The correct answer is ${currentQuestion.answer}.`;
+                feedbackElement.className = 'feedback incorrect';
+            }
+            
+            updateAccuracy();
+        }
+
+        // Update accuracy percentage
+        function updateAccuracy() {
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            accuracyElement.textContent = `${accuracy}%`;
+        }
+
+        // Switch operation mode in setup
+        function setupSwitchOperation(operation) {
+            currentOperation = operation;
+            
+            // Update active button styling
+            setupMultiplyBtn.classList.remove('active');
+            setupDivideBtn.classList.remove('active');
+            setupMixedBtn.classList.remove('active');
+            
+            switch (operation) {
+                case 'multiply':
+                    setupMultiplyBtn.classList.add('active');
+                    break;
+                case 'divide':
+                    setupDivideBtn.classList.add('active');
+                    break;
+                case 'mixed':
+                    setupMixedBtn.classList.add('active');
+                    break;
+            }
+        }
+
+        // Generate reference table
+        function generateReferenceTable(targetTable) {
+            targetTable.innerHTML = '';
+            
+            // Create header row
+            const headerRow = document.createElement('tr');
+            const cornerHeader = document.createElement('th');
+            cornerHeader.textContent = '×';
+            headerRow.appendChild(cornerHeader);
+            
+            for (let i = 1; i <= 12; i++) {
+                const th = document.createElement('th');
+                th.textContent = i;
+                headerRow.appendChild(th);
+            }
+            
+            targetTable.appendChild(headerRow);
+            
+            // Create rows for each times table (2-12)
+            for (let i = 2; i <= 12; i++) {
+                const row = document.createElement('tr');
+                
+                // Row header
+                const rowHeader = document.createElement('th');
+                rowHeader.textContent = i;
+                row.appendChild(rowHeader);
+                
+                // Multiplication results
+                for (let j = 1; j <= 12; j++) {
+                    const cell = document.createElement('td');
+                    cell.textContent = i * j;
+                    row.appendChild(cell);
+                }
+                
+                targetTable.appendChild(row);
+            }
+        }
+
+        // Start practice session
+        function startPractice() {
+            // Get settings
+            minRange = parseInt(minRangeInput.value) || 1;
+            maxRange = parseInt(maxRangeInput.value) || 12;
+            
+            // Validate inputs
+            if (minRange < 1) minRange = 1;
+            if (maxRange > 20) maxRange = 20;
+            if (maxRange < minRange) {
+                const temp = minRange;
+                minRange = maxRange;
+                maxRange = temp;
+            }
+            
+            // Validate at least one table is selected
+            if (selectedTables.length === 0) {
+                alert("Please select at least one times table.");
+                return;
+            }
+            
+            // Update minRange and maxRange inputs to reflect actual values used
+            minRangeInput.value = minRange;
+            maxRangeInput.value = maxRange;
+            
+            // Create a summary text
+            let summaryText = `Practicing `;
+            if (selectedTables.length === 1) {
+                summaryText += `the ${selectedTables[0]} times table`;
+            } else if (selectedTables.length === 11) {
+                summaryText += `all times tables`;
+            } else {
+                summaryText += `times tables: ${selectedTables.join(', ')}`;
+            }
+            
+            summaryText += ` (${currentOperation === 'mixed' ? 'mixed operations' : currentOperation === 'multiply' ? 'multiplication' : 'division'})`;
+            
+            practiceSummary.textContent = summaryText;
+            
+            // Switch screens
+            welcomeScreen.style.display = 'none';
+            practiceScreen.style.display = 'block';
+            
+            // Reset stats
+            correctAnswers = 0;
+            totalQuestions = 0;
+            correctElement.textContent = '0';
+            totalElement.textContent = '0';
+            accuracyElement.textContent = '0%';
+            
+            // Start practice
+            generateQuestion();
+            startTimer();
+        }
+
+        // Return to setup screen
+        function backToSetup() {
+            clearInterval(timerInterval);
+            practiceScreen.style.display = 'none';
+            welcomeScreen.style.display = 'block';
+        }
+
+        // Initialize Quick Select buttons
+        function setupQuickSelectButtons() {
+            // Select All button
+            selectAllBtn.addEventListener('click', function() {
+                selectedTables = [];
+                const tableBtns = document.querySelectorAll('.table-btn');
+                tableBtns.forEach(btn => {
+                    btn.classList.add('selected');
+                    selectedTables.push(parseInt(btn.dataset.table));
+                });
+                selectedTables.sort((a, b) => a - b);
+            });
+            
+            // Select None button
+            selectNoneBtn.addEventListener('click', function() {
+                selectedTables = [];
+                const tableBtns = document.querySelectorAll('.table-btn');
+                tableBtns.forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+            });
+            
+            // Select Even button
+            selectEvenBtn.addEventListener('click', function() {
+                selectedTables = [];
+                const tableBtns = document.querySelectorAll('.table-btn');
+                tableBtns.forEach(btn => {
+                    const tableNum = parseInt(btn.dataset.table);
+                    if (tableNum % 2 === 0) {
+                        btn.classList.add('selected');
+                        selectedTables.push(tableNum);
+                    } else {
+                        btn.classList.remove('selected');
+                    }
+                });
+                selectedTables.sort((a, b) => a - b);
+            });
+            
+            // Select Odd button
+            selectOddBtn.addEventListener('click', function() {
+                selectedTables = [];
+                const tableBtns = document.querySelectorAll('.table-btn');
+                tableBtns.forEach(btn => {
+                    const tableNum = parseInt(btn.dataset.table);
+                    if (tableNum % 2 !== 0) {
+                        btn.classList.add('selected');
+                        selectedTables.push(tableNum);
+                    } else {
+                        btn.classList.remove('selected');
+                    }
+                });
+                selectedTables.sort((a, b) => a - b);
+            });
+        }
+
+        // Initialize the app
+        function init() {
+            // Initialize tables selection
+            initializeTablesSelection();
+            
+            // Generate reference tables
+            generateReferenceTable(setupRefTable);
+            generateReferenceTable(practiceRefTable);
+            
+            // Setup Quick Select buttons
+            setupQuickSelectButtons();
+            
+            // Setup Show/Hide Table buttons
+            setupShowTableBtn.addEventListener('click', function() {
+                if (setupReferenceTable.style.display === 'block') {
+                    setupReferenceTable.style.display = 'none';
+                    setupShowTableBtn.textContent = 'Show Times Tables';
+                } else {
+                    setupReferenceTable.style.display = 'block';
+                    setupShowTableBtn.textContent = 'Hide Times Tables';
+                }
+            });
+            
+            practiceShowTableBtn.addEventListener('click', function() {
+                if (practiceReferenceTable.style.display === 'block') {
+                    practiceReferenceTable.style.display = 'none';
+                    practiceShowTableBtn.textContent = 'Show Times Tables';
+                } else {
+                    practiceReferenceTable.style.display = 'block';
+                    practiceShowTableBtn.textContent = 'Hide Times Tables';
+                }
+            });
+            
+            // Setup Operation buttons
+            setupMultiplyBtn.addEventListener('click', function() {
+                setupSwitchOperation('multiply');
+            });
+            
+            setupDivideBtn.addEventListener('click', function() {
+                setupSwitchOperation('divide');
+            });
+            
+            setupMixedBtn.addEventListener('click', function() {
+                setupSwitchOperation('mixed');
+            });
+            
+            // Start Practice button
+            startPracticeBtn.addEventListener('click', startPractice);
+            
+            // Check Answer button
+            checkButton.addEventListener('click', checkAnswer);
+            
+            // Next Question button
+            nextButton.addEventListener('click', generateQuestion);
+            
+            // Settings button (back to setup)
+            settingsBtn.addEventListener('click', backToSetup);
+            
+            // Enter key for answer input
+            answerInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+            
+            // Number range validation
+            minRangeInput.addEventListener('change', function() {
+                const value = parseInt(this.value);
+                if (value < 1) this.value = 1;
+                if (value > 12) this.value = 12;
+            });
+            
+            maxRangeInput.addEventListener('change', function() {
+                const value = parseInt(this.value);
+                if (value < 1) this.value = 1;
+                if (value > 20) this.value = 20;
+            });
+        }
+
+        // Initialize on page load
+        init();
+    </script>
+</body>
+</html>
