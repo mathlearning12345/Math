@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Equations Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f5f2ee;--card:#fff;--ink:#1a1208;--mid:#7a7060;
+  --faint:#e4e0da;--acc:#2563eb;--acc-lt:#dbeafe;
+  --grn:#166534;--grn-lt:#dcfce7;--grn-b:#86efac;
+  --red:#991b1b;--red-lt:#fee2e2;--red-b:#fca5a5;
+  --radius:12px;--sh:0 2px 14px rgba(0,0,0,0.07);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+.hdr{background:var(--ink);padding:0 1.5rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.hdr-logo{font-family:'DM Serif Display',serif;color:#fff;font-size:1.05rem;}
+.hdr-logo em{color:#fbbf24;font-style:normal;}
+.hdr-back{display:none;background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);padding:5px 13px;border-radius:6px;cursor:pointer;font:500 0.78rem 'DM Sans',sans-serif;}
+.hdr-back.on{display:block;}
+.hdr-back:hover{background:rgba(255,255,255,0.1);}
+.screen{display:none;}
+.screen.on{display:block;animation:up 0.28s ease;}
+@keyframes up{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── FRACTIONS ── */
+.mathfrac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:-0.55em;margin:0 4px;line-height:1.1;}
+.mnum{border-bottom:2px solid currentColor;padding:0 5px 3px;text-align:center;min-width:18px;}
+.mden{padding:3px 5px 0;text-align:center;min-width:18px;}
+
+/* ── SETUP ── */
+#sSetup{max-width:680px;margin:0 auto;padding:2.5rem 1.5rem 4rem;}
+.su-title{font-family:'DM Serif Display',serif;font-size:2rem;line-height:1.2;margin-bottom:0.3rem;}
+.su-sub{font-size:0.88rem;color:var(--mid);margin-bottom:2rem;}
+.lbl{font-size:0.67rem;letter-spacing:0.13em;text-transform:uppercase;color:var(--mid);font-weight:600;margin-bottom:0.7rem;display:flex;justify-content:space-between;align-items:center;}
+.lbl-act{font-size:0.72rem;letter-spacing:0;text-transform:none;color:var(--acc);cursor:pointer;font-weight:500;}
+.lbl-act:hover{text-decoration:underline;}
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.55rem;margin-bottom:1.75rem;}
+@media(max-width:460px){.topic-grid{grid-template-columns:1fr;}}
+.t-tile{position:relative;}
+.t-tile input{position:absolute;opacity:0;width:0;height:0;}
+.t-tile label{display:flex;align-items:center;gap:0.7rem;background:var(--card);border:1.5px solid var(--faint);border-radius:10px;padding:0.8rem 1rem;cursor:pointer;transition:all 0.15s;user-select:none;}
+.t-tile label:hover{border-color:#93c5fd;background:#f8faff;}
+.t-tile input:checked+label{border-color:var(--acc);background:var(--acc-lt);}
+.t-icon{font-size:1.1rem;flex-shrink:0;width:24px;text-align:center;}
+.t-name{font-size:0.85rem;font-weight:500;line-height:1.35;}
+.mode-row{display:flex;gap:0.55rem;margin-bottom:1.75rem;}
+.m-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0.85rem 0.5rem;border:1.5px solid var(--faint);border-radius:10px;background:var(--card);cursor:pointer;font:500 0.85rem 'DM Sans',sans-serif;color:var(--mid);transition:all 0.15s;}
+.m-btn:hover{border-color:#93c5fd;}
+.m-btn.sel{border-color:var(--acc);background:var(--acc-lt);color:var(--acc);}
+.m-icon{font-size:1.4rem;}
+.start-btn{width:100%;padding:13px;background:var(--acc);color:#fff;border:none;border-radius:var(--radius);font:600 1rem 'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s;}
+.start-btn:hover{background:#1d4ed8;}
+.start-btn:disabled{background:#93c5fd;cursor:not-allowed;}
+.start-note{text-align:center;font-size:0.77rem;color:var(--mid);margin-top:0.55rem;}
+
+/* ── QUIZ ── */
+#sQuiz{max-width:640px;margin:0 auto;padding:1.25rem 1.5rem 4rem;}
+.q-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;}
+.q-tag{font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mid);font-weight:600;}
+.q-right{display:flex;gap:8px;align-items:center;}
+.q-num{font-size:0.82rem;color:var(--mid);}
+.q-pill{background:var(--acc-lt);color:var(--acc);font-size:0.75rem;font-weight:600;padding:2px 10px;border-radius:99px;}
+.diff-bar{display:flex;gap:3px;margin-bottom:0.5rem;}
+.diff-pip{height:5px;flex:1;border-radius:99px;background:var(--faint);transition:background 0.3s;}
+.diff-pip.on{background:var(--acc);}
+.prog{height:5px;background:var(--faint);border-radius:99px;margin-bottom:1.4rem;overflow:hidden;}
+.prog-f{height:100%;background:var(--acc);border-radius:99px;transition:width 0.35s;}
+.q-card{background:var(--card);border:1px solid var(--faint);border-radius:16px;padding:1.75rem;box-shadow:var(--sh);}
+.q-topic{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mid);font-weight:600;margin-bottom:0.5rem;}
+.q-instr{font-size:0.88rem;color:var(--mid);margin-bottom:0.75rem;}
+.q-eq{font-family:'DM Serif Display',serif;font-size:1.85rem;color:var(--ink);line-height:1.5;margin-bottom:0.35rem;word-break:break-word;}
+.q-ctx{font-size:0.87rem;color:#555;line-height:1.6;background:#f0f5ff;border-left:3px solid #93c5fd;padding:0.5rem 0.75rem;border-radius:0 6px 6px 0;margin-top:0.6rem;margin-bottom:0.4rem;display:none;}
+.q-ctx.on{display:block;}
+.q-hint{font-size:0.78rem;color:var(--mid);margin-top:0.4rem;font-style:italic;}
+.type-area{margin-top:1.25rem;display:none;}
+.type-area.on{display:block;}
+.type-lbl{font-size:0.85rem;color:var(--mid);margin-bottom:0.4rem;font-weight:500;}
+.type-row{display:flex;gap:0.5rem;}
+.type-in{flex:1;padding:11px 14px;font-size:1.05rem;font-family:'DM Serif Display',serif;border:1.5px solid var(--faint);border-radius:var(--radius);outline:none;color:var(--ink);background:#fafaf8;transition:border-color 0.2s;}
+.type-in:focus{border-color:var(--acc);}
+.type-in.ok{border-color:var(--grn)!important;background:var(--grn-lt);}
+.type-in.no{border-color:var(--red)!important;background:var(--red-lt);}
+.chk-btn{padding:11px 20px;background:var(--acc);color:#fff;border:none;border-radius:var(--radius);font:600 0.88rem 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:background 0.15s;}
+.chk-btn:hover{background:#1d4ed8;}
+.chk-btn:disabled{background:#93c5fd;cursor:not-allowed;}
+.mc-area{display:none;margin-top:1.25rem;}
+.mc-area.on{display:grid;grid-template-columns:1fr 1fr;gap:0.55rem;}
+@media(max-width:420px){.mc-area.on{grid-template-columns:1fr;}}
+.mc-opt{padding:0.85rem;background:#fafaf8;border:1.5px solid var(--faint);border-radius:var(--radius);font:400 1.05rem 'DM Serif Display',serif;color:var(--ink);cursor:pointer;transition:all 0.15s;text-align:center;}
+.mc-opt:hover:not(:disabled){border-color:var(--acc);background:var(--acc-lt);}
+.mc-opt.ok{border-color:var(--grn);background:var(--grn-lt);color:var(--grn);}
+.mc-opt.no{border-color:var(--red);background:var(--red-lt);color:var(--red);}
+.mc-opt.show-ans{border-color:var(--grn);background:var(--grn-lt);color:var(--grn);}
+.mc-opt:disabled{cursor:default;}
+.fb{border-radius:10px;padding:0.9rem 1.1rem;font-size:0.87rem;line-height:1.65;margin-top:0.9rem;display:none;}
+.fb.on{display:block;}
+.fb.ok{background:var(--grn-lt);border:1px solid var(--grn-b);color:var(--grn);}
+.fb.no{background:var(--red-lt);border:1px solid var(--red-b);color:var(--red);}
+.fb-head{font-weight:700;font-size:0.9rem;margin-bottom:5px;}
+.fb-work{font-size:0.83rem;opacity:0.9;line-height:1.8;}
+.next-btn{display:none;width:100%;padding:12px;margin-top:0.75rem;background:var(--ink);color:#fff;border:none;border-radius:var(--radius);font:600 0.95rem 'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s;}
+.next-btn:hover{background:#2d2010;}
+.next-btn.on{display:block;}
+
+/* ── RESULTS ── */
+#sResults{max-width:600px;margin:0 auto;padding:2.5rem 1.5rem 4rem;}
+.res-head{text-align:center;margin-bottom:2rem;}
+.res-em{font-size:3rem;margin-bottom:0.5rem;}
+.res-score{font-family:'DM Serif Display',serif;font-size:3.5rem;color:var(--acc);letter-spacing:-0.02em;}
+.res-pct{font-size:0.85rem;color:var(--mid);margin:0.15rem 0 0.6rem;}
+.res-msg{font-size:0.95rem;color:var(--ink);line-height:1.65;}
+.rev-label{font-size:0.67rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);font-weight:600;margin:1.5rem 0 0.75rem;}
+.rev-item{background:var(--card);border:1px solid var(--faint);border-radius:var(--radius);padding:0.9rem 1rem;margin-bottom:0.55rem;display:flex;gap:0.7rem;align-items:flex-start;}
+.rev-ic{font-size:0.95rem;flex-shrink:0;margin-top:2px;}
+.rev-q{font-size:0.78rem;color:var(--mid);margin-bottom:2px;}
+.rev-eq{font-family:'DM Serif Display',serif;font-size:1rem;margin-bottom:3px;word-break:break-word;}
+.rev-ans{font-size:0.8rem;color:var(--mid);line-height:1.7;}
+.ans-ok{color:var(--grn);font-weight:600;}
+.ans-no{color:var(--red);font-weight:600;}
+.rev-work{font-size:0.75rem;color:#bbb;margin-top:2px;}
+.res-btns{display:flex;gap:0.55rem;margin-top:1.5rem;}
+.btn-out{flex:1;padding:12px;background:none;border:1.5px solid var(--faint);border-radius:var(--radius);font:600 0.88rem 'DM Sans',sans-serif;color:var(--ink);cursor:pointer;transition:all 0.15s;}
+.btn-out:hover{border-color:var(--acc);color:var(--acc);}
+.btn-fill{flex:1;padding:12px;background:var(--acc);border:none;border-radius:var(--radius);font:600 0.88rem 'DM Sans',sans-serif;color:#fff;cursor:pointer;transition:background 0.15s;}
+.btn-fill:hover{background:#1d4ed8;}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <span class="hdr-logo">Maths <em>Applets</em></span>
+  <button class="hdr-back" id="backBtn" onclick="goBack()">← Back</button>
+</header>
+
+<div id="sSetup" class="screen on">
+  <h1 class="su-title">Equations Quiz</h1>
+  <p class="su-sub">Pick topics and answer style. Questions get harder from Q1 to Q10.</p>
+  <div class="lbl">Topics — pick one or more
+    <span class="lbl-act" id="selAllBtn" onclick="toggleAll()">Select all</span>
+  </div>
+  <div class="topic-grid">
+    <div class="t-tile"><input type="checkbox" id="t0" value="oneStep" checked/><label for="t0"><span class="t-icon">1️⃣</span><span class="t-name">One Step Equations</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t1" value="twoStep"/><label for="t1"><span class="t-icon">2️⃣</span><span class="t-name">Two Step Equations</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t2" value="fraction"/><label for="t2"><span class="t-icon">½</span><span class="t-name">Equations with Fractions</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t3" value="bothSides"/><label for="t3"><span class="t-icon">⚖️</span><span class="t-name">Pronumeral Both Sides</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t4" value="brackets"/><label for="t4"><span class="t-icon">( )</span><span class="t-name">Equations with Brackets</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t5" value="formulas"/><label for="t5"><span class="t-icon">📐</span><span class="t-name">Formulas</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t6" value="quadratic"/><label for="t6"><span class="t-icon">x²</span><span class="t-name">Simple Quadratics</span></label></div>
+  </div>
+  <div class="lbl" style="margin-bottom:0.7rem;">Answer style</div>
+  <div class="mode-row">
+    <button class="m-btn sel" id="mType" onclick="setMode('type')"><span class="m-icon">⌨️</span>Type your answer</button>
+    <button class="m-btn" id="mMC" onclick="setMode('mc')"><span class="m-icon">🔘</span>Multiple choice</button>
+  </div>
+  <button class="start-btn" id="startBtn" onclick="startQuiz()">Start Quiz →</button>
+  <p class="start-note">10 questions · difficulty increases Q1→Q10</p>
+</div>
+
+<div id="sQuiz" class="screen">
+  <div class="q-top">
+    <span class="q-tag" id="qTag"></span>
+    <div class="q-right">
+      <span class="q-num" id="qNum"></span>
+      <span class="q-pill" id="qPill">0 ✓</span>
+    </div>
+  </div>
+  <div class="diff-bar" id="diffBar"></div>
+  <div class="prog"><div class="prog-f" id="progF" style="width:0%"></div></div>
+  <div class="q-card">
+    <p class="q-topic" id="qTopic"></p>
+    <p class="q-instr" id="qInstr"></p>
+    <div class="q-eq" id="qEq"></div>
+    <div class="q-ctx" id="qCtx"></div>
+    <p class="q-hint" id="qHint"></p>
+    <div class="type-area" id="typeArea">
+      <p class="type-lbl" id="typeLbl">x =</p>
+      <div class="type-row">
+        <input class="type-in" id="typeIn" type="text" placeholder="your answer" autocomplete="off" spellcheck="false"/>
+        <button class="chk-btn" id="chkBtn" onclick="submitType()">Check</button>
+      </div>
+    </div>
+    <div class="mc-area" id="mcArea"></div>
+    <div class="fb" id="fb">
+      <div class="fb-head" id="fbHead"></div>
+      <div class="fb-work" id="fbWork"></div>
+    </div>
+  </div>
+  <button class="next-btn" id="nextBtn" onclick="nextQ()">Next question →</button>
+</div>
+
+<div id="sResults" class="screen">
+  <div class="res-head">
+    <div class="res-em" id="resEm"></div>
+    <div class="res-score" id="resSc"></div>
+    <div class="res-pct" id="resPct"></div>
+    <div class="res-msg" id="resMsg"></div>
+  </div>
+  <div class="rev-label">Question review</div>
+  <div id="revList"></div>
+  <div class="res-btns">
+    <button class="btn-out" onclick="goSetup()">Change topics</button>
+    <button class="btn-fill" onclick="startQuiz()">Play again ↻</button>
+  </div>
+</div>
+
+<script>
+const ri   = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick = a=>a[Math.floor(Math.random()*a.length)];
+const sh   = a=>[...a].sort(()=>Math.random()-0.5);
+
+function frac(num,den){return `<span class="mathfrac"><span class="mnum">${num}</span><span class="mden">${den}</span></span>`;}
+
+function dv(lv,lo1,hi1,lo2,hi2){
+  const t=Math.min(1,(lv-1)/9);
+  return ri(Math.round(lo1+t*(lo2-lo1)),Math.round(hi1+t*(hi2-hi1)));
+}
+
+function wrongNums(ans){
+  const s=new Set();
+  const offsets=sh([-1,1,-2,2,-3,3,-5,5,-7,7]);
+  for(const o of offsets){
+    if(s.size>=3) break;
+    const w=ans+o;
+    if(w!==ans) s.add(w);
+  }
+  // fallbacks
+  let fb=ans+11; while(s.has(fb)||fb===ans) fb++;
+  while(s.size<3){ s.add(fb); fb++; }
+  return[...s].slice(0,3);
+}
+
+let mode='type',questions=[],cur=0,score=0,busy=false,log=[];
+
+const G={
+
+  oneStep(lv){
+    const t=lv<=3?pick(['xpa','xma']):lv<=6?pick(['xpa','xma','ax']):pick(['xpa','xma','ax','xda']);
+    let eq,ans,sv='x',steps;
+    if(t==='xpa'){
+      const a=dv(lv,2,10,5,25),x=dv(lv,1,10,3,20);
+      eq=`x + ${a} = ${x+a}`; ans=x; steps=`x = ${x+a} − ${a} = ${x}`;
+    } else if(t==='xma'){
+      const a=dv(lv,2,12,5,20),x=dv(lv,1,15,2,25);
+      const b=x-a;
+      eq=`x − ${a} = ${b}`; ans=x;
+      steps=`x = ${b} + ${a} = ${x}`;
+    } else if(t==='ax'){
+      const a=dv(lv,2,8,3,12),x=dv(lv,1,12,2,18);
+      eq=`${a}x = ${a*x}`; ans=x; steps=`x = ${a*x} ÷ ${a} = ${x}`;
+    } else {
+      const a=dv(lv,2,6,3,10),x=dv(lv,2,12,3,18);
+      eq=`x ÷ ${a} = ${x}`; ans=a*x; steps=`x = ${x} × ${a} = ${a*x}`;
+    }
+    return{topic:'One Step Equations',instr:'Solve for x',eq,ans,solveFor:'x',steps};
+  },
+
+  twoStep(lv){
+    const t=lv<=3?'axpb':lv<=6?pick(['axpb','axmb']):pick(['axpb','axmb','bmax','negAns']);
+    let eq,ans,steps;
+    if(t==='axpb'){
+      const a=dv(lv,2,5,2,8),b=dv(lv,1,12,2,20),x=dv(lv,1,8,1,12);
+      const c=a*x+b; eq=`${a}x + ${b} = ${c}`; ans=x;
+      steps=`${a}x = ${c}−${b} = ${c-b}\nx = ${c-b}÷${a} = ${x}`;
+    } else if(t==='axmb'){
+      const a=dv(lv,2,6,3,9),b=dv(lv,1,12,2,18),x=dv(lv,1,10,1,14);
+      const c=a*x-b; eq=`${a}x − ${b} = ${c}`; ans=x;
+      steps=`${a}x = ${c}+${b} = ${c+b}\nx = ${c+b}÷${a} = ${x}`;
+    } else if(t==='bmax'){
+      const a=dv(lv,2,6,3,8),x=dv(lv,1,8,1,10),b=a*x+dv(lv,2,15,5,25);
+      const c=b-a*x; eq=`${b} − ${a}x = ${c}`; ans=x;
+      steps=`${a}x = ${b}−${c} = ${b-c}\nx = ${b-c}÷${a} = ${x}`;
+    } else {
+      // negative answer
+      const a=dv(lv,3,8,4,10),b=dv(lv,5,20,8,30);
+      const x=-(ri(1,5)); const c=a*x+b;
+      eq=`${a}x + ${b} = ${c}`; ans=x;
+      steps=`${a}x = ${c}−${b} = ${c-b}\nx = ${c-b}÷${a} = ${x}`;
+    }
+    return{topic:'Two Step Equations',instr:'Solve for x',eq,ans,solveFor:'x',steps};
+  },
+
+  fraction(lv){
+    // All displayed with horizontal fraction line
+    const t=lv<=2?'simple':lv<=4?'xoaPb':lv<=6?'xpAoB':lv<=8?'xmAoB':'axoB';
+    let eq,ans,solveFor='x',steps;
+    if(t==='simple'){
+      const a=dv(lv,2,6,3,8),x=dv(lv,2,12,3,18);
+      eq=frac('x',`${a}`)+` = ${x}`; ans=a*x;
+      steps=`x ÷ ${a} = ${x}\nx = ${x} × ${a} = ${a*x}`;
+    } else if(t==='xoaPb'){
+      // x/a + b = c
+      const a=dv(lv,2,6,3,8),b=dv(lv,1,10,2,14),gap=dv(lv,1,6,2,10);
+      const x=a*gap,c=gap+b;
+      eq=frac('x',`${a}`)+` + ${b} = ${c}`; ans=x;
+      steps=`x ÷ ${a} = ${c} − ${b} = ${gap}\nx = ${gap} × ${a} = ${x}`;
+    } else if(t==='xpAoB'){
+      // (x+a)/b = c
+      const b=dv(lv,2,6,3,8),a=dv(lv,1,8,1,12),c=dv(lv,2,8,2,10);
+      const x=b*c-a; if(x<1) return G.fraction(lv);
+      eq=frac(`x + ${a}`,`${b}`)+` = ${c}`; ans=x;
+      steps=`x + ${a} = ${c} × ${b} = ${b*c}\nx = ${b*c} − ${a} = ${x}`;
+    } else if(t==='xmAoB'){
+      // (x-a)/b = c
+      const b=dv(lv,2,6,3,8),a=dv(lv,1,10,2,14),c=dv(lv,1,8,2,10);
+      const x=b*c+a;
+      eq=frac(`x − ${a}`,`${b}`)+` = ${c}`; ans=x;
+      steps=`x − ${a} = ${c} × ${b} = ${b*c}\nx = ${b*c} + ${a} = ${x}`;
+    } else {
+      // ax/b + c = d
+      const a=dv(lv,2,5,2,6),b=dv(lv,2,5,3,7),c=dv(lv,1,10,2,14),gap=dv(lv,1,6,2,9);
+      const x=b*gap/a; if(!Number.isInteger(x)) return G.fraction(lv);
+      const d=gap+c;
+      eq=frac(`${a}x`,`${b}`)+` + ${c} = ${d}`; ans=x;
+      steps=`${a}x ÷ ${b} = ${d} − ${c} = ${gap}\n${a}x = ${gap} × ${b} = ${gap*b}\nx = ${gap*b} ÷ ${a} = ${x}`;
+    }
+    return{topic:'Equations with Fractions',instr:'Solve for x',eq,ans,solveFor,steps};
+  },
+
+  bothSides(lv){
+    const t=lv<=3?'simple':lv<=6?pick(['simple','minusB']):pick(['simple','minusB','negAns']);
+    let eq,ans,steps;
+    if(t==='simple'){
+      const c=dv(lv,1,3,1,5),diff=dv(lv,1,4,2,6),x=dv(lv,1,8,1,12),b=dv(lv,1,15,2,20);
+      const a=c+diff,d=(a-c)*x+b;
+      eq=`${a}x + ${b} = ${c}x + ${d}`; ans=x;
+      steps=`${a}x−${c}x = ${d}−${b}\n${diff}x = ${d-b}\nx = ${d-b}÷${diff} = ${x}`;
+    } else if(t==='minusB'){
+      const c=dv(lv,1,4,1,5),diff=dv(lv,2,5,2,7),x=dv(lv,1,10,1,14),b=dv(lv,1,14,2,18);
+      const a=c+diff,d=(a-c)*x-b; if(d<0) return G.bothSides(lv);
+      eq=`${a}x − ${b} = ${c}x + ${d}`; ans=x;
+      steps=`${a}x−${c}x = ${d}+${b}\n${diff}x = ${d+b}\nx = ${d+b}÷${diff} = ${x}`;
+    } else {
+      // negative x
+      const c=dv(lv,2,5,3,7),diff=dv(lv,1,4,1,5),x=-(ri(1,6)),b=dv(lv,1,10,2,15);
+      const a=c+diff,d=(a-c)*x+b;
+      eq=`${a}x + ${b} = ${c}x + ${d}`; ans=x;
+      steps=`${a}x−${c}x = ${d}−${b}\n${diff}x = ${d-b}\nx = ${d-b}÷${diff} = ${x}`;
+    }
+    return{topic:'Pronumeral Both Sides',instr:'Solve for x',eq,ans,solveFor:'x',steps};
+  },
+
+  brackets(lv){
+    const t=lv<=2?'aXpB':lv<=4?'aXmB':lv<=6?'aXpBpC':lv<=8?'aBXpC':'twoBrak';
+    let eq,ans,steps;
+    if(t==='aXpB'){
+      const a=dv(lv,2,4,2,6),b=dv(lv,1,6,1,9),x=dv(lv,1,8,1,12);
+      const c=a*(x+b); eq=`${a}(x + ${b}) = ${c}`; ans=x;
+      steps=`${a}x+${a*b}=${c}\n${a}x=${c-a*b}\nx=${c-a*b}÷${a}=${x}`;
+    } else if(t==='aXmB'){
+      const a=dv(lv,2,5,2,6),b=dv(lv,1,7,1,9),x=dv(lv,b+1,12,b+1,15);
+      const c=a*(x-b); eq=`${a}(x − ${b}) = ${c}`; ans=x;
+      steps=`${a}x−${a*b}=${c}\n${a}x=${c+a*b}\nx=${c+a*b}÷${a}=${x}`;
+    } else if(t==='aXpBpC'){
+      const a=dv(lv,2,5,2,6),b=dv(lv,1,7,1,9),cc=dv(lv,1,12,2,18),x=dv(lv,1,10,1,12);
+      const d=a*(x+b)+cc; eq=`${a}(x + ${b}) + ${cc} = ${d}`; ans=x;
+      steps=`${a}x+${a*b}+${cc}=${d}\n${a}x=${d-a*b-cc}\nx=${d-a*b-cc}÷${a}=${x}`;
+    } else if(t==='aBXpC'){
+      const a=dv(lv,2,5,2,6),b=dv(lv,2,5,2,6),cc=dv(lv,1,10,2,14),x=dv(lv,1,10,1,12);
+      const d=a*(b*x+cc); eq=`${a}(${b}x + ${cc}) = ${d}`; ans=x;
+      steps=`${a*b}x+${a*cc}=${d}\n${a*b}x=${d-a*cc}\nx=${d-a*cc}÷${a*b}=${x}`;
+    } else {
+      // a(x+b) = c(x+d)
+      const a=dv(lv,3,7,4,8),b=dv(lv,1,7,1,9),c=ri(1,a-1);
+      const x=dv(lv,1,8,1,12);
+      const num=(a-c)*x+a*b; if(num%c!==0||num/c<1) return G.brackets(lv);
+      const d2=num/c;
+      eq=`${a}(x + ${b}) = ${c}(x + ${d2})`; ans=x;
+      steps=`${a}x+${a*b}=${c}x+${c*d2}\n${a-c}x=${c*d2-a*b}\nx=${c*d2-a*b}÷${a-c}=${x}`;
+    }
+    return{topic:'Equations with Brackets',instr:'Solve for x',eq,ans,solveFor:'x',steps};
+  },
+
+  formulas(lv){
+    const t=lv<=2?'linear':lv<=4?'area':lv<=6?'perim':lv<=8?'speed':'cost';
+    let eq,ans,sv,instr,ctx,steps;
+    if(t==='linear'){
+      const u=pick([0,2,4,5]),a=pick([2,3,4]),tv=dv(lv,1,6,2,10);
+      const v=u+a*tv; eq='v = u + at'; ans=tv; sv='t';
+      ctx=`v = ${v},  u = ${u},  a = ${a}`; instr='Find t';
+      steps=`${v} = ${u} + ${a}t\n${a}t = ${v-u}\nt = ${v-u}÷${a} = ${tv}`;
+    } else if(t==='area'){
+      const l=dv(lv,3,10,4,15),w=dv(lv,2,8,2,12);
+      eq='A = l × w'; ans=w; sv='w';
+      ctx=`A = ${l*w},  l = ${l}`; instr='Find w';
+      steps=`${l*w} = ${l}×w\nw = ${l*w}÷${l} = ${w}`;
+    } else if(t==='perim'){
+      const l=dv(lv,4,12,5,18),w=dv(lv,2,9,3,12);
+      const P=2*(l+w); eq='P = 2(l + w)'; ans=w; sv='w';
+      ctx=`P = ${P},  l = ${l}`; instr='Find w';
+      steps=`${P} = 2(${l}+w)\n${P/2} = ${l}+w\nw = ${P/2}−${l} = ${w}`;
+    } else if(t==='speed'){
+      const s=dv(lv,3,15,5,20),tv=dv(lv,2,7,2,10);
+      eq='d = s × t'; ans=s; sv='s';
+      ctx=`d = ${s*tv},  t = ${tv}`; instr='Find s';
+      steps=`${s*tv} = s×${tv}\ns = ${s*tv}÷${tv} = ${s}`;
+    } else {
+      const p=pick([4,5,6,8,10]),n=dv(lv,3,10,4,14),f=pick([5,10,15,20]);
+      const C=n*p+f; eq='C = np + f'; ans=n; sv='n';
+      ctx=`C = $${C},  p = $${p},  f = $${f}`; instr='Find n';
+      steps=`${C} = ${p}n+${f}\n${p}n = ${C-f}\nn = ${C-f}÷${p} = ${n}`;
+    }
+    return{topic:'Formulas',instr,eq,ans,solveFor:sv,ctx,steps};
+  },
+
+  quadratic(lv){
+    const t=lv<=2?'xsq':lv<=4?'xsqLg':lv<=6?'xsqpA':lv<=8?'facPos':'facNeg';
+    let eq,ans,instr,steps,hint;
+    if(t==='xsq'){
+      const root=ri(1,5); const sq=root*root;
+      eq=`x² = ${sq}`; ans=root; instr='Solve (give positive solution)';
+      steps=`x = ±√${sq} = ±${root}\nPositive: x = ${root}`;
+    } else if(t==='xsqLg'){
+      const root=ri(4,9); const sq=root*root;
+      eq=`x² = ${sq}`; ans=root; instr='Solve (give positive solution)';
+      steps=`x = ±√${sq} = ±${root}\nPositive: x = ${root}`;
+    } else if(t==='xsqpA'){
+      const root=dv(lv,2,7,3,9),sq=root*root,a=dv(lv,1,12,2,18);
+      eq=`x² + ${a} = ${sq+a}`; ans=root; instr='Solve (give positive solution)';
+      steps=`x² = ${sq+a}−${a} = ${sq}\nx = ±${root}\nPositive: x = ${root}`;
+    } else if(t==='facPos'){
+      const r1=ri(1,8),r2=ri(1,8),b=r1+r2,c=r1*r2,small=Math.min(r1,r2);
+      eq=`x² − ${b}x + ${c} = 0`; ans=small; instr='Factorise and solve (give smaller solution)';
+      hint=`Hint: find two numbers that multiply to ${c} and add to ${b}`;
+      steps=`(x−${r1})(x−${r2}) = 0\nx = ${r1} or x = ${r2}\nSmaller: x = ${small}`;
+    } else {
+      const r1=ri(1,7),r2=ri(1,7),b=r1+r2,c=r1*r2,small=-Math.max(r1,r2);
+      eq=`x² + ${b}x + ${c} = 0`; ans=small; instr='Factorise and solve (give smaller solution)';
+      hint=`Hint: find two numbers that multiply to ${c} and add to ${b}`;
+      steps=`(x+${r1})(x+${r2}) = 0\nx = −${r1} or x = −${r2}\nSmaller: x = ${small}`;
+    }
+    return{topic:'Simple Quadratics',instr,eq,ans,solveFor:'x',steps,hint};
+  }
+};
+
+// ── UI ──────────────────────────────────────────────────────────
+function showScr(id){
+  ['sSetup','sQuiz','sResults'].forEach(s=>document.getElementById(s).classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.getElementById('backBtn').classList.toggle('on',id!=='sSetup');
+  window.scrollTo(0,0);
+}
+let allSel=false;
+function toggleAll(){
+  allSel=!allSel;
+  document.querySelectorAll('.t-tile input').forEach(el=>el.checked=allSel);
+  document.getElementById('selAllBtn').textContent=allSel?'Clear all':'Select all';
+  chkStart();
+}
+function setMode(m){
+  mode=m;
+  document.getElementById('mType').classList.toggle('sel',m==='type');
+  document.getElementById('mMC').classList.toggle('sel',m==='mc');
+}
+function getTopics(){return[...document.querySelectorAll('.t-tile input:checked')].map(e=>e.value);}
+function chkStart(){document.getElementById('startBtn').disabled=!getTopics().length;}
+document.querySelectorAll('.t-tile input').forEach(el=>el.addEventListener('change',chkStart));
+function goBack(){
+  if(document.getElementById('sQuiz').classList.contains('on')){
+    if(confirm('Leave quiz? Progress will be lost.')) showScr('sSetup');
+  } else showScr('sSetup');
+}
+function goSetup(){showScr('sSetup');}
+
+// ── QUIZ ────────────────────────────────────────────────────────
+function startQuiz(){
+  const topics=getTopics();
+  if(!topics.length){alert('Pick at least one topic.');return;}
+  questions=[]; cur=0; score=0; busy=false; log=[];
+  for(let i=0;i<10;i++){
+    const tp=topics[i%topics.length];
+    const lv=i+1;
+    let q=G[tp](lv);
+    let tries=0;
+    while(!Number.isInteger(q.ans)&&tries<15){q=G[tp](lv);tries++;}
+    questions.push(q);
+  }
+  // NO shuffle — keep difficulty order
+  showScr('sQuiz');
+  renderQ();
+}
+
+function renderDiffBar(lv){
+  const bar=document.getElementById('diffBar'); bar.innerHTML='';
+  for(let i=1;i<=10;i++){
+    const d=document.createElement('div');
+    d.className='diff-pip'+(i<=lv?' on':'');
+    bar.appendChild(d);
+  }
+}
+
+function renderQ(){
+  const q=questions[cur]; const lv=cur+1;
+  busy=false;
+  document.getElementById('qTag').textContent=q.topic;
+  document.getElementById('qNum').textContent=`Q ${lv} / 10`;
+  document.getElementById('qPill').textContent=`${score} ✓`;
+  document.getElementById('progF').style.width=`${cur*10}%`;
+  renderDiffBar(lv);
+  document.getElementById('qTopic').textContent=q.topic;
+  document.getElementById('qInstr').textContent=q.instr;
+  document.getElementById('qEq').innerHTML=q.eq; // innerHTML for fraction support
+
+  const ctxEl=document.getElementById('qCtx');
+  if(q.ctx){ctxEl.textContent=q.ctx;ctxEl.classList.add('on');}
+  else ctxEl.classList.remove('on');
+  document.getElementById('qHint').textContent=q.hint||'';
+
+  document.getElementById('fb').className='fb';
+  document.getElementById('nextBtn').className='next-btn';
+
+  if(mode==='type'){
+    document.getElementById('typeArea').className='type-area on';
+    document.getElementById('mcArea').className='mc-area';
+    document.getElementById('typeLbl').textContent=(q.solveFor||'x')+' =';
+    const inp=document.getElementById('typeIn');
+    inp.value=''; inp.className='type-in'; inp.disabled=false;
+    document.getElementById('chkBtn').disabled=false;
+    inp.onkeydown=e=>{if(e.key==='Enter'&&!busy)submitType();};
+    setTimeout(()=>inp.focus(),80);
+  } else {
+    document.getElementById('typeArea').className='type-area';
+    buildMC(q);
+  }
+}
+
+function buildMC(q){
+  const area=document.getElementById('mcArea');
+  area.innerHTML=''; area.className='mc-area on';
+  const opts=sh([q.ans,...wrongNums(q.ans)]);
+  opts.forEach(val=>{
+    const b=document.createElement('button');
+    b.className='mc-opt'; b.textContent=val; b.dataset.val=val;
+    b.onclick=()=>pickOpt(val,b,q);
+    area.appendChild(b);
+  });
+}
+
+function pickOpt(val,btn,q){
+  if(busy)return; busy=true;
+  document.querySelectorAll('.mc-opt').forEach(b=>{
+    b.disabled=true;
+    if(Number(b.dataset.val)===q.ans) b.classList.add(Number(val)===q.ans?'ok':'show-ans');
+  });
+  const ok=Number(val)===q.ans;
+  if(!ok) btn.classList.add('no');
+  if(ok) score++;
+  showFB(ok,q,val);
+}
+
+function submitType(){
+  if(busy)return;
+  const inp=document.getElementById('typeIn');
+  const raw=inp.value.trim(); if(!raw)return;
+  busy=true;
+  const q=questions[cur];
+  let uv=raw.includes('/')?parseFloat(raw.split('/')[0])/parseFloat(raw.split('/')[1]):parseFloat(raw);
+  inp.disabled=true; document.getElementById('chkBtn').disabled=true;
+  const ok=!isNaN(uv)&&Math.abs(uv-q.ans)<0.01;
+  inp.className='type-in '+(ok?'ok':'no');
+  if(ok) score++;
+  showFB(ok,q,raw);
+}
+
+function showFB(ok,q,userVal){
+  const el=document.getElementById('fb');
+  el.className='fb on '+(ok?'ok':'no');
+  document.getElementById('fbHead').textContent=ok?`✓ Correct! ${q.solveFor||'x'} = ${q.ans}`:`✗ Not quite — ${q.solveFor||'x'} = ${q.ans}`;
+  document.getElementById('fbWork').innerHTML=q.steps.replace(/\n/g,'<br>');
+  log.push({q,ok,userVal});
+  const nb=document.getElementById('nextBtn');
+  nb.className='next-btn on';
+  nb.textContent=cur+1<10?'Next question →':'See my results →';
+}
+
+function nextQ(){ cur++; cur>=10?showResults():renderQ(); }
+
+function showResults(){
+  showScr('sResults');
+  document.getElementById('progF').style.width='100%';
+  const pct=Math.round(score/10*100);
+  document.getElementById('resEm').textContent=pct===100?'🏆':pct>=80?'⭐':pct>=60?'👍':'💪';
+  document.getElementById('resSc').textContent=`${score} / 10`;
+  document.getElementById('resPct').textContent=`${pct}% correct`;
+  document.getElementById('resMsg').textContent=
+    pct===100?'Perfect! You solved every equation with confidence.':
+    pct>=80?'Great work! Check the solutions for what you missed.':
+    pct>=60?'Good effort — review the worked solutions below.':
+    pct>=40?'Keep practising. Study each step carefully.':
+            'Review the key concepts and try again — practice makes perfect.';
+
+  const list=document.getElementById('revList'); list.innerHTML='';
+  log.forEach(({q,ok,userVal},i)=>{
+    const d=document.createElement('div'); d.className='rev-item';
+    const ctxLine=q.ctx?`<div style="font-size:0.76rem;color:#888">${q.ctx}</div>`:'';
+    const ansLine=mode==='type'
+      ?`Your answer: <span class="${ok?'ans-ok':'ans-no'}">${userVal}</span> · Correct: <span class="ans-ok">${q.ans}</span>`
+      :`Answer: <span class="${ok?'ans-ok':'ans-no'}">${q.ans}</span>`;
+    d.innerHTML=`
+      <span class="rev-ic">${ok?'✅':'❌'}</span>
+      <div style="min-width:0">
+        <div class="rev-q">Q${i+1} · ${q.topic}</div>
+        <div class="rev-eq">${q.eq}</div>
+        ${ctxLine}
+        <div class="rev-ans">${ansLine}</div>
+        <div class="rev-work">${q.steps.replace(/\n/g,' → ')}</div>
+      </div>`;
+    list.appendChild(d);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Algebraic Expressions Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f5f2ee;--card:#fff;--ink:#1a1208;--mid:#7a7060;
+  --faint:#e4e0da;--acc:#7c3aed;--acc-lt:#ede9fe;
+  --grn:#166534;--grn-lt:#dcfce7;--grn-b:#86efac;
+  --red:#991b1b;--red-lt:#fee2e2;--red-b:#fca5a5;
+  --radius:12px;--sh:0 2px 14px rgba(0,0,0,0.07);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+.hdr{background:var(--ink);padding:0 1.5rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.hdr-logo{font-family:'DM Serif Display',serif;color:#fff;font-size:1.05rem;}
+.hdr-logo em{color:#fbbf24;font-style:normal;}
+.hdr-back{display:none;background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);padding:5px 13px;border-radius:6px;cursor:pointer;font:500 0.78rem 'DM Sans',sans-serif;}
+.hdr-back.on{display:block;}
+.hdr-back:hover{background:rgba(255,255,255,0.1);}
+.screen{display:none;}
+.screen.on{display:block;animation:up 0.28s ease;}
+@keyframes up{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── FRACTION ── */
+.mathfrac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:-0.55em;margin:0 4px;line-height:1.1;}
+.mnum{border-bottom:2px solid currentColor;padding:0 5px 3px;text-align:center;min-width:18px;}
+.mden{padding:3px 5px 0;text-align:center;min-width:18px;}
+
+/* ── SETUP ── */
+#sSetup{max-width:680px;margin:0 auto;padding:2.5rem 1.5rem 4rem;}
+.su-title{font-family:'DM Serif Display',serif;font-size:2rem;line-height:1.2;margin-bottom:0.3rem;}
+.su-sub{font-size:0.88rem;color:var(--mid);margin-bottom:2rem;}
+.lbl{font-size:0.67rem;letter-spacing:0.13em;text-transform:uppercase;color:var(--mid);font-weight:600;margin-bottom:0.7rem;display:flex;justify-content:space-between;align-items:center;}
+.lbl-act{font-size:0.72rem;letter-spacing:0;text-transform:none;color:var(--acc);cursor:pointer;font-weight:500;}
+.lbl-act:hover{text-decoration:underline;}
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.55rem;margin-bottom:1.75rem;}
+@media(max-width:460px){.topic-grid{grid-template-columns:1fr;}}
+.t-tile{position:relative;}
+.t-tile input{position:absolute;opacity:0;width:0;height:0;}
+.t-tile label{display:flex;align-items:center;gap:0.7rem;background:var(--card);border:1.5px solid var(--faint);border-radius:10px;padding:0.8rem 1rem;cursor:pointer;transition:all 0.15s;user-select:none;}
+.t-tile label:hover{border-color:#c4b5fd;background:#faf8ff;}
+.t-tile input:checked+label{border-color:var(--acc);background:var(--acc-lt);}
+.t-icon{font-size:1.1rem;flex-shrink:0;width:24px;text-align:center;}
+.t-name{font-size:0.85rem;font-weight:500;line-height:1.35;}
+.mode-row{display:flex;gap:0.55rem;margin-bottom:1.75rem;}
+.m-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0.85rem 0.5rem;border:1.5px solid var(--faint);border-radius:10px;background:var(--card);cursor:pointer;font:500 0.85rem 'DM Sans',sans-serif;color:var(--mid);transition:all 0.15s;}
+.m-btn:hover{border-color:#c4b5fd;}
+.m-btn.sel{border-color:var(--acc);background:var(--acc-lt);color:var(--acc);}
+.m-icon{font-size:1.4rem;}
+.start-btn{width:100%;padding:13px;background:var(--acc);color:#fff;border:none;border-radius:var(--radius);font:600 1rem 'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s;}
+.start-btn:hover{background:#6d28d9;}
+.start-btn:disabled{background:#c4b5fd;cursor:not-allowed;}
+.start-note{text-align:center;font-size:0.77rem;color:var(--mid);margin-top:0.55rem;}
+
+/* ── QUIZ ── */
+#sQuiz{max-width:640px;margin:0 auto;padding:1.25rem 1.5rem 4rem;}
+.q-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;}
+.q-tag{font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mid);font-weight:600;}
+.q-right{display:flex;gap:8px;align-items:center;}
+.q-num{font-size:0.82rem;color:var(--mid);}
+.q-pill{background:var(--acc-lt);color:var(--acc);font-size:0.75rem;font-weight:600;padding:2px 10px;border-radius:99px;}
+.diff-bar{display:flex;gap:3px;margin-bottom:0.5rem;}
+.diff-pip{height:5px;flex:1;border-radius:99px;background:var(--faint);transition:background 0.3s;}
+.diff-pip.on{background:var(--acc);}
+.prog{height:5px;background:var(--faint);border-radius:99px;margin-bottom:1.4rem;overflow:hidden;}
+.prog-f{height:100%;background:var(--acc);border-radius:99px;transition:width 0.35s;}
+.q-card{background:var(--card);border:1px solid var(--faint);border-radius:16px;padding:1.75rem;box-shadow:var(--sh);}
+.q-topic{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mid);font-weight:600;margin-bottom:0.5rem;}
+.q-instr{font-size:0.88rem;color:var(--mid);margin-bottom:0.75rem;}
+.q-expr{font-family:'DM Serif Display',serif;font-size:1.75rem;color:var(--ink);line-height:1.5;margin-bottom:0.35rem;word-break:break-word;}
+.q-ctx{font-size:0.87rem;color:#555;line-height:1.6;background:#fdf8ff;border-left:3px solid #c4b5fd;padding:0.5rem 0.75rem;border-radius:0 6px 6px 0;margin-top:0.6rem;margin-bottom:0.4rem;display:none;}
+.q-ctx.on{display:block;}
+.q-hint{font-size:0.78rem;color:var(--mid);margin-top:0.4rem;font-style:italic;}
+.type-area{margin-top:1.25rem;display:none;}
+.type-area.on{display:block;}
+.type-lbl{font-size:0.85rem;color:var(--mid);margin-bottom:0.4rem;font-weight:500;}
+.type-row{display:flex;gap:0.5rem;}
+.type-in{flex:1;padding:11px 14px;font-size:1.05rem;font-family:'DM Serif Display',serif;border:1.5px solid var(--faint);border-radius:var(--radius);outline:none;color:var(--ink);background:#fafaf8;transition:border-color 0.2s;}
+.type-in:focus{border-color:var(--acc);}
+.type-in.ok{border-color:var(--grn)!important;background:var(--grn-lt);}
+.type-in.no{border-color:var(--red)!important;background:var(--red-lt);}
+.chk-btn{padding:11px 20px;background:var(--acc);color:#fff;border:none;border-radius:var(--radius);font:600 0.88rem 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:background 0.15s;}
+.chk-btn:hover{background:#6d28d9;}
+.chk-btn:disabled{background:#c4b5fd;cursor:not-allowed;}
+.mc-area{display:none;margin-top:1.25rem;}
+.mc-area.on{display:grid;grid-template-columns:1fr 1fr;gap:0.55rem;}
+@media(max-width:420px){.mc-area.on{grid-template-columns:1fr;}}
+.mc-opt{padding:0.85rem 0.6rem;background:#fafaf8;border:1.5px solid var(--faint);border-radius:var(--radius);font:400 1rem 'DM Serif Display',serif;color:var(--ink);cursor:pointer;transition:all 0.15s;text-align:center;word-break:break-word;line-height:1.5;}
+.mc-opt:hover:not(:disabled){border-color:var(--acc);background:var(--acc-lt);}
+.mc-opt.ok{border-color:var(--grn);background:var(--grn-lt);color:var(--grn);}
+.mc-opt.no{border-color:var(--red);background:var(--red-lt);color:var(--red);}
+.mc-opt.show-ans{border-color:var(--grn);background:var(--grn-lt);color:var(--grn);}
+.mc-opt:disabled{cursor:default;}
+.fb{border-radius:10px;padding:0.9rem 1.1rem;font-size:0.87rem;line-height:1.65;margin-top:0.9rem;display:none;}
+.fb.on{display:block;}
+.fb.ok{background:var(--grn-lt);border:1px solid var(--grn-b);color:var(--grn);}
+.fb.no{background:var(--red-lt);border:1px solid var(--red-b);color:var(--red);}
+.fb-head{font-weight:700;font-size:0.9rem;margin-bottom:5px;}
+.fb-work{font-size:0.83rem;opacity:0.9;line-height:1.8;font-family:'DM Serif Display',serif;}
+.next-btn{display:none;width:100%;padding:12px;margin-top:0.75rem;background:var(--ink);color:#fff;border:none;border-radius:var(--radius);font:600 0.95rem 'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s;}
+.next-btn:hover{background:#2d2010;}
+.next-btn.on{display:block;}
+
+/* ── RESULTS ── */
+#sResults{max-width:600px;margin:0 auto;padding:2.5rem 1.5rem 4rem;}
+.res-head{text-align:center;margin-bottom:2rem;}
+.res-em{font-size:3rem;margin-bottom:0.5rem;}
+.res-score{font-family:'DM Serif Display',serif;font-size:3.5rem;color:var(--acc);letter-spacing:-0.02em;}
+.res-pct{font-size:0.85rem;color:var(--mid);margin:0.15rem 0 0.6rem;}
+.res-msg{font-size:0.95rem;color:var(--ink);line-height:1.65;}
+.rev-label{font-size:0.67rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);font-weight:600;margin:1.5rem 0 0.75rem;}
+.rev-item{background:var(--card);border:1px solid var(--faint);border-radius:var(--radius);padding:0.9rem 1rem;margin-bottom:0.55rem;display:flex;gap:0.7rem;align-items:flex-start;}
+.rev-ic{font-size:0.95rem;flex-shrink:0;margin-top:2px;}
+.rev-q{font-size:0.78rem;color:var(--mid);margin-bottom:2px;}
+.rev-expr{font-family:'DM Serif Display',serif;font-size:0.95rem;margin-bottom:3px;word-break:break-word;}
+.rev-ans{font-size:0.8rem;color:var(--mid);line-height:1.7;}
+.ans-ok{color:var(--grn);font-weight:600;}
+.ans-no{color:var(--red);font-weight:600;}
+.rev-work{font-size:0.75rem;color:#bbb;margin-top:2px;font-family:'DM Serif Display',serif;}
+.res-btns{display:flex;gap:0.55rem;margin-top:1.5rem;}
+.btn-out{flex:1;padding:12px;background:none;border:1.5px solid var(--faint);border-radius:var(--radius);font:600 0.88rem 'DM Sans',sans-serif;color:var(--ink);cursor:pointer;transition:all 0.15s;}
+.btn-out:hover{border-color:var(--acc);color:var(--acc);}
+.btn-fill{flex:1;padding:12px;background:var(--acc);border:none;border-radius:var(--radius);font:600 0.88rem 'DM Sans',sans-serif;color:#fff;cursor:pointer;transition:background 0.15s;}
+.btn-fill:hover{background:#6d28d9;}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <span class="hdr-logo">Maths <em>Applets</em></span>
+  <button class="hdr-back" id="backBtn" onclick="goBack()">← Back</button>
+</header>
+
+<div id="sSetup" class="screen on">
+  <h1 class="su-title">Algebraic Expressions Quiz</h1>
+  <p class="su-sub">Pick topics and answer style. Questions get harder from Q1 to Q10.</p>
+  <div class="lbl">Topics — pick one or more
+    <span class="lbl-act" id="selAllBtn" onclick="toggleAll()">Select all</span>
+  </div>
+  <div class="topic-grid">
+    <div class="t-tile"><input type="checkbox" id="t0" value="adding" checked/><label for="t0"><span class="t-icon">➕</span><span class="t-name">Adding Expressions</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t1" value="subtracting"/><label for="t1"><span class="t-icon">➖</span><span class="t-name">Subtracting Expressions</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t2" value="multiplying"/><label for="t2"><span class="t-icon">✖️</span><span class="t-name">Multiplying Expressions</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t3" value="dividing"/><label for="t3"><span class="t-icon">➗</span><span class="t-name">Dividing Expressions</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t4" value="expanding"/><label for="t4"><span class="t-icon">( )</span><span class="t-name">Expanding Brackets</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t5" value="formula"/><label for="t5"><span class="t-icon">📐</span><span class="t-name">Formula Substitution</span></label></div>
+    <div class="t-tile"><input type="checkbox" id="t6" value="equivalent"/><label for="t6"><span class="t-icon">≡</span><span class="t-name">Equivalent Expressions</span></label></div>
+  </div>
+  <div class="lbl" style="margin-bottom:0.7rem;">Answer style</div>
+  <div class="mode-row">
+    <button class="m-btn sel" id="mType" onclick="setMode('type')"><span class="m-icon">⌨️</span>Type your answer</button>
+    <button class="m-btn" id="mMC" onclick="setMode('mc')"><span class="m-icon">🔘</span>Multiple choice</button>
+  </div>
+  <button class="start-btn" id="startBtn" onclick="startQuiz()">Start Quiz →</button>
+  <p class="start-note">10 questions · difficulty increases Q1→Q10</p>
+</div>
+
+<div id="sQuiz" class="screen">
+  <div class="q-top">
+    <span class="q-tag" id="qTag"></span>
+    <div class="q-right">
+      <span class="q-num" id="qNum"></span>
+      <span class="q-pill" id="qPill">0 ✓</span>
+    </div>
+  </div>
+  <div class="diff-bar" id="diffBar"></div>
+  <div class="prog"><div class="prog-f" id="progF" style="width:0%"></div></div>
+  <div class="q-card">
+    <p class="q-topic" id="qTopic"></p>
+    <p class="q-instr" id="qInstr"></p>
+    <div class="q-expr" id="qExpr"></div>
+    <div class="q-ctx" id="qCtx"></div>
+    <p class="q-hint" id="qHint"></p>
+    <div class="type-area" id="typeArea">
+      <p class="type-lbl" id="typeLbl">Enter your answer:</p>
+      <div class="type-row">
+        <input class="type-in" id="typeIn" type="text" placeholder="your answer" autocomplete="off" spellcheck="false"/>
+        <button class="chk-btn" id="chkBtn" onclick="submitType()">Check</button>
+      </div>
+    </div>
+    <div class="mc-area" id="mcArea"></div>
+    <div class="fb" id="fb">
+      <div class="fb-head" id="fbHead"></div>
+      <div class="fb-work" id="fbWork"></div>
+    </div>
+  </div>
+  <button class="next-btn" id="nextBtn" onclick="nextQ()">Next question →</button>
+</div>
+
+<div id="sResults" class="screen">
+  <div class="res-head">
+    <div class="res-em" id="resEm"></div>
+    <div class="res-score" id="resSc"></div>
+    <div class="res-pct" id="resPct"></div>
+    <div class="res-msg" id="resMsg"></div>
+  </div>
+  <div class="rev-label">Question review</div>
+  <div id="revList"></div>
+  <div class="res-btns">
+    <button class="btn-out" onclick="goSetup()">Change topics</button>
+    <button class="btn-fill" onclick="startQuiz()">Play again ↻</button>
+  </div>
+</div>
+
+<script>
+// ── UTILS ────────────────────────────────────────────────────────
+const ri   = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a    => a[Math.floor(Math.random()*a.length)];
+const sh   = a    => [...a].sort(()=>Math.random()-0.5);
+const SUP  = {1:'',2:'²',3:'³',4:'⁴',5:'⁵',6:'⁶',7:'⁷',8:'⁸'};
+const sup  = n    => SUP[n]||'^'+n;
+
+// Horizontal fraction HTML
+function frac(num,den){ return `<span class="mathfrac"><span class="mnum">${num}</span><span class="mden">${den}</span></span>`; }
+
+// Interpolate a number range based on level 1-10
+function dv(level,lo1,hi1,lo2,hi2){
+  const t=Math.min(1,(level-1)/9);
+  return ri(Math.round(lo1+t*(lo2-lo1)), Math.round(hi1+t*(hi2-hi1)));
+}
+
+// ── STATE ────────────────────────────────────────────────────────
+let mode='type',questions=[],cur=0,score=0,busy=false,log=[];
+
+// ── GENERATORS ───────────────────────────────────────────────────
+// Each G[topic](level) returns:
+// { topic, instr, expr(HTML string), ctx?, hint?,
+//   typeLabel, typeAns(number), typeFullAns(string),
+//   mcAns(string), mcWrong([3 strings]), steps }
+
+const G = {
+
+  adding(lv){
+    if(lv<=3){
+      // simple: ax + bx
+      const a=dv(lv,2,5,4,9),b=dv(lv,1,4,2,7),v=pick(['x','y','m','n']);
+      const s=a+b;
+      return{topic:'Adding Expressions',instr:'Simplify by collecting like terms',
+        expr:`${a}${v} + ${b}${v}`,
+        typeLabel:`Coefficient of ${v}:`,typeAns:s,typeFullAns:`${s}${v}`,
+        mcAns:`${s}${v}`,mcWrong:[`${s+1}${v}`,`${a-b>0?a-b:s+2}${v}`,`${a*b}${v}`],
+        steps:`${a}${v} + ${b}${v} = (${a}+${b})${v} = ${s}${v}`};
+    } else if(lv<=5){
+      // two variables: ax + by + cx + dy
+      const a=dv(lv,2,7,3,10),b=dv(lv,2,6,3,9),c=dv(lv,2,6,3,9),d=dv(lv,1,5,2,7);
+      const sx=a+c,sy=b+d;
+      return{topic:'Adding Expressions',instr:'Simplify by collecting like terms',
+        expr:`${a}x + ${b}y + ${c}x + ${d}y`,
+        typeLabel:'Coefficient of x:',typeAns:sx,typeFullAns:`${sx}x + ${sy}y`,
+        mcAns:`${sx}x + ${sy}y`,
+        mcWrong:[`${sx+1}x + ${sy}y`,`${a+d}x + ${b+c}y`,`${sx}x + ${b}y`],
+        steps:`x terms: ${a}x + ${c}x = ${sx}x\ny terms: ${b}y + ${d}y = ${sy}y\nAnswer: ${sx}x + ${sy}y`};
+    } else if(lv<=7){
+      // with constants: ax + c + bx + d
+      const a=dv(lv,3,8,5,13),b=dv(lv,2,7,4,11),c=dv(lv,2,12,5,18),d=dv(lv,1,8,3,12);
+      const sx=a+b,sc=c+d;
+      return{topic:'Adding Expressions',instr:'Simplify',
+        expr:`${a}x + ${c} + ${b}x + ${d}`,
+        typeLabel:'Coefficient of x:',typeAns:sx,typeFullAns:`${sx}x + ${sc}`,
+        mcAns:`${sx}x + ${sc}`,
+        mcWrong:[`${sx}x + ${c}`,`${a+c}x + ${b+d}`,`${sx+1}x + ${sc}`],
+        steps:`x: ${a}x+${b}x = ${sx}x · constants: ${c}+${d} = ${sc}\nAnswer: ${sx}x + ${sc}`};
+    } else if(lv<=8){
+      // x² + x mixed
+      const a=dv(lv,2,7,3,10),b=dv(lv,2,6,3,9),c=dv(lv,1,8,2,10),d=dv(lv,1,6,2,9);
+      const s2=a+b,s1=c+d;
+      return{topic:'Adding Expressions',instr:'Simplify',
+        expr:`${a}x² + ${c}x + ${b}x² + ${d}x`,
+        typeLabel:'Coefficient of x²:',typeAns:s2,typeFullAns:`${s2}x² + ${s1}x`,
+        mcAns:`${s2}x² + ${s1}x`,
+        mcWrong:[`${s2+1}x² + ${s1}x`,`${a+c}x² + ${b+d}x`,`${s2}x³ + ${s1}x`],
+        steps:`x²: ${a}x²+${b}x² = ${s2}x² · x: ${c}x+${d}x = ${s1}x\nAnswer: ${s2}x² + ${s1}x`};
+    } else {
+      // level 9-10: three term types including constants
+      const a=dv(lv,2,7,3,10),b=dv(lv,2,6,3,8),c=dv(lv,2,8,3,12),d=dv(lv,1,6,2,9),e=dv(lv,2,10,5,15),f=dv(lv,1,8,3,12);
+      const s2=a+b,s1=c+d,sc=e+f;
+      return{topic:'Adding Expressions',instr:'Simplify fully',
+        expr:`${a}x² + ${c}x + ${e} + ${b}x² + ${d}x + ${f}`,
+        typeLabel:'Coefficient of x²:',typeAns:s2,typeFullAns:`${s2}x² + ${s1}x + ${sc}`,
+        mcAns:`${s2}x² + ${s1}x + ${sc}`,
+        mcWrong:[`${a+c}x² + ${b+d}x + ${sc}`,`${s2}x² + ${s1}x + ${e}`,`${s2+1}x² + ${s1}x + ${sc}`],
+        steps:`x²: ${s2}x² · x: ${s1}x · const: ${sc}\nAnswer: ${s2}x² + ${s1}x + ${sc}`};
+    }
+  },
+
+  subtracting(lv){
+    if(lv<=3){
+      const b=dv(lv,2,5,3,7),diff=dv(lv,1,5,2,8),a=b+diff,v=pick(['x','y','m','a']);
+      return{topic:'Subtracting Expressions',instr:'Simplify',
+        expr:`${a}${v} − ${b}${v}`,
+        typeLabel:`Coefficient of ${v}:`,typeAns:diff,typeFullAns:`${diff}${v}`,
+        mcAns:`${diff}${v}`,mcWrong:[`${a+b}${v}`,`${diff+2}${v}`,`${diff}${v}²`],
+        steps:`${a}${v} − ${b}${v} = (${a}−${b})${v} = ${diff}${v}`};
+    } else if(lv<=5){
+      const a=dv(lv,4,9,5,13),b=dv(lv,3,8,4,11),c=dv(lv,1,a-1,2,a-1),d=dv(lv,1,b-1,1,b-1);
+      const rx=a-c,ry=b-d;
+      return{topic:'Subtracting Expressions',instr:'Simplify',
+        expr:`${a}x + ${b}y − ${c}x − ${d}y`,
+        typeLabel:'Coefficient of x:',typeAns:rx,typeFullAns:`${rx}x + ${ry}y`,
+        mcAns:`${rx}x + ${ry}y`,
+        mcWrong:[`${rx+1}x + ${ry}y`,`${a-d}x + ${b-c}y`,`${rx}x − ${ry}y`],
+        steps:`x: ${a}x−${c}x = ${rx}x · y: ${b}y−${d}y = ${ry}y\nAnswer: ${rx}x + ${ry}y`};
+    } else if(lv<=7){
+      const a=dv(lv,4,10,6,15),b=dv(lv,2,5,3,7),c=dv(lv,5,14,8,20),d=dv(lv,1,c-1,2,c-1);
+      const rx=a-b,rc=c-d;
+      return{topic:'Subtracting Expressions',instr:'Simplify',
+        expr:`${a}x + ${c} − ${b}x − ${d}`,
+        typeLabel:'Constant term:',typeAns:rc,typeFullAns:`${rx}x + ${rc}`,
+        mcAns:`${rx}x + ${rc}`,mcWrong:[`${rx}x − ${rc}`,`${rx}x + ${c+d}`,`${a+b}x + ${rc}`],
+        steps:`x: ${a}x−${b}x=${rx}x · const: ${c}−${d}=${rc}\nAnswer: ${rx}x + ${rc}`};
+    } else if(lv<=8){
+      const a=dv(lv,3,8,5,12),b=dv(lv,2,7,3,10),bx=dv(lv,1,5,2,7),c=dv(lv,1,10,2,14);
+      const rx=a-bx,rc=b-c;
+      const sign=rc>=0?` + ${rc}`:` − ${Math.abs(rc)}`;
+      return{topic:'Subtracting Expressions',instr:'Remove the brackets and simplify',
+        expr:`${a}x + ${b} − (${bx}x + ${c})`,
+        hint:'Change the sign of every term inside the bracket',
+        typeLabel:'Coefficient of x:',typeAns:rx,typeFullAns:`${rx}x${sign}`,
+        mcAns:`${rx}x${sign}`,
+        mcWrong:[`${a+bx}x${sign}`,`${rx}x + ${b+c}`,`${rx-1}x${sign}`],
+        steps:`= ${a}x + ${b} − ${bx}x − ${c}\nx: ${a}−${bx}=${rx} · const: ${b}−${c}=${rc}\nAnswer: ${rx}x${sign}`};
+    } else {
+      const a=dv(lv,3,8,5,12),b=dv(lv,2,6,3,9),bx=dv(lv,2,6,3,9),by=dv(lv,1,5,2,7);
+      const rx=a-bx,ry=b-by;
+      const sign2=ry>=0?` + ${ry}y`:` − ${Math.abs(ry)}y`;
+      return{topic:'Subtracting Expressions',instr:'Remove brackets and simplify fully',
+        expr:`${a}x + ${b}y − (${bx}x + ${by}y)`,
+        typeLabel:'Coefficient of x:',typeAns:rx,typeFullAns:`${rx}x${sign2}`,
+        mcAns:`${rx}x${sign2}`,
+        mcWrong:[`${rx+1}x${sign2}`,`${a+bx}x${sign2}`,`${rx}x + ${by}y`],
+        steps:`= ${a}x + ${b}y − ${bx}x − ${by}y\nx: ${a}−${bx}=${rx} · y: ${b}−${by}=${ry}\nAnswer: ${rx}x${sign2}`};
+    }
+  },
+
+  multiplying(lv){
+    if(lv<=2){
+      const a=dv(lv,2,6,3,9),b=dv(lv,2,7,3,10),v=pick(['x','y','m']);
+      const p=a*b;
+      return{topic:'Multiplying Expressions',instr:'Simplify',
+        expr:`${a} × ${b}${v}`,
+        typeLabel:`Coefficient of ${v}:`,typeAns:p,typeFullAns:`${p}${v}`,
+        mcAns:`${p}${v}`,mcWrong:[`${a+b}${v}`,`${p}${v}²`,`${p+1}${v}`],
+        steps:`${a} × ${b}${v} = ${p}${v}`};
+    } else if(lv<=4){
+      const a=dv(lv,2,7,3,10),b=dv(lv,2,7,3,9),v=pick(['x','y','m']);
+      const p=a*b;
+      return{topic:'Multiplying Expressions',instr:'Simplify using index laws',
+        expr:`${a}${v} × ${b}${v}`,
+        typeLabel:`Coefficient of ${v}²:`,typeAns:p,typeFullAns:`${p}${v}²`,
+        mcAns:`${p}${v}²`,mcWrong:[`${a+b}${v}²`,`${p}${v}`,`${p}${v}³`],
+        steps:`${a}${v} × ${b}${v} = ${p}${v}¹⁺¹ = ${p}${v}²`};
+    } else if(lv<=6){
+      const a=dv(lv,2,6,3,8),b=dv(lv,2,5,3,7),p=ri(2,4),q=ri(1,3),v=pick(['x','y','a']);
+      const prod=a*b,pw=p+q;
+      return{topic:'Multiplying Expressions',instr:'Simplify using index laws (aᵐ × aⁿ = aᵐ⁺ⁿ)',
+        expr:`${a}${v}${sup(p)} × ${b}${v}${sup(q)}`,
+        typeLabel:`Power of ${v} in the answer:`,typeAns:pw,typeFullAns:`${prod}${v}${sup(pw)}`,
+        mcAns:`${prod}${v}${sup(pw)}`,
+        mcWrong:[`${prod}${v}${sup(p*q)}`,`${a+b}${v}${sup(pw)}`,`${prod}${v}${sup(pw-1)}`],
+        steps:`coefficients: ${a}×${b}=${prod} · powers: ${v}${sup(p)}×${v}${sup(q)}=${v}${sup(pw)}\nAnswer: ${prod}${v}${sup(pw)}`};
+    } else if(lv<=8){
+      const a=dv(lv,2,6,3,8),b=dv(lv,2,5,3,7);
+      const prod=a*b;
+      return{topic:'Multiplying Expressions',instr:'Simplify',
+        expr:`${a}x × ${b}y`,
+        typeLabel:'Coefficient of xy:',typeAns:prod,typeFullAns:`${prod}xy`,
+        mcAns:`${prod}xy`,mcWrong:[`${a+b}xy`,`${prod}x²y²`,`${prod}x + ${prod}y`],
+        steps:`${a}x × ${b}y = ${prod}xy`};
+    } else {
+      const a=dv(lv,2,5,3,7),b=dv(lv,2,4,3,6),p=ri(2,4),q=ri(2,3);
+      const prod=a*b,px=p+q;
+      return{topic:'Multiplying Expressions',instr:'Simplify using index laws',
+        expr:`${a}x${sup(p)}y² × ${b}x${sup(q)}y`,
+        typeLabel:'Coefficient:',typeAns:prod,typeFullAns:`${prod}x${sup(px)}y³`,
+        mcAns:`${prod}x${sup(px)}y³`,
+        mcWrong:[`${a+b}x${sup(px)}y³`,`${prod}x${sup(p)}y²`,`${prod}x${sup(px+1)}y²`],
+        steps:`coeff: ${a}×${b}=${prod} · x: x${sup(p)}×x${sup(q)}=x${sup(px)} · y: y²×y=y³\nAnswer: ${prod}x${sup(px)}y³`};
+    }
+  },
+
+  dividing(lv){
+    // All displayed as horizontal fractions
+    if(lv<=2){
+      const q=dv(lv,2,6,3,9),d=dv(lv,2,4,2,5),n=q*d,v=pick(['x','y','m']);
+      return{topic:'Dividing Expressions',instr:'Simplify the fraction',
+        expr:frac(`${n}${v}²`,`${d}${v}`),
+        typeLabel:`Coefficient of ${v}:`,typeAns:q,typeFullAns:`${q}${v}`,
+        mcAns:`${q}${v}`,mcWrong:[`${q}${v}²`,`${d}${v}`,`${q+1}${v}`],
+        steps:`${n}÷${d}=${q} · ${v}²÷${v}=${v}\nAnswer: ${q}${v}`};
+    } else if(lv<=4){
+      const q=dv(lv,2,7,3,10),d=dv(lv,2,5,2,6),p=dv(lv,2,4,3,5),dp=1,rp=p-1,n=q*d,v=pick(['x','a']);
+      return{topic:'Dividing Expressions',instr:'Simplify using index laws (aᵐ ÷ aⁿ = aᵐ⁻ⁿ)',
+        expr:frac(`${n}${v}${sup(p)}`,`${d}${v}`),
+        typeLabel:`Power of ${v}:`,typeAns:rp,typeFullAns:`${q}${v}${sup(rp)}`,
+        mcAns:`${q}${v}${sup(rp)}`,mcWrong:[`${q}${v}${sup(p)}`,`${d}${v}${sup(rp)}`,`${q+1}${v}${sup(rp)}`],
+        steps:`${n}÷${d}=${q} · ${v}${sup(p)}÷${v}=${v}${sup(rp)}\nAnswer: ${q}${v}${sup(rp)}`};
+    } else if(lv<=6){
+      const q=dv(lv,2,7,3,9),d=dv(lv,2,5,3,6),p=ri(3,5),dp=ri(1,p-1),rp=p-dp,n=q*d;
+      return{topic:'Dividing Expressions',instr:'Simplify using index laws',
+        expr:frac(`${n}x${sup(p)}`,`${d}x${sup(dp)}`),
+        typeLabel:'Power of x in the answer:',typeAns:rp,typeFullAns:`${q}x${sup(rp)}`,
+        mcAns:`${q}x${sup(rp)}`,mcWrong:[`${q}x${sup(p+dp)}`,`${q}x${sup(rp-1)}`,`${d}x${sup(rp)}`],
+        steps:`${n}÷${d}=${q} · x${sup(p)}÷x${sup(dp)}=x${sup(rp)}\nAnswer: ${q}x${sup(rp)}`};
+    } else if(lv<=8){
+      const q=dv(lv,2,7,3,9),d=dv(lv,2,4,2,5),px=ri(2,4),py=ri(2,3),n=q*d;
+      return{topic:'Dividing Expressions',instr:'Simplify using index laws',
+        expr:frac(`${n}x${sup(px)}y${sup(py)}`,`${d}xy`),
+        typeLabel:'Coefficient:',typeAns:q,typeFullAns:`${q}x${sup(px-1)}y${sup(py-1)}`,
+        mcAns:`${q}x${sup(px-1)}y${sup(py-1)}`,
+        mcWrong:[`${d}x${sup(px-1)}y${sup(py-1)}`,`${q}x${sup(px)}y${sup(py)}`,`${q}x${sup(px+1)}y${sup(py+1)}`],
+        steps:`${n}÷${d}=${q} · x${sup(px)}÷x=x${sup(px-1)} · y${sup(py)}÷y=y${sup(py-1)}\nAnswer: ${q}x${sup(px-1)}y${sup(py-1)}`};
+    } else {
+      const q=dv(lv,3,8,4,10),d=dv(lv,2,4,3,5),p=ri(3,5),n=q*d;
+      return{topic:'Dividing Expressions',instr:'Simplify',
+        expr:frac(`${n}a${sup(p)}b`,`${d}ab`),
+        typeLabel:'Coefficient:',typeAns:q,typeFullAns:`${q}a${sup(p-1)}`,
+        mcAns:`${q}a${sup(p-1)}`,
+        mcWrong:[`${q}a${sup(p)}`,`${d}a${sup(p-1)}`,`${q}a${sup(p-1)}b`],
+        steps:`${n}÷${d}=${q} · a${sup(p)}÷a=a${sup(p-1)} · b÷b=1\nAnswer: ${q}a${sup(p-1)}`};
+    }
+  },
+
+  expanding(lv){
+    if(lv<=2){
+      const a=dv(lv,2,4,2,5),b=dv(lv,1,6,2,8),c=dv(lv,1,6,1,8);
+      const rx=a*b,rc=a*c;
+      return{topic:'Expanding Brackets',instr:'Expand the brackets',
+        expr:`${a}(${b}x + ${c})`,
+        typeLabel:'Coefficient of x:',typeAns:rx,typeFullAns:`${rx}x + ${rc}`,
+        mcAns:`${rx}x + ${rc}`,mcWrong:[`${b}x + ${rc}`,`${rx}x + ${c}`,`${rx+a}x + ${rc}`],
+        steps:`${a}×${b}x = ${rx}x · ${a}×${c} = ${rc}\nAnswer: ${rx}x + ${rc}`};
+    } else if(lv<=4){
+      const a=dv(lv,2,6,3,8),b=dv(lv,1,8,2,10),c=dv(lv,1,8,2,10);
+      const rx=a*b,rc=a*c;
+      return{topic:'Expanding Brackets',instr:'Expand the brackets',
+        expr:`${a}(${b}x − ${c})`,
+        typeLabel:'Constant term (include − if negative):',typeAns:-rc,typeFullAns:`${rx}x − ${rc}`,
+        mcAns:`${rx}x − ${rc}`,mcWrong:[`${rx}x + ${rc}`,`${b}x − ${rc}`,`${rx}x − ${c}`],
+        steps:`${a}×${b}x = ${rx}x · ${a}×(−${c}) = −${rc}\nAnswer: ${rx}x − ${rc}`};
+    } else if(lv<=6){
+      const a=dv(lv,2,6,3,8),b=dv(lv,1,6,2,8),c=dv(lv,1,6,2,8);
+      const rx=a*b,ry=a*c;
+      return{topic:'Expanding Brackets',instr:'Expand the brackets',
+        expr:`${a}(${b}x + ${c}y)`,
+        typeLabel:'Coefficient of x:',typeAns:rx,typeFullAns:`${rx}x + ${ry}y`,
+        mcAns:`${rx}x + ${ry}y`,mcWrong:[`${rx}x + ${c}y`,`${b}x + ${ry}y`,`${rx+1}x + ${ry}y`],
+        steps:`${a}×${b}x = ${rx}x · ${a}×${c}y = ${ry}y\nAnswer: ${rx}x + ${ry}y`};
+    } else if(lv<=8){
+      const a=dv(lv,2,6,3,8),b=dv(lv,1,8,2,10),c=dv(lv,1,8,2,10);
+      const rx=a*b,rc=a*c;
+      return{topic:'Expanding Brackets',instr:'Expand the brackets',
+        expr:`−${a}(${b}x + ${c})`,
+        hint:'A negative outside changes the sign of every term inside',
+        typeLabel:'Coefficient of x (include sign):',typeAns:-rx,typeFullAns:`−${rx}x − ${rc}`,
+        mcAns:`−${rx}x − ${rc}`,mcWrong:[`${rx}x − ${rc}`,`−${rx}x + ${rc}`,`−${b}x − ${rc}`],
+        steps:`−${a}×${b}x = −${rx}x · −${a}×${c} = −${rc}\nAnswer: −${rx}x − ${rc}`};
+    } else {
+      // ax(bx + c) = abx² + acx
+      const a=dv(lv,2,5,2,6),b=dv(lv,2,6,3,8),c=dv(lv,1,8,2,10);
+      const rx=a*b,rc=a*c;
+      return{topic:'Expanding Brackets',instr:'Expand the brackets',
+        expr:`${a}x(${b}x + ${c})`,
+        hint:'Multiply both terms inside by ax',
+        typeLabel:'Coefficient of x²:',typeAns:rx,typeFullAns:`${rx}x² + ${rc}x`,
+        mcAns:`${rx}x² + ${rc}x`,mcWrong:[`${rx}x + ${rc}`,`${b}x² + ${rc}x`,`${rx}x² + ${c}x`],
+        steps:`${a}x×${b}x = ${rx}x² · ${a}x×${c} = ${rc}x\nAnswer: ${rx}x² + ${rc}x`};
+    }
+  },
+
+  formula(lv){
+    if(lv<=2){
+      const m=dv(lv,2,5,2,7),c=dv(lv,1,8,1,12),x=dv(lv,1,6,1,8);
+      const val=m*x+c;
+      return{topic:'Formula Substitution',instr:'Substitute and evaluate',
+        expr:`y = ${m}x + ${c}`,ctx:`Find y when x = ${x}`,
+        typeLabel:'Value of y:',typeAns:val,typeFullAns:`${val}`,
+        mcAns:`${val}`,mcWrong:[`${m*x}`,`${val+m}`,`${val+c}`].map(String),
+        steps:`y = ${m}(${x}) + ${c} = ${m*x} + ${c} = ${val}`};
+    } else if(lv<=4){
+      const m=dv(lv,2,8,3,12),c=dv(lv,1,10,2,15),x=dv(lv,2,8,2,10);
+      const val=m*x+c;
+      return{topic:'Formula Substitution',instr:'Substitute and evaluate',
+        expr:`y = ${m}x + ${c}`,ctx:`Find y when x = ${x}`,
+        typeLabel:'Value of y:',typeAns:val,typeFullAns:`${val}`,
+        mcAns:`${val}`,mcWrong:[`${val+m}`,`${m*x}`,`${val-c}`].map(String),
+        steps:`y = ${m}(${x}) + ${c} = ${m*x} + ${c} = ${val}`};
+    } else if(lv<=6){
+      const a=dv(lv,2,6,3,8),b=dv(lv,2,5,2,7),x=ri(1,8),y=ri(1,6);
+      const val=a*x+b*y;
+      return{topic:'Formula Substitution',instr:'Substitute both values and evaluate',
+        expr:`P = ${a}x + ${b}y`,ctx:`Find P when x = ${x}, y = ${y}`,
+        typeLabel:'Value of P:',typeAns:val,typeFullAns:`${val}`,
+        mcAns:`${val}`,mcWrong:[`${a*x+b}`,`${a+b*y}`,`${val+b}`].map(String),
+        steps:`P = ${a}(${x}) + ${b}(${y}) = ${a*x} + ${b*y} = ${val}`};
+    } else if(lv<=8){
+      const a=dv(lv,2,5,2,6),x=ri(2,6);
+      const val=a*x*x;
+      return{topic:'Formula Substitution',instr:'Substitute and evaluate',
+        expr:`A = ${a}x²`,ctx:`Find A when x = ${x}`,
+        typeLabel:'Value of A:',typeAns:val,typeFullAns:`${val}`,
+        mcAns:`${val}`,mcWrong:[`${a*x}`,`${val+a}`,`${2*a*x}`].map(String),
+        steps:`A = ${a}(${x})² = ${a}×${x*x} = ${val}`};
+    } else {
+      const a=dv(lv,1,4,2,5),b=dv(lv,2,6,3,8),c=dv(lv,1,8,2,12),x=ri(1,5);
+      const val=a*x*x+b*x+c;
+      return{topic:'Formula Substitution',instr:'Substitute and evaluate',
+        expr:`f(x) = ${a}x² + ${b}x + ${c}`,ctx:`Find f(${x})`,
+        typeLabel:'Value:',typeAns:val,typeFullAns:`${val}`,
+        mcAns:`${val}`,mcWrong:[`${a*x*x+b+c}`,`${val+b}`,`${a*x+b*x+c}`].map(String),
+        steps:`f(${x}) = ${a}(${x})² + ${b}(${x}) + ${c}\n= ${a*x*x} + ${b*x} + ${c} = ${val}`};
+    }
+  },
+
+  equivalent(lv){
+    if(lv<=2){
+      const a=ri(2,5),b=ri(1,6),c=ri(1,6);
+      const rx=a*b,rc=a*c;
+      const correct=`${rx}x + ${rc}`;
+      return{topic:'Equivalent Expressions',instr:'Which expression is equivalent to:',
+        expr:`${a}(${b}x + ${c})`,
+        typeLabel:'Constant term of the expanded form:',typeAns:rc,typeFullAns:correct,
+        mcAns:correct,mcWrong:[`${b}x + ${rc}`,`${rx}x + ${c}`,`${rx+a}x + ${rc}`],
+        steps:`${a}×${b}x=${rx}x · ${a}×${c}=${rc}\nAnswer: ${correct}`};
+    } else if(lv<=4){
+      const a=ri(2,6),b=ri(2,6),c=ri(1,8);
+      const rx=a*b,rc=a*c;
+      const correct=`${rx}x + ${rc}`;
+      return{topic:'Equivalent Expressions',instr:'Which expression is equivalent to:',
+        expr:`${a}(${b}x + ${c})`,
+        typeLabel:'Coefficient of x in the expanded form:',typeAns:rx,typeFullAns:correct,
+        mcAns:correct,mcWrong:[`${a*b+1}x + ${rc}`,`${b}x + ${a*c}`,`${rx}x + ${c}`],
+        steps:`${a}×${b}x=${rx}x · ${a}×${c}=${rc}\nAnswer: ${correct}`};
+    } else if(lv<=6){
+      const a=ri(2,7),bv=ri(1,8),cv=ri(1,8);
+      const correct=`${a}(${bv}x + ${cv})`;
+      const expanded=`${a*bv}x + ${a*cv}`;
+      return{topic:'Equivalent Expressions',instr:'Which is the factorised form of:',
+        expr:expanded,
+        hint:'Find the highest common factor of both terms',
+        typeLabel:'Number outside the bracket:',typeAns:a,typeFullAns:correct,
+        mcAns:correct,mcWrong:[`${a}(${bv+1}x + ${cv})`,`${a+1}(${bv}x + ${cv})`,`${a}(${bv}x − ${cv})`],
+        steps:`HCF of ${a*bv} and ${a*cv} is ${a}\nAnswer: ${a}(${bv}x + ${cv})`};
+    } else if(lv<=8){
+      const a=ri(2,7),b=ri(2,6),c=ri(1,8),d=ri(1,8);
+      const sx=a+c,sc=b+d;
+      const expr2=`${a}x + ${b} + ${c}x + ${d}`;
+      const correct=`${sx}x + ${sc}`;
+      return{topic:'Equivalent Expressions',instr:'Which is the simplified equivalent of:',
+        expr:expr2,
+        typeLabel:'Coefficient of x:',typeAns:sx,typeFullAns:correct,
+        mcAns:correct,mcWrong:[`${sx+1}x + ${sc}`,`${a}x + ${sc}`,`${sx}x + ${b}`],
+        steps:`x: ${a}x+${c}x=${sx}x · const: ${b}+${d}=${sc}\nAnswer: ${correct}`};
+    } else {
+      const a=ri(2,6),b=ri(2,5);
+      const correct=`${a}x(x + ${b})`;
+      const expanded=`${a}x² + ${a*b}x`;
+      return{topic:'Equivalent Expressions',instr:'Which is the factorised form of:',
+        expr:expanded,
+        hint:'Look for a common factor that includes a variable',
+        typeLabel:'Number outside the bracket:',typeAns:a,typeFullAns:correct,
+        mcAns:correct,mcWrong:[`${a}(x² + ${b}x)`,`x(${a}x + ${a*b})`,`${a}x(x + ${b+1})`],
+        steps:`Common factor: ${a}x\n${a}x²÷${a}x=x · ${a*b}x÷${a}x=${b}\nAnswer: ${a}x(x + ${b})`};
+    }
+  }
+};
+
+// ── UI HELPERS ───────────────────────────────────────────────────
+function showScr(id){
+  ['sSetup','sQuiz','sResults'].forEach(s=>document.getElementById(s).classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.getElementById('backBtn').classList.toggle('on',id!=='sSetup');
+  window.scrollTo(0,0);
+}
+let allSel=false;
+function toggleAll(){
+  allSel=!allSel;
+  document.querySelectorAll('.t-tile input').forEach(el=>el.checked=allSel);
+  document.getElementById('selAllBtn').textContent=allSel?'Clear all':'Select all';
+  chkStart();
+}
+function setMode(m){
+  mode=m;
+  document.getElementById('mType').classList.toggle('sel',m==='type');
+  document.getElementById('mMC').classList.toggle('sel',m==='mc');
+}
+function getTopics(){return[...document.querySelectorAll('.t-tile input:checked')].map(e=>e.value);}
+function chkStart(){document.getElementById('startBtn').disabled=!getTopics().length;}
+document.querySelectorAll('.t-tile input').forEach(el=>el.addEventListener('change',chkStart));
+function goBack(){
+  if(document.getElementById('sQuiz').classList.contains('on')){
+    if(confirm('Leave quiz? Progress will be lost.')) showScr('sSetup');
+  } else showScr('sSetup');
+}
+function goSetup(){showScr('sSetup');}
+
+// ── QUIZ FLOW ────────────────────────────────────────────────────
+function startQuiz(){
+  const topics=getTopics();
+  if(!topics.length){alert('Pick at least one topic.');return;}
+  questions=[]; cur=0; score=0; busy=false; log=[];
+  for(let i=0;i<10;i++){
+    const tp=topics[i%topics.length];
+    const lv=i+1; // difficulty 1 → 10
+    questions.push(G[tp](lv));
+  }
+  // NO shuffle — keep difficulty order Q1→Q10
+  showScr('sQuiz');
+  renderQ();
+}
+
+function renderDiffBar(lv){
+  const bar=document.getElementById('diffBar');
+  bar.innerHTML='';
+  for(let i=1;i<=10;i++){
+    const d=document.createElement('div');
+    d.className='diff-pip'+(i<=lv?' on':'');
+    bar.appendChild(d);
+  }
+}
+
+function renderQ(){
+  const q=questions[cur];
+  const lv=cur+1;
+  busy=false;
+
+  document.getElementById('qTag').textContent=q.topic;
+  document.getElementById('qNum').textContent=`Q ${lv} / 10`;
+  document.getElementById('qPill').textContent=`${score} ✓`;
+  document.getElementById('progF').style.width=`${cur*10}%`;
+  renderDiffBar(lv);
+
+  document.getElementById('qTopic').textContent=q.topic;
+  document.getElementById('qInstr').textContent=q.instr;
+  document.getElementById('qExpr').innerHTML=q.expr; // innerHTML for fraction support
+
+  const ctxEl=document.getElementById('qCtx');
+  if(q.ctx){ctxEl.textContent=q.ctx;ctxEl.classList.add('on');}
+  else ctxEl.classList.remove('on');
+  document.getElementById('qHint').textContent=q.hint||'';
+
+  document.getElementById('fb').className='fb';
+  document.getElementById('nextBtn').className='next-btn';
+
+  if(mode==='type'){
+    document.getElementById('typeArea').className='type-area on';
+    document.getElementById('mcArea').className='mc-area';
+    document.getElementById('typeLbl').textContent=q.typeLabel||'Enter your answer:';
+    const inp=document.getElementById('typeIn');
+    inp.value=''; inp.className='type-in'; inp.disabled=false;
+    document.getElementById('chkBtn').disabled=false;
+    inp.onkeydown=e=>{if(e.key==='Enter'&&!busy)submitType();};
+    setTimeout(()=>inp.focus(),80);
+  } else {
+    document.getElementById('typeArea').className='type-area';
+    buildMC(q);
+  }
+}
+
+function buildMC(q){
+  const area=document.getElementById('mcArea');
+  area.innerHTML=''; area.className='mc-area on';
+  const opts=sh([q.mcAns,...q.mcWrong]);
+  opts.forEach(val=>{
+    const b=document.createElement('button');
+    b.className='mc-opt'; b.textContent=val; b.dataset.val=val;
+    b.onclick=()=>pickOpt(val,b,q);
+    area.appendChild(b);
+  });
+}
+
+function norm(s){return String(s).replace(/\s+/g,'').toLowerCase();}
+
+function pickOpt(val,btn,q){
+  if(busy)return; busy=true;
+  document.querySelectorAll('.mc-opt').forEach(b=>{
+    b.disabled=true;
+    if(norm(b.dataset.val)===norm(q.mcAns)) b.classList.add(norm(val)===norm(q.mcAns)?'ok':'show-ans');
+  });
+  const ok=norm(val)===norm(q.mcAns);
+  if(!ok) btn.classList.add('no');
+  if(ok) score++;
+  showFB(ok,q,val);
+}
+
+function submitType(){
+  if(busy)return;
+  const inp=document.getElementById('typeIn');
+  const raw=inp.value.trim(); if(!raw)return;
+  busy=true;
+  const q=questions[cur];
+  let uv=raw.includes('/')?parseFloat(raw.split('/')[0])/parseFloat(raw.split('/')[1]):parseFloat(raw);
+  inp.disabled=true; document.getElementById('chkBtn').disabled=true;
+  const ok=!isNaN(uv)&&Math.abs(uv-q.typeAns)<0.01;
+  inp.className='type-in '+(ok?'ok':'no');
+  if(ok) score++;
+  showFB(ok,q,raw);
+}
+
+function showFB(ok,q,userVal){
+  const el=document.getElementById('fb');
+  el.className='fb on '+(ok?'ok':'no');
+  document.getElementById('fbHead').textContent=ok
+    ?`✓ Correct! The answer is ${q.typeFullAns||q.mcAns}`
+    :`✗ Not quite — the answer is ${q.typeFullAns||q.mcAns}`;
+  document.getElementById('fbWork').innerHTML=q.steps.replace(/\n/g,'<br>');
+  log.push({q,ok,userVal});
+  const nb=document.getElementById('nextBtn');
+  nb.className='next-btn on';
+  nb.textContent=cur+1<10?'Next question →':'See my results →';
+}
+
+function nextQ(){ cur++; cur>=10?showResults():renderQ(); }
+
+// ── RESULTS ─────────────────────────────────────────────────────
+function showResults(){
+  showScr('sResults');
+  document.getElementById('progF').style.width='100%';
+  const pct=Math.round(score/10*100);
+  document.getElementById('resEm').textContent=pct===100?'🏆':pct>=80?'⭐':pct>=60?'👍':'💪';
+  document.getElementById('resSc').textContent=`${score} / 10`;
+  document.getElementById('resPct').textContent=`${pct}% correct`;
+  document.getElementById('resMsg').textContent=
+    pct===100?'Perfect! You handled every level with confidence.':
+    pct>=80?'Great work! Review the solutions for any you missed.':
+    pct>=60?'Good effort — check the worked solutions below to improve.':
+    pct>=40?'Keep practising. Study the steps carefully and try again.':
+            'Review the key concepts then try again — you\'ll improve!';
+
+  const list=document.getElementById('revList'); list.innerHTML='';
+  log.forEach(({q,ok,userVal},i)=>{
+    const d=document.createElement('div'); d.className='rev-item';
+    const ctxLine=q.ctx?`<div style="font-size:0.76rem;color:#888">${q.ctx}</div>`:'';
+    const ansLine=mode==='type'
+      ?`Your answer: <span class="${ok?'ans-ok':'ans-no'}">${userVal}</span> · Correct: <span class="ans-ok">${q.typeAns}</span>`
+      :`Answer: <span class="${ok?'ans-ok':'ans-no'}">${q.mcAns}</span>`;
+    d.innerHTML=`
+      <span class="rev-ic">${ok?'✅':'❌'}</span>
+      <div style="min-width:0">
+        <div class="rev-q">Q${i+1} · ${q.topic}</div>
+        <div class="rev-expr">${q.expr}</div>
+        ${ctxLine}
+        <div class="rev-ans">${ansLine}</div>
+        <div class="rev-work">${q.steps.replace(/\n/g,' → ')}</div>
+      </div>`;
+    list.appendChild(d);
+  });
+}
+</script>
+</body>
+</html>
