@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fractions Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f0f13;--card:#1a1a22;--border:#2e2e3e;
+  --text:#f0eee8;--mid:#9896a4;--dim:#55536a;
+  --add:#4ade80;--add-dim:#1a3d28;
+  --sub:#f87171;--sub-dim:#3d1a1a;
+  --gold:#fbbf24;--gold-dim:#2d2510;
+  --blue:#60a5fa;--blue-dim:#1a2a3d;
+  --purp:#a78bfa;--purp-dim:#1e1535;
+  --mono:'Space Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;height:52px;border-bottom:1px solid var(--border);flex-shrink:0;gap:0.75rem;}
+.hdr-logo{font-family:var(--mono);font-size:0.8rem;color:var(--mid);}
+.hdr-logo span{color:var(--text);}
+.hdr-timer{font-family:var(--mono);font-size:1.05rem;color:var(--gold);letter-spacing:0.08em;min-width:56px;text-align:center;}
+.reset-btn{background:none;border:1px solid var(--border);color:var(--mid);padding:5px 12px;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:0.75rem;transition:all 0.15s;}
+.reset-btn:hover{border-color:var(--sub);color:var(--sub);}
+
+/* ── STATS ── */
+.stats{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.stat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0.5rem 0.25rem;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-val{font-family:var(--mono);font-size:1.2rem;font-weight:700;line-height:1;}
+.stat-val.grn{color:var(--add);}
+.stat-val.red{color:var(--sub);}
+.stat-val.gld{color:var(--gold);}
+.stat-lbl{font-size:0.62rem;color:var(--mid);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;}
+
+/* ── TOPIC BAR ── */
+.topic-bar{display:flex;padding:0.6rem 0.75rem;gap:0.35rem;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;}
+.topic-bar::-webkit-scrollbar{display:none;}
+.t-btn{flex-shrink:0;padding:0.4rem 0.7rem;border:1.5px solid var(--border);border-radius:8px;background:none;cursor:pointer;font-family:var(--sans);font-size:0.75rem;font-weight:500;color:var(--mid);transition:all 0.15s;white-space:nowrap;}
+.t-btn:hover{color:var(--text);border-color:var(--text);}
+.t-btn.on{border-color:var(--blue);background:var(--blue-dim);color:var(--blue);}
+
+/* ── OPTIONS BARS ── */
+.opts-bar{display:flex;padding:0.5rem 0.75rem;gap:0.4rem;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+.opt-btn{padding:0.35rem 0.75rem;border:1.5px solid var(--border);border-radius:7px;background:none;cursor:pointer;font-family:var(--sans);font-size:0.75rem;font-weight:500;color:var(--mid);transition:all 0.2s;}
+.opt-btn:hover{color:var(--text);border-color:var(--text);}
+.opt-btn.on-denom{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);}
+.opt-btn.on-neg0{border-color:var(--mid);background:#1e1e28;color:var(--text);}
+.opt-btn.on-neg1{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);}
+.opt-btn.on-neg2{border-color:var(--sub);background:var(--sub-dim);color:var(--sub);}
+.opt-sep{width:1px;background:var(--border);margin:0 0.2rem;flex-shrink:0;}
+
+/* ── QUIZ AREA ── */
+.quiz-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0.75rem 1rem;overflow:hidden;gap:1rem;}
+
+.instr{font-size:0.8rem;color:var(--mid);letter-spacing:0.06em;text-transform:uppercase;font-weight:600;}
+
+/* Question expression */
+.q-expr{display:flex;align-items:center;justify-content:center;gap:0.6rem;flex-wrap:wrap;}
+.q-op{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--dim);line-height:1;}
+.q-eq{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--dim);line-height:1;}
+
+/* Fraction display */
+.fq{display:inline-flex;flex-direction:column;align-items:center;font-family:var(--mono);font-size:1.85rem;font-weight:700;line-height:1.1;vertical-align:middle;}
+.fn{border-bottom:2.5px solid var(--blue);padding:0 8px 4px;text-align:center;min-width:28px;}
+.fd{padding:4px 8px 0;text-align:center;min-width:28px;}
+.fq.neg-frac{color:var(--sub);}
+.fq .fn{border-color:currentColor;}
+/* whole number display */
+.fq-whole{font-family:var(--mono);font-size:1.85rem;font-weight:700;line-height:1;}
+/* mixed numeral */
+.fq-mixed{display:inline-flex;align-items:center;gap:0.35rem;vertical-align:middle;}
+
+/* ── ANSWER INPUT AREA ── */
+.ans-area{display:flex;flex-direction:column;align-items:center;gap:0.75rem;}
+.ans-label{font-size:0.72rem;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;}
+
+/* Fraction input */
+.frac-inp-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:0;}
+.frac-inp{
+  font-family:var(--mono);font-size:1.7rem;font-weight:700;
+  width:80px;text-align:center;
+  background:var(--card);border:none;border-bottom:2.5px solid var(--border);
+  color:var(--text);outline:none;padding:6px 4px;
+  transition:border-color 0.2s;-moz-appearance:textfield;
+}
+.frac-inp::-webkit-outer-spin-button,.frac-inp::-webkit-inner-spin-button{-webkit-appearance:none;}
+.frac-inp:focus{border-color:var(--gold);}
+.frac-inp.top-inp{border-bottom:3px solid var(--blue);padding-bottom:8px;}
+.frac-inp.bot-inp{border-bottom:2.5px solid var(--border);padding-top:6px;}
+.frac-inp.ok{border-color:var(--add)!important;color:var(--add);}
+.frac-inp.no{border-color:var(--sub)!important;color:var(--sub);}
+.frac-divline{height:3px;width:80px;background:var(--blue);border-radius:99px;margin:0;}
+
+/* Mixed numeral input */
+.mixed-inp-wrap{display:inline-flex;align-items:center;gap:0.5rem;}
+.whole-inp{
+  font-family:var(--mono);font-size:1.7rem;font-weight:700;
+  width:64px;text-align:center;
+  background:var(--card);border:none;border-bottom:2.5px solid var(--border);
+  color:var(--text);outline:none;padding:6px 4px;
+  transition:border-color 0.2s;-moz-appearance:textfield;
+  align-self:flex-end;margin-bottom:0;
+}
+.whole-inp::-webkit-outer-spin-button,.whole-inp::-webkit-inner-spin-button{-webkit-appearance:none;}
+.whole-inp:focus{border-color:var(--gold);}
+.whole-inp.ok{border-color:var(--add)!important;color:var(--add);}
+.whole-inp.no{border-color:var(--sub)!important;color:var(--sub);}
+
+/* Check button */
+.check-btn{
+  padding:10px 28px;background:var(--blue);color:var(--bg);
+  border:none;border-radius:8px;
+  font:700 0.88rem var(--sans);cursor:pointer;
+  transition:background 0.15s;letter-spacing:0.03em;
+}
+.check-btn:hover{background:#3b96f5;}
+.check-btn:disabled{background:var(--border);color:var(--dim);cursor:not-allowed;}
+
+/* Feedback */
+.feedback{font-family:var(--sans);font-size:0.85rem;font-weight:600;min-height:1.1rem;text-align:center;letter-spacing:0.03em;}
+.feedback.ok{color:var(--add);}
+.feedback.no{color:var(--sub);}
+.feedback.hint{color:var(--gold);}
+
+/* Worked solution */
+.solution{font-family:var(--mono);font-size:0.75rem;color:var(--mid);text-align:center;line-height:1.8;max-width:360px;}
+
+/* ── FOOTER ── */
+.bot-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0.6rem 1.25rem;border-top:1px solid var(--border);}
+.hint-txt{font-size:0.72rem;color:var(--dim);}
+
+/* ── STREAK BADGE ── */
+.streak-badge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.5);font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--gold);pointer-events:none;opacity:0;z-index:100;text-shadow:0 0 24px rgba(251,191,36,0.5);}
+.streak-badge.pop{animation:streakPop 0.9s ease forwards;}
+@keyframes streakPop{0%{opacity:0;transform:translate(-50%,-50%) scale(0.5);}20%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}40%{transform:translate(-50%,-50%) scale(1);}70%{opacity:1;}100%{opacity:0;transform:translate(-50%,-60%) scale(0.9);}}
+</style>
+</head>
+<body>
+
+<div class="streak-badge" id="streakBadge"></div>
+
+<!-- Header -->
+<div class="hdr">
+  <span class="hdr-logo">Maths <span>Applets</span></span>
+  <div class="hdr-timer" id="timerEl">0:00</div>
+  <button class="reset-btn" onclick="resetAll()">Reset</button>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-val grn" id="stCorr">0</div><div class="stat-lbl">Correct</div></div>
+  <div class="stat"><div class="stat-val red" id="stWrong">0</div><div class="stat-lbl">Incorrect</div></div>
+  <div class="stat"><div class="stat-val gld" id="stPct">—</div><div class="stat-lbl">Accuracy</div></div>
+  <div class="stat"><div class="stat-val" id="stStreak" style="color:var(--dim)">0</div><div class="stat-lbl">Streak</div></div>
+</div>
+
+<!-- Topic selector -->
+<div class="topic-bar">
+  <button class="t-btn on" id="tb-add"      onclick="setTopic('add')">＋ Adding</button>
+  <button class="t-btn"    id="tb-sub"      onclick="setTopic('sub')">－ Subtracting</button>
+  <button class="t-btn"    id="tb-mul"      onclick="setTopic('mul')">× Multiplying</button>
+  <button class="t-btn"    id="tb-div"      onclick="setTopic('div')">÷ Dividing</button>
+  <button class="t-btn"    id="tb-simplify" onclick="setTopic('simplify')">↓ Simplifying</button>
+  <button class="t-btn"    id="tb-impToMix" onclick="setTopic('impToMix')">⇣ Improper→Mixed</button>
+  <button class="t-btn"    id="tb-mixToImp" onclick="setTopic('mixToImp')">⇡ Mixed→Improper</button>
+</div>
+
+<!-- Options -->
+<div class="opts-bar" id="optsBar">
+  <button class="opt-btn" id="opt-same" onclick="setDenom('same')">Same denominator</button>
+  <button class="opt-btn on-denom" id="opt-diff" onclick="setDenom('diff')">Different denominators</button>
+  <div class="opt-sep"></div>
+  <button class="opt-btn on-neg0" id="neg-none" onclick="setNegMode('none')">No negatives</button>
+  <button class="opt-btn"         id="neg-one"  onclick="setNegMode('one')">One −ve</button>
+  <button class="opt-btn"         id="neg-two"  onclick="setNegMode('two')">Two −ve</button>
+</div>
+
+<!-- Quiz area -->
+<div class="quiz-wrap">
+  <div class="instr" id="instrEl">Solve the fraction problem</div>
+  <div class="q-expr" id="qExpr"></div>
+  <div class="ans-area">
+    <div class="ans-label">Your answer:</div>
+    <div id="ansInputs"></div>
+  </div>
+  <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check →</button>
+  <div class="feedback" id="feedbackEl"></div>
+  <div class="solution" id="solutionEl"></div>
+</div>
+
+<!-- Footer -->
+<div class="bot-bar">
+  <span class="hint-txt">Tab between fields · Enter to check</span>
+  <span class="hint-txt" style="color:var(--dim)">Ongoing — no limit</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// MATH HELPERS
+// ══════════════════════════════════════════════════════════════
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){const t=b;b=a%b;a=t;}return a||1;}
+function lcm(a,b){return Math.abs(a*b)/gcd(a,b);}
+function simp(n,d){
+  if(d===0) return{n:0,d:1};
+  const g=gcd(Math.abs(n),Math.abs(d));
+  let sn=n/g,sd=d/g;
+  if(sd<0){sn=-sn;sd=-sd;}
+  return{n:sn,d:sd};
+}
+function fracEq(n1,d1,n2,d2){return n1*d2===n2*d1;}
+function ri(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let topic='add', denomMode='diff', negMode='none';
+let correct=0, wrong=0, streak=0;
+let timerStart=null, timerInterval=null, timerSec=0;
+let currentQ=null;
+let feedbackTO=null;
+let nextTO=null;
+
+// ══════════════════════════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════════════════════════
+function startTimer(){
+  if(timerInterval) return;
+  timerStart=Date.now()-timerSec*1000;
+  timerInterval=setInterval(()=>{
+    timerSec=Math.floor((Date.now()-timerStart)/1000);
+    const m=Math.floor(timerSec/60),s=timerSec%60;
+    document.getElementById('timerEl').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  },500);
+}
+function stopTimer(){clearInterval(timerInterval);timerInterval=null;}
+
+// ══════════════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════════════
+function updateStats(){
+  document.getElementById('stCorr').textContent=correct;
+  document.getElementById('stWrong').textContent=wrong;
+  const tot=correct+wrong;
+  document.getElementById('stPct').textContent=tot?Math.round(correct/tot*100)+'%':'—';
+  const sEl=document.getElementById('stStreak');
+  sEl.textContent=streak;
+  sEl.style.color=streak>=5?'var(--gold)':streak>=3?'var(--add)':'var(--dim)';
+}
+
+// ══════════════════════════════════════════════════════════════
+// DISPLAY HELPERS
+// ══════════════════════════════════════════════════════════════
+function fracHTML(n,d,small){
+  const fs=small?'1.3rem':'1.85rem';
+  const bs=small?'2px':'2.5px';
+  const pad=small?'2px 5px 3px':'0 8px 4px';
+  const pad2=small?'3px 5px 0':'4px 8px 0';
+  const mn=small?'18px':'28px';
+  const neg=n<0&&d>0;
+  if(d===1) return `<span class="fq-whole" style="font-size:${fs}">${n}</span>`;
+  return `<span class="fq${neg?' neg-frac':''}" style="font-size:${fs}">` +
+    `<span class="fn" style="border-bottom:${bs} solid currentColor;padding:${pad};min-width:${mn}">${n}</span>` +
+    `<span class="fd" style="padding:${pad2};min-width:${mn}">${d}</span></span>`;
+}
+
+function mixedHTML(w,n,d,small){
+  if(n===0) return `<span class="fq-whole" style="font-size:${small?'1.3rem':'1.85rem'}">${w}</span>`;
+  return `<span class="fq-mixed">${fracHTML(w,1,small)} ${fracHTML(n,d,small)}</span>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// ANSWER INPUT BUILDERS
+// ══════════════════════════════════════════════════════════════
+function buildFracInput(){
+  return `<div class="frac-inp-wrap" id="ainFrac">
+    <input class="frac-inp top-inp" id="ainNum" type="number" placeholder="?" autocomplete="off"/>
+    <div class="frac-divline"></div>
+    <input class="frac-inp bot-inp" id="ainDen" type="number" placeholder="?" min="1" autocomplete="off"/>
+  </div>`;
+}
+
+function buildMixedInput(){
+  return `<div class="mixed-inp-wrap">
+    <input class="whole-inp" id="ainWhole" type="number" placeholder="?" autocomplete="off"/>
+    <div class="frac-inp-wrap">
+      <input class="frac-inp top-inp" id="ainNum" type="number" placeholder="?" autocomplete="off"/>
+      <div class="frac-divline"></div>
+      <input class="frac-inp bot-inp" id="ainDen" type="number" placeholder="?" min="1" autocomplete="off"/>
+    </div>
+  </div>`;
+}
+
+function buildWholeInput(){
+  return `<div class="frac-inp-wrap">
+    <input class="frac-inp top-inp" id="ainNum" type="number" placeholder="?" autocomplete="off" style="border-bottom:2.5px solid var(--blue)"/>
+  </div>`;
+}
+
+function attachEnterKeys(){
+  document.querySelectorAll('.frac-inp,.whole-inp').forEach(inp=>{
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkAnswer();}});
+    inp.addEventListener('input',clearOk);
+  });
+}
+
+function clearOk(){
+  document.querySelectorAll('.frac-inp,.whole-inp').forEach(el=>{
+    el.classList.remove('ok','no');
+  });
+}
+
+function focusFirst(){
+  setTimeout(()=>{
+    const el=document.getElementById('ainWhole')||document.getElementById('ainNum');
+    if(el) el.focus();
+  },60);
+}
+
+// ══════════════════════════════════════════════════════════════
+// QUESTION GENERATORS
+// ══════════════════════════════════════════════════════════════
+function pickDen(){return ri(2,12);}
+function pickDenPair(){
+  if(denomMode==='same'){const d=ri(2,10);return[d,d];}
+  let d1=ri(2,10),d2;do{d2=ri(2,10);}while(d2===d1);
+  return[d1,d2];
+}
+// Apply negMode to two operand numerators
+function applyNegs(n1,n2){
+  if(negMode==='none') return[n1,n2];
+  if(negMode==='one') return Math.random()<0.5?[-n1,n2]:[n1,-n2];
+  return[-n1,-n2]; // 'two'
+}
+// Apply negMode to a single operand (simplify)
+function applyNeg1(n){
+  return negMode!=='none'?-n:n;
+}
+
+const GEN={
+  add(){
+    const[d1,d2]=pickDenPair();
+    let[n1,n2]=applyNegs(ri(1,d1),ri(1,d2));
+    const com=lcm(d1,d2);
+    const resN=n1*(com/d1)+n2*(com/d2);
+    const res=simp(resN,com);
+    const steps=d1===d2
+      ?`${n1} + ${n2} = ${resN}, over ${d1}  →  ${res.n}/${res.d}`
+      :`LCM(${d1},${d2}) = ${com}\n${n1}/${d1} = ${n1*(com/d1)}/${com}\n${n2}/${d2} = ${n2*(com/d2)}/${com}\n= ${resN}/${com} = ${res.n}/${res.d}`;
+    return{
+      instr:'Add the fractions',
+      exprHTML:fracHTML(n1,d1)+`<span class="q-op">+</span>`+fracHTML(n2,d2)+`<span class="q-eq">=</span>`,
+      ansType:'fraction',ans:res,steps
+    };
+  },
+
+  sub(){
+    const[d1,d2]=pickDenPair();
+    let[n1,n2]=applyNegs(ri(1,d1),ri(1,d2));
+    const com=lcm(d1,d2);
+    const resN=n1*(com/d1)-n2*(com/d2);
+    const res=simp(resN,com);
+    const steps=d1===d2
+      ?`${n1} − ${n2} = ${resN}, over ${d1}  →  ${res.n}/${res.d}`
+      :`LCM(${d1},${d2}) = ${com}\n${n1}/${d1} = ${n1*(com/d1)}/${com}\n${n2}/${d2} = ${n2*(com/d2)}/${com}\n= ${resN}/${com} = ${res.n}/${res.d}`;
+    return{
+      instr:'Subtract the fractions',
+      exprHTML:fracHTML(n1,d1)+`<span class="q-op">−</span>`+fracHTML(n2,d2)+`<span class="q-eq">=</span>`,
+      ansType:'fraction',ans:res,steps
+    };
+  },
+
+  mul(){
+    const[d1,d2]=pickDenPair();
+    let[n1,n2]=applyNegs(ri(1,d1),ri(1,d2));
+    const res=simp(n1*n2,d1*d2);
+    const steps=`${n1} × ${n2} = ${n1*n2}\n${d1} × ${d2} = ${d1*d2}\n= ${n1*n2}/${d1*d2} = ${res.n}/${res.d}`;
+    return{
+      instr:'Multiply the fractions',
+      exprHTML:fracHTML(n1,d1)+`<span class="q-op">×</span>`+fracHTML(n2,d2)+`<span class="q-eq">=</span>`,
+      ansType:'fraction',ans:res,steps
+    };
+  },
+
+  div(){
+    const[d1,d2]=pickDenPair();
+    let[n1,n2]=applyNegs(ri(1,d1),ri(1,d2));
+    // ensure divisor isn't zero; already guaranteed by ri(1,...)
+    const res=simp(n1*d2,d1*n2);
+    const steps=`Flip and multiply: ${n1}/${d1} × ${d2}/${n2}\n= ${n1*d2}/${d1*n2} = ${res.n}/${res.d}`;
+    return{
+      instr:'Divide the fractions',
+      exprHTML:fracHTML(n1,d1)+`<span class="q-op">÷</span>`+fracHTML(n2,d2)+`<span class="q-eq">=</span>`,
+      ansType:'fraction',ans:res,steps
+    };
+  },
+
+  simplify(){
+    const k=ri(2,5);
+    const d=ri(2,8);
+    const n=ri(1,d-1);
+    // negMode 'none' → positive; 'one' or 'two' → randomly negative
+    const sn=(negMode!=='none'&&Math.random()<0.5)?-n:n;
+    const bigN=sn*k,bigD=d*k;
+    const res=simp(bigN,bigD);
+    const steps=`GCD(${Math.abs(bigN)},${bigD}) = ${k}\n${bigN} ÷ ${k} = ${res.n}\n${bigD} ÷ ${k} = ${res.d}`;
+    return{
+      instr:'Simplify the fraction fully',
+      exprHTML:fracHTML(bigN,bigD)+`<span class="q-eq">=</span>`,
+      ansType:'fraction',ans:res,steps
+    };
+  },
+
+  // Improper fraction → mixed numeral (negatives NEVER applied)
+  impToMix(){
+    const d=ri(2,9);
+    const w=ri(1,4);
+    const remN=ri(1,d-1);
+    const impN=w*d+remN; // always positive
+    const steps=`${impN} ÷ ${d} = ${w} remainder ${remN}\n= ${w} and ${remN}/${d}`;
+    return{
+      instr:'Convert to a mixed numeral',
+      exprHTML:fracHTML(impN,d)+`<span class="q-eq">=</span>`,
+      ansType:'mixed',
+      ans:{w,n:remN,d},
+      steps
+    };
+  },
+
+  // Mixed numeral → improper fraction (negatives NEVER applied)
+  mixToImp(){
+    const d=ri(2,9);
+    const w=ri(1,4);
+    const remN=ri(1,d-1);
+    const impN=w*d+remN; // always positive
+    const steps=`${w} × ${d} + ${remN} = ${impN}\n= ${impN}/${d}`;
+    return{
+      instr:'Convert to an improper fraction',
+      exprHTML:mixedHTML(w,remN,d)+`<span class="q-eq">=</span>`,
+      ansType:'fraction',
+      ans:{n:impN,d},
+      steps
+    };
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// RENDER QUESTION
+// ══════════════════════════════════════════════════════════════
+function renderQ(){
+  clearTimeout(nextTO);
+  currentQ=GEN[topic]();
+
+  document.getElementById('instrEl').textContent=currentQ.instr;
+  document.getElementById('qExpr').innerHTML=currentQ.exprHTML;
+  document.getElementById('feedbackEl').textContent='';
+  document.getElementById('feedbackEl').className='feedback';
+  document.getElementById('solutionEl').textContent='';
+  document.getElementById('checkBtn').disabled=false;
+
+  const ainDiv=document.getElementById('ansInputs');
+  ainDiv.innerHTML=currentQ.ansType==='mixed'?buildMixedInput():buildFracInput();
+  attachEnterKeys();
+  focusFirst();
+}
+
+// ══════════════════════════════════════════════════════════════
+// CHECK ANSWER
+// ══════════════════════════════════════════════════════════════
+function getInputs(){
+  const numEl=document.getElementById('ainNum');
+  const denEl=document.getElementById('ainDen');
+  const whlEl=document.getElementById('ainWhole');
+  return{
+    n:numEl?parseInt(numEl.value,10):NaN,
+    d:denEl?parseInt(denEl.value,10):NaN,
+    w:whlEl?parseInt(whlEl.value,10):NaN,
+    numEl,denEl,whlEl
+  };
+}
+
+function checkAnswer(){
+  startTimer();
+  const{n,d,w,numEl,denEl,whlEl}=getInputs();
+  const q=currentQ;
+  let correct_ans=false;
+  let errorMsg='';
+
+  if(q.ansType==='fraction'){
+    if(isNaN(n)||n===undefined){numEl&&numEl.classList.add('no');setFB('Enter the numerator','no');return;}
+    // If there's a denominator field, validate it
+    if(denEl){
+      if(isNaN(d)||d===0){denEl&&denEl.classList.add('no');setFB('Denominator can\'t be 0','no');return;}
+      correct_ans=fracEq(n,d,q.ans.n,q.ans.d);
+    } else {
+      // whole number answer (den field missing = simplified to whole)
+      correct_ans=(n===q.ans.n&&q.ans.d===1);
+    }
+    if(correct_ans){
+      numEl&&numEl.classList.add('ok');
+      denEl&&denEl.classList.add('ok');
+    } else {
+      numEl&&numEl.classList.add('no');
+      denEl&&denEl.classList.add('no');
+    }
+  } else if(q.ansType==='mixed'){
+    if(isNaN(w)){whlEl&&whlEl.classList.add('no');setFB('Enter the whole number','no');return;}
+    if(isNaN(n)){numEl&&numEl.classList.add('no');setFB('Enter the numerator','no');return;}
+    if(isNaN(d)||d===0){denEl&&denEl.classList.add('no');setFB('Denominator can\'t be 0','no');return;}
+    const negative=w<0;
+    // Convert both to improper and compare
+    const userImpN=negative?-(Math.abs(w)*d+Math.abs(n)):Math.abs(w)*d+Math.abs(n);
+    const corrImpN=q.ans.w<0?-(Math.abs(q.ans.w)*q.ans.d+q.ans.n):Math.abs(q.ans.w)*q.ans.d+q.ans.n;
+    correct_ans=(userImpN===corrImpN&&d===q.ans.d);
+    if(correct_ans){
+      whlEl&&whlEl.classList.add('ok');
+      numEl&&numEl.classList.add('ok');
+      denEl&&denEl.classList.add('ok');
+    } else {
+      whlEl&&whlEl.classList.add('no');
+      numEl&&numEl.classList.add('no');
+      denEl&&denEl.classList.add('no');
+    }
+  }
+
+  document.getElementById('checkBtn').disabled=true;
+
+  if(correct_ans){
+    correct++;
+    streak++;
+    setFB('✓ Correct!','ok');
+    if(streak%5===0&&streak>0) showStreak(streak);
+    nextTO=setTimeout(()=>renderQ(),500);
+  } else {
+    wrong++;
+    streak=0;
+    // Build correct answer display
+    let ansStr='';
+    if(q.ansType==='mixed'){
+      const neg=q.ans.w<0;
+      ansStr=`${q.ans.w} and ${q.ans.n}/${q.ans.d}`;
+    } else {
+      ansStr=`${q.ans.n}/${q.ans.d}`;
+    }
+    setFB(`✗  Answer: ${ansStr}`,'no');
+    document.getElementById('solutionEl').textContent=q.steps;
+    nextTO=setTimeout(()=>renderQ(),2500);
+  }
+
+  updateStats();
+}
+
+function setFB(msg,cls){
+  clearTimeout(feedbackTO);
+  const el=document.getElementById('feedbackEl');
+  el.textContent=msg; el.className='feedback '+cls;
+}
+
+function showStreak(n){
+  const b=document.getElementById('streakBadge');
+  b.textContent=`🔥 ${n} streak!`;
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+}
+
+// ══════════════════════════════════════════════════════════════
+// UI CONTROLS
+// ══════════════════════════════════════════════════════════════
+const TOPICS=['add','sub','mul','div','simplify','impToMix','mixToImp'];
+
+function setTopic(t){
+  topic=t;
+  TOPICS.forEach(id=>document.getElementById('tb-'+id).classList.remove('on'));
+  document.getElementById('tb-'+t).classList.add('on');
+  // Same/diff denom toggle only makes sense for arithmetic operations
+  const showDenom=t==='add'||t==='sub'||t==='mul'||t==='div';
+  document.getElementById('opt-same').style.display=showDenom?'':'none';
+  document.getElementById('opt-diff').style.display=showDenom?'':'none';
+  document.querySelector('.opt-sep').style.display=showDenom?'':'none';
+  // Neg toggle not shown for conversion topics
+  const isConvert=t==='impToMix'||t==='mixToImp';
+  ['neg-none','neg-one','neg-two'].forEach(id=>{
+    document.getElementById(id).style.display=isConvert?'none':'';
+  });
+  renderQ();
+}
+
+function setDenom(mode){
+  denomMode=mode;
+  document.getElementById('opt-same').classList.toggle('on-denom',mode==='same');
+  document.getElementById('opt-diff').classList.toggle('on-denom',mode==='diff');
+  renderQ();
+}
+
+function setNegMode(mode){
+  negMode=mode;
+  document.getElementById('neg-none').className='opt-btn'+(mode==='none'?' on-neg0':'');
+  document.getElementById('neg-one').className='opt-btn'+(mode==='one'?' on-neg1':'');
+  document.getElementById('neg-two').className='opt-btn'+(mode==='two'?' on-neg2':'');
+  renderQ();
+}
+
+function resetAll(){
+  correct=0; wrong=0; streak=0;
+  stopTimer(); timerSec=0; timerStart=null;
+  document.getElementById('timerEl').textContent='0:00';
+  updateStats(); renderQ();
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+setTopic('add'); // also calls renderQ
+</script>
+</body>
+</html>

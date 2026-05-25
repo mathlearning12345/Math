@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rounding Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f0f13;--card:#1a1a22;--border:#2e2e3e;
+  --text:#f0eee8;--mid:#9896a4;--dim:#55536a;
+  --add:#4ade80;--add-dim:#1a3d28;
+  --sub:#f87171;--sub-dim:#3d1a1a;
+  --gold:#fbbf24;--gold-dim:#2d2510;
+  --blue:#60a5fa;--blue-dim:#1a2a3d;
+  --purp:#a78bfa;--purp-dim:#1e1535;
+  --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;height:52px;border-bottom:1px solid var(--border);flex-shrink:0;gap:0.75rem;}
+.hdr-logo{font-family:var(--mono);font-size:0.8rem;color:var(--mid);}
+.hdr-logo span{color:var(--text);}
+.hdr-timer{font-family:var(--mono);font-size:1.05rem;color:var(--gold);letter-spacing:0.08em;min-width:56px;text-align:center;}
+.reset-btn{background:none;border:1px solid var(--border);color:var(--mid);padding:5px 12px;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:0.75rem;transition:all 0.15s;}
+.reset-btn:hover{border-color:var(--sub);color:var(--sub);}
+
+/* ── STATS ── */
+.stats{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.stat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0.5rem 0.25rem;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-val{font-family:var(--mono);font-size:1.2rem;font-weight:700;line-height:1;}
+.stat-val.grn{color:var(--add);}
+.stat-val.red{color:var(--sub);}
+.stat-val.gld{color:var(--gold);}
+.stat-lbl{font-size:0.62rem;color:var(--mid);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;}
+
+/* ── TOPIC BAR ── */
+.topic-bar{display:flex;padding:0.6rem 0.75rem;gap:0.35rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+.t-btn{flex:1;padding:0.45rem 0.5rem;border:1.5px solid var(--border);border-radius:8px;background:none;cursor:pointer;font-family:var(--sans);font-size:0.78rem;font-weight:500;color:var(--mid);transition:all 0.15s;text-align:center;white-space:nowrap;}
+.t-btn:hover{color:var(--text);border-color:var(--text);}
+.t-btn.on{border-color:var(--blue);background:var(--blue-dim);color:var(--blue);}
+
+/* ── SUB-OPTIONS BAR ── */
+.sub-bar{display:flex;padding:0.5rem 0.75rem;gap:0.35rem;border-bottom:1px solid var(--border);flex-shrink:0;display:none;}
+.sub-bar.visible{display:flex;}
+.s-btn{flex:1;padding:0.38rem 0.5rem;border:1.5px solid var(--border);border-radius:7px;background:none;cursor:pointer;font-family:var(--sans);font-size:0.75rem;font-weight:500;color:var(--mid);transition:all 0.2s;text-align:center;}
+.s-btn:hover{color:var(--text);border-color:var(--text);}
+.s-btn.on{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);}
+.s-btn.on-mix{border-color:var(--purp);background:var(--purp-dim);color:var(--purp);}
+
+/* ── QUIZ AREA ── */
+.quiz-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;gap:1.25rem;overflow:hidden;}
+
+/* Instruction */
+.instr{font-size:0.8rem;color:var(--mid);letter-spacing:0.06em;text-transform:uppercase;font-weight:600;text-align:center;}
+
+/* Number display card */
+.num-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:1.25rem 2.5rem;text-align:center;
+  box-shadow:0 4px 20px rgba(0,0,0,0.3);
+  min-width:240px;
+}
+.num-label{font-size:0.65rem;color:var(--dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem;}
+.num-display{font-family:var(--mono);font-size:3rem;font-weight:700;color:var(--text);letter-spacing:-0.01em;line-height:1.1;}
+.num-round-to{font-size:0.75rem;color:var(--blue);margin-top:0.5rem;font-family:var(--mono);}
+
+/* Answer area */
+.ans-area{display:flex;flex-direction:column;align-items:center;gap:0.6rem;}
+.ans-label{font-size:0.72rem;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;}
+.ans-input{
+  font-family:var(--mono);font-size:2rem;font-weight:700;
+  width:200px;text-align:center;
+  background:var(--card);border:none;border-bottom:2.5px solid var(--border);
+  color:var(--text);outline:none;padding:8px 4px;
+  transition:border-color 0.2s,color 0.2s;
+  -moz-appearance:textfield;
+}
+.ans-input::-webkit-outer-spin-button,.ans-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.ans-input:focus{border-color:var(--gold);}
+.ans-input.ok{border-color:var(--add)!important;color:var(--add);}
+.ans-input.no{border-color:var(--sub)!important;color:var(--sub);}
+
+/* Buttons */
+.check-btn{padding:10px 30px;background:var(--blue);color:var(--bg);border:none;border-radius:8px;font:700 0.88rem var(--sans);cursor:pointer;transition:background 0.15s;}
+.check-btn:hover{background:#3b96f5;}
+.check-btn:disabled{background:var(--border);color:var(--dim);cursor:not-allowed;}
+
+/* Feedback */
+.feedback{font-family:var(--sans);font-size:0.88rem;font-weight:600;min-height:1.1rem;text-align:center;letter-spacing:0.03em;}
+.feedback.ok{color:var(--add);}
+.feedback.no{color:var(--sub);}
+
+/* Steps */
+.steps{font-family:var(--mono);font-size:0.73rem;color:var(--mid);text-align:center;line-height:1.85;white-space:pre-line;}
+
+/* ── FOOTER ── */
+.bot-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0.6rem 1.25rem;border-top:1px solid var(--border);}
+.hint-txt{font-size:0.72rem;color:var(--dim);}
+
+/* ── STREAK ── */
+.streak-badge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.5);font-family:var(--mono);font-size:2.2rem;font-weight:700;color:var(--gold);pointer-events:none;opacity:0;z-index:100;text-shadow:0 0 24px rgba(251,191,36,0.5);}
+.streak-badge.pop{animation:sp 0.9s ease forwards;}
+@keyframes sp{0%{opacity:0;transform:translate(-50%,-50%) scale(0.5);}20%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}40%{transform:translate(-50%,-50%) scale(1);}70%{opacity:1;}100%{opacity:0;transform:translate(-50%,-60%) scale(0.9);}}
+</style>
+</head>
+<body>
+
+<div class="streak-badge" id="streakBadge"></div>
+
+<!-- Header -->
+<div class="hdr">
+  <span class="hdr-logo">Maths <span>Applets</span></span>
+  <div class="hdr-timer" id="timerEl">0:00</div>
+  <button class="reset-btn" onclick="resetAll()">Reset</button>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-val grn" id="stCorr">0</div><div class="stat-lbl">Correct</div></div>
+  <div class="stat"><div class="stat-val red" id="stWrong">0</div><div class="stat-lbl">Incorrect</div></div>
+  <div class="stat"><div class="stat-val gld" id="stPct">—</div><div class="stat-lbl">Accuracy</div></div>
+  <div class="stat"><div class="stat-val" id="stStreak" style="color:var(--dim)">0</div><div class="stat-lbl">Streak</div></div>
+</div>
+
+<!-- Topic selector -->
+<div class="topic-bar">
+  <button class="t-btn on" id="tb-dp" onclick="setTopic('dp')">Decimal Places</button>
+  <button class="t-btn"    id="tb-sf" onclick="setTopic('sf')">Significant Figures</button>
+  <button class="t-btn"    id="tb-wn" onclick="setTopic('wn')">Nearest 10 / 100 / 1000</button>
+</div>
+
+<!-- Sub-options: Decimal Places -->
+<div class="sub-bar visible" id="bar-dp">
+  <button class="s-btn on" id="dp-1" onclick="setDP(1)">1 d.p.</button>
+  <button class="s-btn"    id="dp-2" onclick="setDP(2)">2 d.p.</button>
+  <button class="s-btn"    id="dp-3" onclick="setDP(3)">3 d.p.</button>
+  <button class="s-btn"    id="dp-mix" onclick="setDP('mix')">Mixed</button>
+</div>
+
+<!-- Sub-options: Significant Figures -->
+<div class="sub-bar" id="bar-sf">
+  <button class="s-btn" id="sf-1" onclick="setSF(1)">1 sig. fig.</button>
+  <button class="s-btn" id="sf-2" onclick="setSF(2)">2 sig. figs.</button>
+  <button class="s-btn" id="sf-3" onclick="setSF(3)">3 sig. figs.</button>
+  <button class="s-btn" id="sf-mix" onclick="setSF('mix')">Mixed</button>
+</div>
+
+<!-- Sub-options: Whole Numbers -->
+<div class="sub-bar" id="bar-wn">
+  <button class="s-btn" id="wn-10"   onclick="setWN(10)">Nearest 10</button>
+  <button class="s-btn" id="wn-100"  onclick="setWN(100)">Nearest 100</button>
+  <button class="s-btn" id="wn-1000" onclick="setWN(1000)">Nearest 1000</button>
+  <button class="s-btn" id="wn-mix"  onclick="setWN('mix')">Mixed</button>
+</div>
+
+<!-- Quiz -->
+<div class="quiz-wrap">
+  <div class="instr" id="instrEl"></div>
+  <div class="num-card">
+    <div class="num-label">Round this number</div>
+    <div class="num-display" id="numEl"></div>
+    <div class="num-round-to" id="roundToEl"></div>
+  </div>
+  <div class="ans-area">
+    <div class="ans-label">Your answer:</div>
+    <input class="ans-input" id="ansInput" type="text" inputmode="decimal" placeholder="?" autocomplete="off" spellcheck="false"/>
+    <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check →</button>
+  </div>
+  <div class="feedback" id="feedbackEl"></div>
+  <div class="steps" id="stepsEl"></div>
+</div>
+
+<!-- Footer -->
+<div class="bot-bar">
+  <span class="hint-txt">Type your answer · Press Enter to check</span>
+  <span class="hint-txt" style="color:var(--dim)">Ongoing — no limit</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+const ri   = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a    => a[Math.floor(Math.random()*a.length)];
+const ord  = n    => n===1?'1st':n===2?'2nd':n===3?'3rd':n+'th';
+
+// Format a number for display — no scientific notation, strip trailing zeros
+function fmt(n){
+  if(Number.isInteger(n)) return n.toLocaleString();
+  const s = n.toPrecision(15).replace(/\.?0+$/,'');
+  // if still has 'e', convert manually
+  if(s.includes('e')){
+    // For very small numbers use toFixed
+    const dp = Math.max(0, -Math.floor(Math.log10(Math.abs(n))) + 6);
+    return parseFloat(n.toFixed(dp)).toString();
+  }
+  return s;
+}
+
+// Format with commas (for whole numbers display)
+function fmtInt(n){ return n.toLocaleString('en-AU'); }
+
+// Strip commas from user input
+function stripCommas(s){ return s.replace(/,/g,''); }
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let topic='dp', dpMode=1, sfMode=1, wnMode=10;
+let correct=0, wrong=0, streak=0;
+let timerStart=null, timerInterval=null, timerSec=0;
+let currentQ=null, nextTO=null;
+
+// ══════════════════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════════════════
+function startTimer(){
+  if(timerInterval) return;
+  timerStart=Date.now()-timerSec*1000;
+  timerInterval=setInterval(()=>{
+    timerSec=Math.floor((Date.now()-timerStart)/1000);
+    const m=Math.floor(timerSec/60),s=timerSec%60;
+    document.getElementById('timerEl').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  },500);
+}
+function stopTimer(){ clearInterval(timerInterval); timerInterval=null; }
+
+// ══════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════
+function updateStats(){
+  document.getElementById('stCorr').textContent=correct;
+  document.getElementById('stWrong').textContent=wrong;
+  const tot=correct+wrong;
+  document.getElementById('stPct').textContent=tot?Math.round(correct/tot*100)+'%':'—';
+  const sEl=document.getElementById('stStreak');
+  sEl.textContent=streak;
+  sEl.style.color=streak>=5?'var(--gold)':streak>=3?'var(--add)':'var(--dim)';
+}
+
+// ══════════════════════════════════════════════════════
+// GENERATORS
+// ══════════════════════════════════════════════════════
+
+// ── Decimal Places ────────────────────────────────────
+function genDP(dp){
+  const whole = ri(1,99);
+  const extraDP = ri(1,2);
+  const totalDP = dp + extraDP;
+
+  // Build decimal digits
+  const dec = [];
+  for(let i=0;i<totalDP;i++){
+    // The deciding digit (at index dp) must be 1-9 so rounding actually happens
+    dec.push(i===dp ? ri(1,9) : ri(0,9));
+  }
+  const numStr = `${whole}.${dec.join('')}`;
+  const num = parseFloat(numStr);
+  const answer = parseFloat(num.toFixed(dp));
+  const deciding = dec[dp];
+  const dir = deciding>=5?'round up':'round down';
+
+  return {
+    numStr,
+    answer,
+    instruction: `Round to ${dp} decimal place${dp>1?'s':''}`,
+    roundToLabel: `${dp} d.p.`,
+    steps:`Deciding digit — ${ord(dp+1)} decimal place: ${deciding}\n${deciding}${deciding>=5?' ≥ ':' < '}5  →  ${dir}\nAnswer: ${answer.toFixed(dp)}`,
+    compare: v => Math.abs(v - answer) < 1e-9
+  };
+}
+
+// ── Significant Figures ───────────────────────────────
+function genSF(sf){
+  // Build a number with exactly sf+1 or sf+2 significant figures
+  // so that rounding to sf actually changes it
+  const extraSF = ri(1,2);
+  const totalSF  = sf + extraSF;
+
+  // Generate significant digits array
+  function makeDigits(n){
+    const d = [ri(1,9)]; // first digit: 1-9
+    for(let i=1;i<n;i++) d.push(ri(0,9));
+    if(d[sf]===0) d[sf]=ri(1,9); // ensure deciding digit is non-zero
+    return d;
+  }
+
+  // Number types: integer of varying size, decimal of varying magnitude
+  const type = ri(0,4);
+  const digits = makeDigits(totalSF);
+  const base   = parseInt(digits.join(''));
+  let num;
+
+  switch(type){
+    case 0: num=base; break;                               // e.g. 2345
+    case 1: num=base*10; break;                            // e.g. 23450
+    case 2: num=base/Math.pow(10,totalSF); break;          // e.g. 0.02345
+    case 3: num=base/Math.pow(10,totalSF-1); break;        // e.g. 0.2345
+    case 4: num=base/Math.pow(10,totalSF-2); break;        // e.g. 2.345
+  }
+
+  // Rounded answer
+  const answer  = parseFloat(num.toPrecision(sf));
+  const numStr  = fmt(num);
+  const ansStr  = fmt(answer);
+
+  // Extract deciding digit from the (sf+1)-digit precision string
+  const sfPlus1 = num.toPrecision(sf+1);
+  // Strip non-digits to get digit string, then take the (sf)th digit (0-indexed)
+  const digitStr = sfPlus1.replace(/[^0-9]/g,'').replace(/^0+(?!$)/,''); // strip leading zeros
+  const deciding = parseInt(digitStr[sf])||0;
+  const dir = deciding>=5?'round up':'round down';
+
+  // Guard: if numStr === ansStr, regenerate (number already had sf sig figs)
+  if(numStr===ansStr) return genSF(sf);
+
+  return {
+    numStr,
+    answer,
+    instruction: `Round to ${sf} significant figure${sf>1?'s':''}`,
+    roundToLabel: `${sf} s.f.`,
+    steps:`${sf} sig. fig${sf>1?'s':''}: keep ${sf} non-zero leading digit${sf>1?'s':''}\nDeciding digit (${ord(sf+1)} sig. fig.): ${deciding}\n${deciding}${deciding>=5?' ≥ ':' < '}5  →  ${dir}\nAnswer: ${ansStr}`,
+    compare: v => Math.abs(v - answer) < Math.abs(answer)*1e-9 + 1e-12
+  };
+}
+
+// ── Nearest 10 / 100 / 1000 ──────────────────────────
+function genWN(nearest){
+  const ranges = { 10:[15,9985], 100:[150,99850], 1000:[1500,998500] };
+  const [lo,hi] = ranges[nearest];
+  let num = ri(lo,hi);
+
+  // Ensure number is NOT already a multiple of nearest
+  while(num % nearest === 0) num += ri(1, nearest-1);
+
+  // Deciding digit: the digit immediately below the rounding position
+  // Nearest 10 → units, Nearest 100 → tens, Nearest 1000 → hundreds
+  const deciding = Math.floor(num % nearest / (nearest/10));
+  const answer   = Math.round(num/nearest)*nearest;
+  const placeNames = { 10:'units', 100:'tens', 1000:'hundreds' };
+  const dir = deciding>=5?'round up':'round down';
+
+  return {
+    numStr:      fmtInt(num),
+    answer,
+    instruction: `Round to the nearest ${fmtInt(nearest)}`,
+    roundToLabel:`nearest ${fmtInt(nearest)}`,
+    steps:`Look at the ${placeNames[nearest]} digit: ${deciding}\n${deciding}${deciding>=5?' ≥ ':' < '}5  →  ${dir}\nAnswer: ${fmtInt(answer)}`,
+    compare: v => v === answer
+  };
+}
+
+// ── Pick current mode and generate ───────────────────
+function genQuestion(){
+  if(topic==='dp'){
+    const dp = dpMode==='mix' ? ri(1,3) : dpMode;
+    return genDP(dp);
+  }
+  if(topic==='sf'){
+    const sf = sfMode==='mix' ? ri(1,3) : sfMode;
+    return genSF(sf);
+  }
+  // wn
+  const n = wnMode==='mix' ? pick([10,100,1000]) : wnMode;
+  return genWN(n);
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════
+function renderQ(){
+  clearTimeout(nextTO);
+  currentQ = genQuestion();
+
+  document.getElementById('instrEl').textContent     = currentQ.instruction;
+  document.getElementById('numEl').textContent       = currentQ.numStr;
+  document.getElementById('roundToEl').textContent   = currentQ.roundToLabel;
+  document.getElementById('feedbackEl').textContent  = '';
+  document.getElementById('feedbackEl').className    = 'feedback';
+  document.getElementById('stepsEl').textContent     = '';
+  document.getElementById('checkBtn').disabled       = false;
+
+  const inp = document.getElementById('ansInput');
+  inp.value=''; inp.className='ans-input'; inp.disabled=false;
+  setTimeout(()=>inp.focus(), 50);
+}
+
+// ══════════════════════════════════════════════════════
+// CHECK ANSWER
+// ══════════════════════════════════════════════════════
+function checkAnswer(){
+  const inp = document.getElementById('ansInput');
+  const raw = stripCommas(inp.value.trim());
+  if(!raw) return;
+
+  startTimer();
+
+  const userVal = parseFloat(raw);
+  if(isNaN(userVal)){
+    setFB('Please enter a number','no');
+    return;
+  }
+
+  const q = currentQ;
+  const isCorrect = q.compare(userVal);
+
+  document.getElementById('checkBtn').disabled=true;
+  inp.disabled=true;
+
+  if(isCorrect){
+    correct++; streak++;
+    inp.classList.add('ok');
+    setFB('✓ Correct!','ok');
+    if(streak>0&&streak%5===0) showStreak(streak);
+    nextTO=setTimeout(renderQ, 500);
+  } else {
+    wrong++; streak=0;
+    inp.classList.add('no');
+    const ansDisplay = topic==='wn' ? fmtInt(q.answer) : fmt(q.answer);
+    setFB(`✗  The answer is ${ansDisplay}`,'no');
+    document.getElementById('stepsEl').textContent = q.steps;
+    nextTO=setTimeout(renderQ, 2500);
+  }
+
+  updateStats();
+}
+
+function setFB(msg,cls){
+  const el=document.getElementById('feedbackEl');
+  el.textContent=msg; el.className='feedback '+cls;
+}
+
+function showStreak(n){
+  const b=document.getElementById('streakBadge');
+  b.textContent=`🔥 ${n} streak!`;
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+}
+
+// ══════════════════════════════════════════════════════
+// UI CONTROLS
+// ══════════════════════════════════════════════════════
+function setTopic(t){
+  topic=t;
+  ['dp','sf','wn'].forEach(id=>{
+    document.getElementById('tb-'+id).classList.toggle('on', id===t);
+    document.getElementById('bar-'+id).classList.toggle('visible', id===t);
+  });
+  renderQ();
+}
+
+// ── DP sub-options ──
+function setDP(m){
+  dpMode=m;
+  [1,2,3,'mix'].forEach(v=>{
+    const btn=document.getElementById('dp-'+v);
+    btn.classList.remove('on','on-mix');
+    if(v===m) btn.classList.add(m==='mix'?'on-mix':'on');
+  });
+  renderQ();
+}
+
+// ── SF sub-options ──
+function setSF(m){
+  sfMode=m;
+  [1,2,3,'mix'].forEach(v=>{
+    const btn=document.getElementById('sf-'+v);
+    btn.classList.remove('on','on-mix');
+    if(v===m) btn.classList.add(m==='mix'?'on-mix':'on');
+  });
+  renderQ();
+}
+
+// ── WN sub-options ──
+function setWN(m){
+  wnMode=m;
+  [10,100,1000,'mix'].forEach(v=>{
+    const btn=document.getElementById('wn-'+v);
+    btn.classList.remove('on','on-mix');
+    if(v===m) btn.classList.add(m==='mix'?'on-mix':'on');
+  });
+  renderQ();
+}
+
+function resetAll(){
+  correct=0; wrong=0; streak=0;
+  stopTimer(); timerSec=0; timerStart=null;
+  document.getElementById('timerEl').textContent='0:00';
+  updateStats(); renderQ();
+}
+
+// Enter key
+document.getElementById('ansInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter') checkAnswer();
+});
+document.getElementById('ansInput').addEventListener('input',()=>{
+  const inp=document.getElementById('ansInput');
+  inp.classList.remove('ok','no');
+});
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+setTopic('dp'); // sets default sub-option active state too
+setDP(1);       // highlight 1 d.p. button
+</script>
+</body>
+</html>

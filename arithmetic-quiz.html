@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Addition &amp; Subtraction Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f0f13;
+  --card:#1a1a22;
+  --card2:#222230;
+  --border:#2e2e3e;
+  --text:#f0eee8;
+  --mid:#9896a4;
+  --add:#4ade80;
+  --add-dim:#1a3d28;
+  --sub:#f87171;
+  --sub-dim:#3d1a1a;
+  --gold:#fbbf24;
+  --mono:'Space Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:56px;border-bottom:1px solid var(--border);flex-shrink:0;gap:1rem;}
+.hdr-logo{font-family:var(--mono);font-size:0.85rem;color:var(--mid);}
+.hdr-logo span{color:var(--text);}
+.hdr-timer{font-family:var(--mono);font-size:1.1rem;color:var(--gold);letter-spacing:0.08em;min-width:60px;text-align:center;}
+.hdr-right{display:flex;align-items:center;gap:0.75rem;}
+
+/* ── STATS BAR ── */
+.stats{display:flex;align-items:stretch;border-bottom:1px solid var(--border);flex-shrink:0;}
+.stat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0.6rem 0.5rem;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-val{font-family:var(--mono);font-size:1.3rem;font-weight:700;line-height:1;}
+.stat-val.green{color:var(--add);}
+.stat-val.red{color:var(--sub);}
+.stat-val.gold{color:var(--gold);}
+.stat-lbl{font-size:0.65rem;color:var(--mid);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;}
+
+/* ── MODE SELECTOR ── */
+.mode-bar{display:flex;padding:0.75rem 1.5rem;gap:0.5rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+.mode-btn{flex:1;padding:0.5rem;border:1.5px solid var(--border);border-radius:8px;background:none;cursor:pointer;font-family:var(--sans);font-size:0.8rem;font-weight:500;color:var(--mid);transition:all 0.15s;}
+.mode-btn:hover{border-color:var(--text);color:var(--text);}
+.mode-btn.active-add{border-color:var(--add);background:var(--add-dim);color:var(--add);}
+.mode-btn.active-sub{border-color:var(--sub);background:var(--sub-dim);color:var(--sub);}
+
+.level-bar{display:flex;padding:0 1.5rem 0.75rem;gap:0.4rem;flex-shrink:0;}
+.lv-btn{flex:1;padding:0.4rem 0.25rem;border:1.5px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-family:var(--sans);font-size:0.72rem;font-weight:500;color:var(--mid);transition:all 0.15s;line-height:1.3;text-align:center;}
+.lv-btn:hover{color:var(--text);border-color:var(--text);}
+.lv-btn.active{border-color:var(--gold);background:#2d2510;color:var(--gold);}
+
+/* ── MAIN QUIZ AREA ── */
+.quiz-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:1rem;}
+
+/* ── COLUMN METHOD LAYOUT ── */
+.column-problem{display:flex;flex-direction:column;align-items:flex-end;gap:0;}
+
+.col-row{display:flex;gap:0;align-items:stretch;}
+
+.col-cell{
+  width:52px;height:58px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:2rem;font-weight:700;
+  color:var(--text);
+  position:relative;
+}
+
+.col-cell.empty{color:transparent;}
+
+/* operator cell */
+.op-cell{
+  width:44px;height:58px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:2rem;font-weight:700;
+}
+.op-add{color:var(--add);}
+.op-sub{color:var(--sub);}
+
+/* carry/borrow indicator */
+.carry{
+  position:absolute;
+  top:6px;right:6px;
+  font-size:0.65rem;
+  font-family:var(--mono);
+  color:var(--gold);
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.carry.show{opacity:1;}
+
+/* the dividing line */
+.col-line{
+  width:100%;
+  height:2px;
+  background:var(--border);
+  margin:2px 0;
+}
+.col-line.add-line{background:var(--add);opacity:0.5;}
+.col-line.sub-line{background:var(--sub);opacity:0.5;}
+
+/* answer row — individual digit inputs */
+.answer-row{display:flex;gap:0;align-items:center;}
+
+.digit-input{
+  width:52px;height:58px;
+  font-family:var(--mono);font-size:2rem;font-weight:700;
+  text-align:center;
+  background:none;
+  border:none;
+  border-bottom:2px solid var(--border);
+  color:var(--text);
+  outline:none;
+  caret-color:var(--gold);
+  transition:border-color 0.2s;
+  -moz-appearance:textfield;
+}
+.digit-input::-webkit-outer-spin-button,
+.digit-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.digit-input:focus{border-color:var(--gold);}
+.digit-input.correct{color:var(--add);border-color:var(--add);}
+.digit-input.wrong{color:var(--sub);border-color:var(--sub);}
+
+/* single wide input for answer */
+.answer-input-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:0.5rem;
+  margin-top:4px;
+}
+.answer-input{
+  font-family:var(--mono);font-size:2.2rem;font-weight:700;
+  text-align:right;
+  background:none;
+  border:none;
+  border-bottom:2.5px solid var(--border);
+  color:var(--text);
+  outline:none;
+  caret-color:var(--gold);
+  width:auto;
+  min-width:52px;
+  max-width:180px;
+  transition:border-color 0.2s, color 0.2s;
+  -moz-appearance:textfield;
+}
+.answer-input::-webkit-outer-spin-button,
+.answer-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.answer-input:focus{border-color:var(--gold);}
+.answer-input.correct{color:var(--add);border-color:var(--add);}
+.answer-input.wrong{color:var(--sub);border-color:var(--sub);}
+
+/* feedback flash */
+.feedback{
+  font-family:var(--sans);font-size:0.85rem;font-weight:600;
+  letter-spacing:0.04em;
+  min-height:1.2rem;
+  text-align:center;
+  margin-top:1rem;
+  transition:opacity 0.3s;
+}
+.feedback.ok{color:var(--add);}
+.feedback.no{color:var(--sub);}
+
+/* ── NEGATIVE TOGGLE ── */
+.neg-bar{display:flex;padding:0 1.5rem 0.75rem;flex-shrink:0;}
+.neg-toggle{
+  display:flex;align-items:center;gap:0.6rem;
+  background:none;border:1.5px solid var(--border);
+  border-radius:8px;padding:0.45rem 1rem;
+  cursor:pointer;font-family:var(--sans);font-size:0.8rem;font-weight:500;
+  color:var(--mid);transition:all 0.2s;
+  user-select:none;
+}
+.neg-toggle:hover{border-color:var(--text);color:var(--text);}
+.neg-toggle.on{border-color:var(--sub);background:var(--sub-dim);color:var(--sub);}
+.neg-toggle .pip{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid currentColor;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:background 0.2s;
+}
+.neg-toggle.on .pip{background:var(--sub);}
+.neg-toggle .pip::after{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:#fff;opacity:0;transition:opacity 0.2s;
+}
+.neg-toggle.on .pip::after{opacity:1;}
+
+/* ── NEGATIVE OPERANDS TOGGLE ── */
+.negop-bar{display:flex;padding:0 1.5rem 0.75rem;gap:0.5rem;flex-shrink:0;}
+.negop-btn{
+  flex:1;padding:0.45rem 0.5rem;
+  border:1.5px solid var(--border);border-radius:8px;
+  background:none;cursor:pointer;
+  font-family:var(--sans);font-size:0.78rem;font-weight:500;
+  color:var(--mid);transition:all 0.2s;line-height:1.3;text-align:center;
+}
+.negop-btn:hover{border-color:var(--text);color:var(--text);}
+.negop-btn.on{border-color:#a78bfa;background:#1e1535;color:#a78bfa;}
+.negop-lbl{display:block;font-size:0.65rem;color:inherit;opacity:0.75;margin-top:1px;}
+
+/* ── BOTTOM BAR ── */
+.bot-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;border-top:1px solid var(--border);gap:1rem;}
+.hint-text{font-size:0.75rem;color:var(--mid);}
+.reset-btn{background:none;border:1px solid var(--border);color:var(--mid);padding:6px 14px;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:0.78rem;transition:all 0.15s;}
+.reset-btn:hover{border-color:var(--sub);color:var(--sub);}
+
+/* ── STREAK ── */
+.streak-badge{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.5);
+  font-family:var(--mono);font-size:2.5rem;font-weight:700;
+  color:var(--gold);
+  pointer-events:none;
+  opacity:0;
+  transition:none;
+  z-index:100;
+  text-shadow:0 0 30px rgba(251,191,36,0.6);
+}
+.streak-badge.pop{
+  animation:streakPop 0.9s ease forwards;
+}
+@keyframes streakPop{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(0.5);}
+  20%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}
+  40%{transform:translate(-50%,-50%) scale(1);}
+  70%{opacity:1;transform:translate(-50%,-52%) scale(1);}
+  100%{opacity:0;transform:translate(-50%,-60%) scale(0.9);}
+}
+</style>
+</head>
+<body>
+
+<!-- streak pop -->
+<div class="streak-badge" id="streakBadge"></div>
+
+<!-- Header -->
+<div class="hdr">
+  <span class="hdr-logo">Maths <span>Applets</span></span>
+  <div class="hdr-timer" id="timerEl">0:00</div>
+  <div class="hdr-right">
+    <button class="reset-btn" onclick="resetAll()">Reset</button>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-val green" id="cntCorrect">0</div>
+    <div class="stat-lbl">Correct</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val red" id="cntWrong">0</div>
+    <div class="stat-lbl">Incorrect</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val gold" id="cntPct">—</div>
+    <div class="stat-lbl">Accuracy</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val" id="cntStreak" style="color:var(--mid)">0</div>
+    <div class="stat-lbl">Streak</div>
+  </div>
+</div>
+
+<!-- Mode toggle -->
+<div class="mode-bar">
+  <button class="mode-btn active-add" id="btnAdd" onclick="setOp('add')">＋ Addition</button>
+  <button class="mode-btn" id="btnSub" onclick="setOp('sub')">－ Subtraction</button>
+  <button class="mode-btn" id="btnMix" onclick="setOp('mix')">± Mixed</button>
+</div>
+
+<!-- Level selector -->
+<div class="level-bar">
+  <button class="lv-btn active" id="lv0" onclick="setLevel(0)">1+1<br><span style="font-size:0.62rem">single</span></button>
+  <button class="lv-btn" id="lv1" onclick="setLevel(1)">1+2<br><span style="font-size:0.62rem">s+d</span></button>
+  <button class="lv-btn" id="lv2" onclick="setLevel(2)">2+2<br><span style="font-size:0.62rem">double</span></button>
+  <button class="lv-btn" id="lv3" onclick="setLevel(3)">2+3<br><span style="font-size:0.62rem">d+t</span></button>
+  <button class="lv-btn" id="lv4" onclick="setLevel(4)">3+3<br><span style="font-size:0.62rem">triple</span></button>
+  <button class="lv-btn" id="lv5" onclick="setLevel(5)">Mix<br><span style="font-size:0.62rem">all</span></button>
+</div>
+
+<!-- Negative answers toggle -->
+<div class="neg-bar">
+  <button class="neg-toggle" id="negToggle" onclick="toggleNegative()">
+    <span class="pip"></span>
+    Allow negative answers
+  </button>
+</div>
+
+<!-- Negative operands toggle -->
+<div class="negop-bar">
+  <button class="negop-btn on" id="negop-none" onclick="setNegOp('none')">
+    No negatives<span class="negop-lbl">default</span>
+  </button>
+  <button class="negop-btn" id="negop-one" onclick="setNegOp('one')">
+    One −ve number<span class="negop-lbl">e.g. −5 + 3</span>
+  </button>
+  <button class="negop-btn" id="negop-two" onclick="setNegOp('two')">
+    Two −ve numbers<span class="negop-lbl">e.g. −5 + (−3)</span>
+  </button>
+</div>
+
+<!-- Quiz area -->
+<div class="quiz-wrap">
+  <div>
+    <div id="problemEl"></div>
+    <div class="feedback" id="feedbackEl"></div>
+  </div>
+</div>
+
+<!-- Bottom bar -->
+<div class="bot-bar">
+  <span class="hint-text" id="hintEl">Type your answer and press Enter</span>
+  <span class="hint-text" style="color:var(--mid)">Ongoing · no set limit</span>
+</div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────
+let op='add', level=0;
+let correct=0, wrong=0, streak=0;
+let timerStart=null, timerInterval=null;
+let currentA=0, currentB=0, currentOp='+';
+let answered=false;
+let feedbackTimeout=null;
+let allowNegative=false;
+let negOperands='none'; // 'none' | 'one' | 'two'
+
+// ── LEVEL DEFINITIONS ────────────────────────────────────────────
+// [minA, maxA, minB, maxB]
+const LEVELS=[
+  [1,9,   1,9  ],  // 0: single + single
+  [1,9,   10,99],  // 1: single + double
+  [10,99, 10,99],  // 2: double + double
+  [10,99, 100,999],// 3: double + triple
+  [100,999,100,999],// 4: triple + triple
+  null,             // 5: mix all
+];
+
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+function getRangeForLevel(lv){
+  if(lv===5){
+    const pick=Math.floor(Math.random()*5);
+    return LEVELS[pick];
+  }
+  return LEVELS[lv];
+}
+
+// ── TIMER ────────────────────────────────────────────────────────
+function startTimer(){
+  if(timerInterval) return;
+  timerStart=Date.now();
+  timerInterval=setInterval(updateTimer,500);
+}
+
+function updateTimer(){
+  if(!timerStart) return;
+  const elapsed=Math.floor((Date.now()-timerStart)/1000);
+  const m=Math.floor(elapsed/60);
+  const s=elapsed%60;
+  document.getElementById('timerEl').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function stopTimer(){
+  clearInterval(timerInterval);
+  timerInterval=null;
+}
+
+// ── STATS ────────────────────────────────────────────────────────
+function updateStats(){
+  document.getElementById('cntCorrect').textContent=correct;
+  document.getElementById('cntWrong').textContent=wrong;
+  const total=correct+wrong;
+  document.getElementById('cntPct').textContent=total?Math.round(correct/total*100)+'%':'—';
+  const sEl=document.getElementById('cntStreak');
+  sEl.textContent=streak;
+  sEl.style.color=streak>=5?'var(--gold)':streak>=3?'var(--add)':'var(--mid)';
+}
+
+// ── MODE / LEVEL SETTERS ─────────────────────────────────────────
+function setOp(o){
+  op=o;
+  ['add','sub','mix'].forEach(id=>{
+    const btn=document.getElementById('btn'+id.charAt(0).toUpperCase()+id.slice(1));
+    btn.className='mode-btn';
+  });
+  const map={add:'active-add',sub:'active-sub',mix:'active-add'};
+  document.getElementById(o==='add'?'btnAdd':o==='sub'?'btnSub':'btnMix').classList.add(map[o]);
+  nextQuestion();
+}
+
+function setLevel(lv){
+  level=lv;
+  for(let i=0;i<6;i++) document.getElementById('lv'+i).classList.remove('active');
+  document.getElementById('lv'+lv).classList.add('active');
+  nextQuestion();
+}
+
+function toggleNegative(){
+  allowNegative=!allowNegative;
+  const btn=document.getElementById('negToggle');
+  btn.classList.toggle('on',allowNegative);
+  nextQuestion();
+}
+
+function setNegOp(val){
+  negOperands=val;
+  ['none','one','two'].forEach(k=>{
+    document.getElementById('negop-'+k).classList.toggle('on',k===val);
+  });
+  nextQuestion();
+}
+
+// ── QUESTION GENERATION ──────────────────────────────────────────
+function genQuestion(){
+  const range=getRangeForLevel(level);
+  let a=ri(range[0],range[1]);
+  let b=ri(range[2],range[3]);
+
+  // Decide operation
+  let thisOp;
+  if(op==='add') thisOp='+';
+  else if(op==='sub') thisOp='-';
+  else thisOp=Math.random()<0.5?'+':'-';
+
+  // For subtraction: enforce a >= b only when no negative operands and negatives not allowed
+  if(thisOp==='-' && !allowNegative && negOperands==='none'){
+    if(a<b){const t=a;a=b;b=t;}
+    if(a===b) a=b+ri(1,Math.max(1,Math.floor(b/2)));
+  }
+
+  // Apply negative operands
+  if(negOperands==='one'){
+    if(Math.random()<0.5) a=-a; else b=-b;
+  } else if(negOperands==='two'){
+    a=-a; b=-b;
+  }
+
+  currentA=a; currentB=b; currentOp=thisOp;
+}
+
+// ── RENDER COLUMN METHOD ─────────────────────────────────────────
+function render(){
+  const container=document.getElementById('problemEl');
+  container.innerHTML='';
+
+  // Work with absolute values for digit display; track signs separately
+  const aAbs=Math.abs(currentA);
+  const bAbs=Math.abs(currentB);
+  const aNeg=currentA<0;
+  const bNeg=currentB<0;
+  const hasSignCol=aNeg||bNeg; // only add sign column if needed
+
+  const A=String(aAbs);
+  const B=String(bAbs);
+  const maxLen=Math.max(A.length,B.length);
+
+  const paddedA=A.padStart(maxLen,' ');
+  const paddedB=B.padStart(maxLen,' ');
+
+  const isAdd=currentOp==='+';
+  const opClass=isAdd?'op-add':'op-sub';
+  const lineClass=isAdd?'add-line':'sub-line';
+  const opChar=isAdd?'+':'−';
+
+  const SIGN_W=40;  // width of the sign column (px)
+  const DIGIT_W=52; // width of each digit cell (px)
+  const OP_W=44;    // width of the operator column (px)
+
+  const prob=document.createElement('div');
+  prob.className='column-problem';
+
+  // Helper: make a sign cell
+  function makeSign(isNegative){
+    const sc=document.createElement('div');
+    sc.style.cssText=`width:${SIGN_W}px;height:58px;display:flex;align-items:center;`+
+      `justify-content:center;font-family:var(--mono);font-size:2rem;font-weight:700;`+
+      `color:${isNegative?'var(--sub)':'transparent'};`;
+    sc.textContent=isNegative?'−':'+'; // + is hidden via transparent color
+    return sc;
+  }
+
+  // ── Row 1: top number ──
+  const row1=document.createElement('div');
+  row1.className='col-row';
+  const opSpacer=document.createElement('div');
+  opSpacer.style.cssText=`width:${OP_W}px;height:58px;`;
+  row1.appendChild(opSpacer);
+  if(hasSignCol) row1.appendChild(makeSign(aNeg));
+  for(let i=0;i<maxLen;i++){
+    const cell=document.createElement('div');
+    cell.className='col-cell'+(paddedA[i]===' '?' empty':'');
+    cell.textContent=paddedA[i]===' '?'0':paddedA[i];
+    row1.appendChild(cell);
+  }
+  prob.appendChild(row1);
+
+  // ── Row 2: operator + sign + bottom number ──
+  const row2=document.createElement('div');
+  row2.className='col-row';
+  const opCell=document.createElement('div');
+  opCell.className='op-cell '+opClass;
+  opCell.textContent=opChar;
+  row2.appendChild(opCell);
+  if(hasSignCol) row2.appendChild(makeSign(bNeg));
+  for(let i=0;i<maxLen;i++){
+    const cell=document.createElement('div');
+    cell.className='col-cell'+(paddedB[i]===' '?' empty':'');
+    cell.textContent=paddedB[i]===' '?'0':paddedB[i];
+    row2.appendChild(cell);
+  }
+  prob.appendChild(row2);
+
+  // ── Dividing line ──
+  const lineWrap=document.createElement('div');
+  lineWrap.style.cssText=`display:flex;padding-left:${OP_W}px;`;
+  const line=document.createElement('div');
+  line.className='col-line '+lineClass;
+  line.style.width=((hasSignCol?SIGN_W:0)+maxLen*DIGIT_W)+'px';
+  lineWrap.appendChild(line);
+  prob.appendChild(lineWrap);
+
+  // ── Answer row ──
+  const ansWrap=document.createElement('div');
+  ansWrap.className='answer-input-wrap';
+  ansWrap.style.paddingLeft=OP_W+'px';
+
+  const inp=document.createElement('input');
+  inp.type='number';
+  inp.className='answer-input';
+  inp.id='answerInput';
+  inp.placeholder='?';
+  inp.autocomplete='off';
+  // Width: sign col (if present) + digit columns + 1 extra for carry/overflow
+  const signExtra=hasSignCol?SIGN_W:0;
+  inp.style.width=(signExtra+(maxLen+1)*38+24)+'px';
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter') checkAnswer();});
+  inp.addEventListener('input',()=>{
+    if(inp.classList.contains('wrong')||inp.classList.contains('correct')){
+      inp.className='answer-input';
+    }
+  });
+  ansWrap.appendChild(inp);
+  prob.appendChild(ansWrap);
+
+  container.appendChild(prob);
+
+  setTimeout(()=>{
+    const el=document.getElementById('answerInput');
+    if(el) el.focus();
+  },50);
+}
+
+// ── CHECK ANSWER ─────────────────────────────────────────────────
+function checkAnswer(){
+  const inp=document.getElementById('answerInput');
+  if(!inp) return;
+  const raw=inp.value.trim();
+  if(raw==='') return;
+
+  const userVal=parseInt(raw,10);
+  const correctVal=currentOp==='+'?currentA+currentB:currentA-currentB;
+
+  startTimer();
+
+  if(userVal===correctVal){
+    correct++;
+    streak++;
+    inp.classList.add('correct');
+    setFeedback('✓ Correct!','ok');
+    if(streak>0&&streak%5===0) showStreak(streak);
+    setTimeout(()=>nextQuestion(),400);
+  } else {
+    wrong++;
+    streak=0;
+    inp.classList.add('wrong');
+    setFeedback(`✗  Answer was ${correctVal}`,'no');
+    setTimeout(()=>nextQuestion(),1200);
+  }
+
+  updateStats();
+  answered=true;
+}
+
+function setFeedback(msg,cls){
+  clearTimeout(feedbackTimeout);
+  const el=document.getElementById('feedbackEl');
+  el.textContent=msg;
+  el.className='feedback '+cls;
+  feedbackTimeout=setTimeout(()=>{
+    el.textContent='';
+    el.className='feedback';
+  },1000);
+}
+
+function showStreak(n){
+  const badge=document.getElementById('streakBadge');
+  badge.textContent=`🔥 ${n} streak!`;
+  badge.classList.remove('pop');
+  void badge.offsetWidth; // reflow
+  badge.classList.add('pop');
+}
+
+// ── NEXT QUESTION ────────────────────────────────────────────────
+function nextQuestion(){
+  answered=false;
+  const fb=document.getElementById('feedbackEl');
+  fb.textContent='';
+  fb.className='feedback';
+  genQuestion();
+  render();
+}
+
+// ── RESET ────────────────────────────────────────────────────────
+function resetAll(){
+  correct=0; wrong=0; streak=0;
+  stopTimer(); timerStart=null; timerInterval=null;
+  document.getElementById('timerEl').textContent='0:00';
+  updateStats();
+  nextQuestion();
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+nextQuestion();
+</script>
+</body>
+</html>
