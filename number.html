@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Number — Maths Applets</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f8f8f6;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e4e4e0;
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    header a { text-decoration: none; color: #999; font-size: 0.9rem; }
+    header a:hover { color: #4a7fe8; }
+    header .sep { color: #ddd; font-size: 0.9rem; }
+    header .current { color: #1a1a1a; font-weight: 600; font-size: 0.9rem; }
+
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3.5rem 2rem;
+    }
+
+    .page-header { margin-bottom: 3rem; }
+
+    .page-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.4rem;
+    }
+
+    .page-header p { font-size: 0.95rem; color: #888; }
+
+    /* ── Subtopic section ── */
+    .subtopic { margin-bottom: 3rem; }
+
+    .subtopic-heading {
+      font-size: 0.68rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: #aaa;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid #ebebeb;
+    }
+
+    .applet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    /* ── Applet card ── */
+    .applet-card {
+      background: #fff;
+      border: 1px solid #e4e4e0;
+      border-radius: 12px;
+      padding: 1.4rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .applet-card h3 {
+      font-size: 0.98rem;
+      font-weight: 600;
+      margin-bottom: 0.1rem;
+    }
+
+    .applet-card p {
+      font-size: 0.82rem;
+      color: #999;
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 0.5rem;
+    }
+
+    .tag {
+      font-size: 0.68rem;
+      background: #f3f4f6;
+      color: #666;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .launch-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      text-decoration: none;
+      background: #4a7fe8;
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 7px;
+      transition: background 0.15s;
+      align-self: flex-start;
+    }
+
+    .launch-btn:hover { background: #3a6fd8; }
+
+    footer {
+      text-align: center;
+      padding: 2.5rem 2rem;
+      font-size: 0.8rem;
+      color: #ccc;
+      border-top: 1px solid #eee;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html">Maths Applets</a>
+  <span class="sep">›</span>
+  <span class="current">Number</span>
+</header>
+
+<main>
+  <div class="page-header">
+    <h1>Number</h1>
+    <p>Practice and explore number concepts with interactive applets.</p>
+  </div>
+
+  <!-- ── SUBTOPIC: TIMES TABLES ─────────────────────────────────── -->
+  <div class="subtopic">
+    <p class="subtopic-heading">Times Tables</p>
+    <div class="applet-grid">
+
+      <div class="applet-card">
+        <h3>Times Table Practice</h3>
+        <p>Select a times table and answer as many questions as you can. Score is tracked as you go.</p>
+        <a class="launch-btn" href="times_table.html">Launch →</a>
+        <!-- NOTE: rename your file to times_table.html if it has spaces -->
+      </div>
+
+      <!-- TO ADD ANOTHER APPLET HERE: copy the card above -->
+
+    </div>
+  </div>
+
+  <!-- ── SUBTOPIC: ARITHMETIC ───────────────────────────────────── -->
+  <div class="subtopic">
+    <p class="subtopic-heading">Arithmetic</p>
+    <div class="applet-grid">
+
+      <div class="applet-card">
+        <h3>Addition &amp; Subtraction Quiz</h3>
+        <p>Column method practice for adding and subtracting. Choose from single, double or triple digit numbers. Includes a timer, streak counter and accuracy tracker.</p>
+        <div class="tag-row">
+          <span class="tag">Adding</span>
+          <span class="tag">Subtracting</span>
+          <span class="tag">Column method</span>
+          <span class="tag">Negative numbers</span>
+        </div>
+        <a class="launch-btn" href="arithmetic-quiz.html">Launch →</a>
+      </div>
+
+      <!-- TO ADD ANOTHER APPLET UNDER ARITHMETIC: copy the card above -->
+
+    </div>
+  </div>
+
+  <!-- ── SUBTOPIC: FRACTIONS ────────────────────────────────────── -->
+  <div class="subtopic">
+    <p class="subtopic-heading">Fractions</p>
+    <div class="applet-grid">
+
+      <div class="applet-card">
+        <h3>Fractions Quiz</h3>
+        <p>Pick one or more fraction topics and practise with randomly generated questions. Ongoing — no set limit.</p>
+        <div class="tag-row">
+          <span class="tag">Adding</span>
+          <span class="tag">Subtracting</span>
+          <span class="tag">Multiplying</span>
+          <span class="tag">Dividing</span>
+          <span class="tag">Simplifying</span>
+          <span class="tag">Improper ⇄ Mixed</span>
+        </div>
+        <a class="launch-btn" href="fractions-quiz.html">Launch →</a>
+      </div>
+
+      <!-- TO ADD ANOTHER APPLET UNDER FRACTIONS: copy the card above -->
+
+    </div>
+  </div>
+
+  <!-- ── SUBTOPIC: ROUNDING ─────────────────────────────────────── -->
+  <div class="subtopic">
+    <p class="subtopic-heading">Rounding</p>
+    <div class="applet-grid">
+
+      <div class="applet-card">
+        <h3>Rounding Quiz</h3>
+        <p>Practise rounding to decimal places, significant figures or the nearest 10, 100 or 1000. Toggle between levels or use mixed mode.</p>
+        <div class="tag-row">
+          <span class="tag">Decimal places</span>
+          <span class="tag">Sig. figs.</span>
+          <span class="tag">Nearest 10/100/1000</span>
+        </div>
+        <a class="launch-btn" href="rounding-quiz.html">Launch →</a>
+      </div>
+
+      <!-- TO ADD ANOTHER APPLET UNDER ROUNDING: copy the card above -->
+
+    </div>
+  </div>
+
+  <!-- TO ADD A NEW SUBTOPIC: copy a subtopic block above and update the heading and cards -->
+  <!--
+  <div class="subtopic">
+    <p class="subtopic-heading">Your New Subtopic</p>
+    <div class="applet-grid">
+      <div class="applet-card">
+        <h3>Applet Name</h3>
+        <p>Brief description.</p>
+        <a class="launch-btn" href="your_filename.html">Launch →</a>
+      </div>
+    </div>
+  </div>
+  -->
+
+</main>
+
+<footer>
+  <a href="index.html" style="color:#bbb; text-decoration:none;">← Back to all topics</a>
+</footer>
+
+</body>
+</html>
