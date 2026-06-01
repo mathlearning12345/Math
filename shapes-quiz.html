@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shape Calculations Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0f13;--card:#1a1a22;--card2:#22222e;--border:#2e2e3e;--gold:#fbbf24;--blue:#60a5fa;--green:#34d399;--red:#f87171;--purple:#a78bfa;--text:#e2e0f0;--muted:#8884a8;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;justify-content:center;padding:16px 12px 60px;}
+.app{width:100%;max-width:460px;}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 0 12px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.hdr h1{font-family:'Space Mono',monospace;color:var(--gold);font-size:1rem;font-weight:700;}
+.stats{display:flex;gap:10px;font-size:0.78rem;color:var(--muted);}
+.stat strong{color:var(--text);font-family:'Space Mono',monospace;}
+.controls{margin-bottom:14px;display:flex;flex-direction:column;gap:8px;}
+.pill-row{display:flex;gap:6px;flex-wrap:wrap;}
+.pill{padding:5px 14px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.78rem;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;}
+.pill.active{background:var(--blue);border-color:var(--blue);color:#0f0f13;font-weight:600;}
+.pill.cat-pill{font-size:0.72rem;padding:4px 10px;}
+.pill.cat-pill.active{background:var(--gold);border-color:var(--gold);}
+.cats-wrap{display:none;flex-wrap:wrap;gap:5px;margin-top:2px;}
+.cats-wrap.open{display:flex;}
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 14px 12px;margin-bottom:12px;}
+.svg-wrap{width:100%;aspect-ratio:3/2;background:var(--card2);border-radius:8px;overflow:hidden;margin-bottom:10px;display:flex;align-items:center;justify-content:center;}
+.svg-wrap svg{width:100%;height:100%;}
+.prompt{font-size:0.85rem;color:var(--muted);text-align:center;}
+.shape-label{font-family:'Space Mono',monospace;color:var(--gold);font-size:0.78rem;text-align:center;margin-bottom:6px;}
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.mc-btn{padding:12px 8px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:'Space Mono',monospace;font-size:0.82rem;text-align:center;cursor:pointer;transition:all .15s;}
+.mc-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);}
+.mc-btn.correct{border-color:var(--green);background:rgba(52,211,153,0.12);color:var(--green);}
+.mc-btn.wrong{border-color:var(--red);background:rgba(248,113,113,0.08);color:var(--red);}
+.mc-btn:disabled{cursor:default;}
+.type-row{display:flex;gap:8px;margin-bottom:12px;}
+.type-input{flex:1;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:'Space Mono',monospace;font-size:0.9rem;outline:none;}
+.type-input:focus{border-color:var(--blue);}
+.type-input.correct{border-color:var(--green);}
+.type-input.wrong{border-color:var(--red);}
+.submit-btn{padding:11px 18px;border-radius:10px;border:none;background:var(--blue);color:#0f0f13;font-family:'Space Mono',monospace;font-size:0.82rem;font-weight:700;cursor:pointer;}
+.submit-btn:hover{opacity:.88;}
+.type-hint{font-size:0.72rem;color:var(--muted);margin-bottom:8px;}
+.feedback{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;display:none;}
+.fb-banner{font-weight:700;font-size:0.95rem;margin-bottom:10px;}
+.fb-banner.ok{color:var(--green);}
+.fb-banner.err{color:var(--red);}
+.fb-formula{font-family:'Space Mono',monospace;color:var(--purple);font-size:0.78rem;margin-bottom:4px;}
+.fb-working{font-family:'Space Mono',monospace;color:var(--muted);font-size:0.78rem;}
+.next-btn{width:100%;padding:13px;border-radius:12px;border:none;background:var(--gold);color:#0f0f13;font-family:'Space Mono',monospace;font-size:0.88rem;font-weight:700;cursor:pointer;display:none;}
+.next-btn:hover{opacity:.88;}
+.no-shapes{text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <h1>Shape Calculations</h1>
+    <div class="stats">
+      <span class="stat"><strong id="stat-score">0 / 0</strong> correct</span>
+      <span class="stat">&#x1F525;&nbsp;<strong id="stat-streak">0</strong></span>
+      <span class="stat">&#x23F1;&nbsp;<strong id="stat-timer">0s</strong></span>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="pill-row">
+      <button class="pill active" id="btn-area" onclick="setTopic('area')">Area</button>
+      <button class="pill" id="btn-peri" onclick="setTopic('perimeter')">Perimeter</button>
+      <button class="pill" id="btn-vol"  onclick="setTopic('volume')">Volume</button>
+    </div>
+    <div class="pill-row">
+      <button class="pill active" id="btn-mc" onclick="setMode('mc')">Multiple Choice</button>
+      <button class="pill" id="btn-type" onclick="setMode('type')">Type In</button>
+    </div>
+    <div class="pill-row">
+      <button class="pill diff-pill active" onclick="setDiff('easy')">Easy</button>
+      <button class="pill diff-pill" onclick="setDiff('medium')">Medium</button>
+      <button class="pill diff-pill" onclick="setDiff('all')">All Shapes</button>
+      <button class="pill diff-pill" id="btn-custom" onclick="toggleCustom()">Custom &#x25be;</button>
+    </div>
+    <div class="cats-wrap" id="cats-wrap"></div>
+  </div>
+  <div class="q-card">
+    <div class="shape-label" id="shape-label"></div>
+    <div class="svg-wrap" id="svg-wrap"></div>
+    <p class="prompt" id="prompt">Find the area. Give your answer in cm&#xb2;.</p>
+  </div>
+  <div id="answer-area"></div>
+  <div class="feedback" id="feedback">
+    <div class="fb-banner" id="fb-banner"></div>
+    <div class="fb-formula" id="fb-formula"></div>
+    <div class="fb-working" id="fb-working"></div>
+  </div>
+  <button class="next-btn" id="next-btn" onclick="nextQ()">Next Question &rarr;</button>
+</div>
+<script>
+// ═══════════════════════════════════════════════════════
+//  SVG HELPERS
+// ═══════════════════════════════════════════════════════
+const FILL='rgba(96,165,250,0.15)',FILL2='rgba(96,165,250,0.3)';
+const SHPS='#60a5fa',GOLD='#fbbf24',DASH='#55536a',CBGD='#1a1a22';
+const FONT="font-family='Space Mono,monospace' font-size='12'";
+
+const W = c=>`<svg viewBox='0 0 300 200' width='100%' height='100%'>${c}</svg>`;
+const F = n=>parseFloat(n.toFixed(1));
+
+const poly=pts=>`<polygon points='${pts.map(p=>p[0]+','+p[1]).join(' ')}' fill='${FILL}' stroke='${SHPS}' stroke-width='2' stroke-linejoin='round'/>`;
+const rct=(x,y,w,h,f,s)=>`<rect x='${x}' y='${y}' width='${w}' height='${h}' fill='${f||FILL}' stroke='${s||SHPS}' stroke-width='2'/>`;
+const crc=(cx,cy,r,f,s)=>`<circle cx='${cx}' cy='${cy}' r='${r}' fill='${f||FILL}' stroke='${s||SHPS}' stroke-width='2'/>`;
+const dot=(cx,cy)=>`<circle cx='${cx}' cy='${cy}' r='3' fill='${GOLD}'/>`;
+const seg=(x1,y1,x2,y2,c,da)=>`<line x1='${x1}' y1='${y1}' x2='${x2}' y2='${y2}' stroke='${c}' stroke-width='1.5'${da?" stroke-dasharray='5,3'":""}/>`;
+const txt=(x,y,t,c,a)=>{c=c||GOLD;a=a||'middle';return`<text x='${x}' y='${y}' text-anchor='${a}' dominant-baseline='middle' fill='${c}' ${FONT}>${t}</text>`;};
+
+const dimH=(x1,x2,y,lbl,ly)=>{const k=4,loy=ly!==undefined?ly:y-11;return seg(x1,y,x2,y,GOLD)+seg(x1,y-k,x1,y+k,GOLD)+seg(x2,y-k,x2,y+k,GOLD)+txt((x1+x2)/2,loy,lbl);};
+const dimV=(x,y1,y2,lbl,lx)=>{const k=4,lox=lx!==undefined?lx:x+14;return seg(x,y1,x,y2,GOLD)+seg(x-k,y1,x+k,y1,GOLD)+seg(x-k,y2,x+k,y2,GOLD)+txt(lox,(y1+y2)/2,lbl,GOLD,'start');};
+
+// 8-direction right-angle marker
+function ra(px,py,sz,dir){
+  sz=sz||7;
+  const m={
+    tr:`M${px},${py-sz} L${px+sz},${py-sz} L${px+sz},${py}`,
+    tl:`M${px},${py-sz} L${px-sz},${py-sz} L${px-sz},${py}`,
+    br:`M${px},${py+sz} L${px+sz},${py+sz} L${px+sz},${py}`,
+    bl:`M${px},${py+sz} L${px-sz},${py+sz} L${px-sz},${py}`,
+    ul:`M${px},${py} L${px},${py-sz} L${px-sz},${py-sz}`,
+    ur:`M${px},${py} L${px},${py-sz} L${px+sz},${py-sz}`,
+    dl:`M${px},${py} L${px},${py+sz} L${px-sz},${py+sz}`,
+    dr:`M${px},${py} L${px},${py+sz} L${px+sz},${py+sz}`,
+  };
+  return`<path d='${m[dir]}' fill='none' stroke='${DASH}' stroke-width='1.5'/>`;
+}
+
+// Equal-side tick marks on a line segment
+function ticks(x1,y1,x2,y2,n){
+  n=n||1;
+  const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1)return'';
+  const mx=(x1+x2)/2,my=(y1+y2)/2;
+  const px=-dy/len,py=dx/len,sz=5;
+  let out='';
+  for(let i=0;i<n;i++){
+    const off=(i-(n-1)/2)*6;
+    const bx=mx+px*off,by=my+py*off;
+    out+=seg(F(bx-px*sz),F(by-py*sz),F(bx+px*sz),F(by+py*sz),SHPS);
+  }
+  return out;
+}
+
+// ── Sector helpers ─────────────────────────────────────
+const D2R=d=>d*Math.PI/180;
+const cp=(cx,cy,r,deg)=>[F(cx+r*Math.cos(D2R(deg))),F(cy+r*Math.sin(D2R(deg)))];
+
+function sectorPath(cx,cy,r,s,sw,f,st){
+  const[x1,y1]=cp(cx,cy,r,s),[x2,y2]=cp(cx,cy,r,s+sw);
+  return`<path d='M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${sw>180?1:0},1 ${x2},${y2} Z' fill='${f||FILL}' stroke='${st||SHPS}' stroke-width='2'/>`;
+}
+function angleArc(cx,cy,ar,s,sw){
+  const[x1,y1]=cp(cx,cy,ar,s),[x2,y2]=cp(cx,cy,ar,s+sw);
+  return`<path d='M${x1},${y1} A${ar},${ar} 0 ${sw>180?1:0},1 ${x2},${y2}' fill='none' stroke='${GOLD}' stroke-width='1.5'/>`;
+}
+function midLbl(cx,cy,lr,s,sw,t){const m=D2R(s+sw/2);return txt(F(cx+lr*Math.cos(m)),F(cy+lr*Math.sin(m)),t);}
+function rLine(cx,cy,r,deg){const[ex,ey]=cp(cx,cy,r,deg);return seg(cx,cy,ex,ey,GOLD);}
+
+// ── Scale helpers ──────────────────────────────────────
+// Fit two dimensions in available pixel space
+function sc2(l,w,mxW,mxH){mxW=mxW||195;mxH=mxH||135;return Math.min(20,Math.max(7,Math.min(mxW/l,mxH/w)));}
+function sc1(d,t){t=t||120;return Math.min(20,Math.max(8,t/d));}
+
+// ═══════════════════════════════════════════════════════
+//  DRAW FUNCTIONS  (return SVG content string for W())
+// ═══════════════════════════════════════════════════════
+
+function dSquare({s}){
+  const k=sc1(s),sz=F(s*k);
+  const x=F(150-sz/2),y=F(100-sz/2);
+  return rct(x,y,sz,sz)+
+    ticks(x,y,x+sz,y,1)+ticks(x+sz,y,x+sz,y+sz,1)+
+    ticks(x+sz,y+sz,x,y+sz,1)+ticks(x,y+sz,x,y,1)+
+    dimH(x,x+sz,y-14,`s = ${s} cm`);
+}
+
+function dRectangle({l,w},variant){
+  const isP=variant==='portrait';
+  const[hz,vt]=isP?[w,l]:[l,w];
+  const[lH,lV]=isP?[`w = ${w} cm`,`l = ${l} cm`]:[`l = ${l} cm`,`w = ${w} cm`];
+  const k=sc2(hz,vt,185,135);
+  const pw=F(hz*k),ph=F(vt*k);
+  const x=F(150-pw/2),y=F(100-ph/2);
+  return rct(x,y,pw,ph)+
+    ticks(x,y,x+pw,y,isP?2:1)+ticks(x+pw,y,x+pw,y+ph,isP?1:2)+
+    ticks(x+pw,y+ph,x,y+ph,isP?2:1)+ticks(x,y+ph,x,y,isP?1:2)+
+    dimH(x,x+pw,y-14,lH)+dimV(x+pw+13,y,y+ph,lV);
+}
+
+function dParallelogram({b,h,slant}){
+  const leanCm=Math.sqrt(Math.max(0,slant*slant-h*h));
+  const k=sc2(b+leanCm,h,190,130);
+  const bpx=F(b*k),hpx=F(h*k),lean=F(leanCm*k);
+  const x=F(150-(bpx+lean)/2),y=F(100-hpx/2);
+  const BL=[x,y+hpx],BR=[x+bpx,y+hpx],TR=[x+bpx+lean,y],TL=[x+lean,y];
+  return poly([BL,BR,TR,TL])+
+    ticks(BL[0],BL[1],BR[0],BR[1],1)+ticks(TL[0],TL[1],TR[0],TR[1],1)+
+    ticks(BL[0],BL[1],TL[0],TL[1],2)+ticks(BR[0],BR[1],TR[0],TR[1],2)+
+    dimH(BL[0],BR[0],BL[1]+14,`b = ${b} cm`)+
+    seg(TR[0],TR[1],TR[0],BL[1],DASH,true)+
+    ra(TR[0],BL[1],6,'ul')+
+    dimV(TR[0]+12,TR[1],BL[1],`h = ${h} cm`);
+}
+
+function dIsoscelesTri({b,h},variant){
+  const k=sc2(b,h);
+  const bpx=F(b*k),hpx=F(h*k);
+  if(variant==='apex-right'){
+    // Base vertical on left, apex points right
+    const x=F(150-hpx/2),y=F(100-bpx/2);
+    const BL=[x,y+bpx],TL=[x,y],apex=[x+hpx,y+bpx/2];
+    return poly([BL,TL,apex])+
+      ticks(BL[0],BL[1],TL[0],TL[1],1)+   // base (left edge)
+      ticks(TL[0],TL[1],apex[0],apex[1],2)+ticks(BL[0],BL[1],apex[0],apex[1],2)+
+      dimV(BL[0]-14,TL[1],BL[1],`b = ${b} cm`,BL[0]-26)+
+      seg(x,y+bpx/2,apex[0],apex[1],DASH,true)+ra(x,y+bpx/2,6,'dr')+
+      dimH(x,apex[0],y+bpx/2+14,`h = ${h} cm`);
+  }
+  // Default: apex up
+  const x=F(150-bpx/2),y=F(100-hpx/2);
+  const BL=[x,y+hpx],BR=[x+bpx,y+hpx],apex=[x+bpx/2,y];
+  return poly([BL,apex,BR])+
+    ticks(BL[0],BL[1],BR[0],BR[1],1)+     // base
+    ticks(BL[0],BL[1],apex[0],apex[1],2)+ticks(BR[0],BR[1],apex[0],apex[1],2)+
+    dimH(BL[0],BR[0],BL[1]+14,`b = ${b} cm`)+
+    seg(apex[0],apex[1],apex[0],BL[1],DASH,true)+ra(apex[0],BL[1],6,'ul')+
+    dimV(apex[0]+12,apex[1],BL[1],`h = ${h} cm`);
+}
+
+function dEquilateralTri({a,h}){
+  const k=sc2(a,h);
+  const apx=F(a*k),hpx=F(h*k);
+  const x=F(150-apx/2),y=F(100-hpx/2);
+  const BL=[x,y+hpx],BR=[x+apx,y+hpx],apex=[x+apx/2,y];
+  return poly([BL,apex,BR])+
+    ticks(BL[0],BL[1],BR[0],BR[1],1)+
+    ticks(BL[0],BL[1],apex[0],apex[1],1)+
+    ticks(BR[0],BR[1],apex[0],apex[1],1)+
+    dimH(BL[0],BR[0],BL[1]+14,`a = ${a} cm`)+
+    seg(apex[0],apex[1],apex[0],BL[1],DASH,true)+ra(apex[0],BL[1],6,'ul')+
+    txt(apex[0]+12,F(y+hpx/2),`h = ${h} cm`,GOLD,'start');
+}
+
+function dRightTri({a,b},variant){
+  // a = horizontal leg, b = vertical leg
+  const k=sc2(a,b);
+  const apx=F(a*k),bpx=F(b*k);
+  if(variant==='BR'){
+    // Right angle at bottom-right
+    const x=F(150-apx/2),y=F(100-bpx/2);
+    const BL=[x,y+bpx],BR=[x+apx,y+bpx],TL=[x+apx,y];
+    return poly([BL,BR,TL])+
+      ra(BR[0],BR[1],7,'tl')+
+      dimH(BL[0],BR[0],BL[1]+14,`a = ${a} cm`)+
+      dimV(BR[0]+13,TL[1],BR[1],`b = ${b} cm`);
+  }
+  // Default: right angle at bottom-left
+  const x=F(150-apx/2),y=F(100-bpx/2);
+  const BL=[x,y+bpx],BR=[x+apx,y+bpx],TL=[x,y];
+  return poly([BL,BR,TL])+
+    ra(BL[0],BL[1],7,'tr')+
+    dimH(BL[0],BR[0],BL[1]+14,`a = ${a} cm`)+
+    dimV(BL[0]-14,TL[1],BL[1],`b = ${b} cm`,BL[0]-26);
+}
+
+function dScaleneTri({b,h}){
+  const k=sc2(b,h);
+  const bpx=F(b*k),hpx=F(h*k);
+  // Apex offset to 35% along the base to look scalene
+  const ox=F(bpx*0.35);
+  const x=F(150-bpx/2),y=F(100-hpx/2);
+  const BL=[x,y+hpx],BR=[x+bpx,y+hpx],apex=[x+ox,y];
+  return poly([BL,apex,BR])+
+    dimH(BL[0],BR[0],BL[1]+14,`b = ${b} cm`)+
+    seg(apex[0],apex[1],apex[0],BL[1],DASH,true)+ra(apex[0],BL[1],6,'ul')+
+    txt(apex[0]+12,F(y+hpx/2),`h = ${h} cm`,GOLD,'start');
+}
+
+function dCircleR({r}){
+  const k=sc1(r,85);
+  const rpx=F(r*k);
+  const cx=150,cy=100;
+  return crc(cx,cy,rpx)+dot(cx,cy)+
+    seg(cx,cy,cx+rpx,cy,GOLD)+
+    txt(F(cx+rpx/2),cy-12,`r = ${r} cm`);
+}
+
+function dCircleD({d}){
+  const r=d/2;
+  const k=sc1(r,85);
+  const rpx=F(r*k),dpx=F(d*k);
+  const cx=150,cy=100;
+  return crc(cx,cy,rpx)+dot(cx,cy)+
+    seg(cx-rpx,cy,cx+rpx,cy,GOLD)+
+    txt(cx,cy-12,`d = ${d} cm`);
+}
+
+function dTrapezium({a,b,h}){
+  // a=top (shorter), b=bottom (longer)
+  const k=sc2(b,h);
+  const apx=F(a*k),bpx=F(b*k),hpx=F(h*k);
+  const inset=F((bpx-apx)/2);
+  const x=F(150-bpx/2),y=F(100-hpx/2);
+  const BL=[x,y+hpx],BR=[x+bpx,y+hpx],TR=[x+bpx-inset,y],TL=[x+inset,y];
+  return poly([BL,BR,TR,TL])+
+    dimH(TL[0],TR[0],TL[1]-14,`a = ${a} cm`)+
+    dimH(BL[0],BR[0],BL[1]+14,`b = ${b} cm`)+
+    seg(BL[0]+inset,BL[1],TL[0],TL[1],DASH,true)+ra(TL[0],BL[1],6,'ur')+
+    dimV(TL[0]-14,TL[1],BL[1],`h = ${h} cm`,TL[0]-26);
+}
+
+function dRhombus({d1,d2}){
+  // d1=horizontal diagonal, d2=vertical diagonal
+  const k=sc2(d1,d2);
+  const h=F(d1*k/2),v=F(d2*k/2);
+  const cx=150,cy=100;
+  return poly([[cx-h,cy],[cx,cy-v],[cx+h,cy],[cx,cy+v]])+
+    dot(cx,cy)+
+    seg(cx-h,cy,cx+h,cy,GOLD)+txt(cx,cy-12,`d₁ = ${d1} cm`)+
+    seg(cx,cy-v,cx,cy+v,GOLD)+txt(cx+12,cy+v/2,`d₂ = ${d2} cm`,GOLD,'start');
+}
+
+function dKite({d1,d2}){
+  // d1=long diagonal (vertical), d2=short diagonal (horizontal)
+  const k=sc2(d2,d1);
+  const h=F(d2*k/2),v=F(d1*k/2);
+  const cx=150,cy=100;
+  // Kite: top apex at 1/3 of long diagonal, bottom at 2/3
+  const t=F(v*0.35),bo=F(v*0.65);
+  return poly([[cx,cy-t],[cx+h,cy],[cx,cy+bo],[cx-h,cy]])+
+    dot(cx,cy-t)+dot(cx,cy+bo)+
+    seg(cx,cy-t,cx,cy+bo,GOLD)+txt(cx+12,cy,`d₁ = ${d1} cm`,GOLD,'start')+
+    seg(cx-h,cy,cx+h,cy,GOLD)+txt(cx,cy-12,`d₂ = ${d2} cm`)+
+    ticks(cx-h,cy,cx,cy,1)+ticks(cx,cy,cx+h,cy,1)+
+    ticks(cx-h,cy,cx,cy-t,2)+ticks(cx+h,cy,cx,cy-t,2);
+}
+
+// ── Composite shapes ───────────────────────────────────
+
+function dSector({r,θ}){
+  const k=sc1(r,80);
+  const rpx=F(r*k);
+  const cx=150,cy=105;
+  if(θ===180){
+    // Flat top, arc downward, label as diameter
+    const s=180,sw=180;
+    return sectorPath(cx,cy,rpx,s,sw)+rLine(cx,cy,rpx,s)+rLine(cx,cy,rpx,s+sw)+
+      txt(cx,cy-12,`d = ${r*2} cm`)+txt(cx,cy+40,'180°');
+  }
+  // General sector starting from -90° (top) sweeping clockwise
+  let startAngle,sweepAngle,labelAngle;
+  if(θ<=180){
+    startAngle=-90; sweepAngle=θ;
+    // For small sectors use centre-left start
+    if(θ<=90){startAngle=-90-θ/2+θ/2;}  // symmetric about top
+    startAngle=270-θ/2; // symmetric about vertical axis
+  } else {
+    startAngle=0; sweepAngle=θ;
+  }
+  const s=sectorPath(cx,cy,rpx,startAngle,sweepAngle);
+  const arc=sweepAngle<=180?angleArc(cx,cy,28,startAngle,sweepAngle):'';
+  const ang=midLbl(cx,cy,Math.min(46,rpx*0.5),startAngle,sweepAngle,`${θ}°`);
+  // Radius label along first radius
+  const[rx,ry]=cp(cx,cy,rpx*0.55,startAngle);
+  const lbl=txt(F(rx-8),F(ry),`r = ${r} cm`,GOLD,'end');
+  return s+rLine(cx,cy,rpx,startAngle)+rLine(cx,cy,rpx,startAngle+sweepAngle)+arc+ang+lbl;
+}
+
+function dLShape({W,H,w,h}){
+  // Notch at top-right: W×H outer, w×h notch
+  const k=sc2(W,H,210,148);
+  const Wpx=F(W*k),Hpx=F(H*k),wpx=F(w*k),hpx=F(h*k);
+  const x=F(150-Wpx/2),y=F(100-Hpx/2);
+  // Vertices: BL,TL,TM,inner,notch-BR,BR
+  const pts=[[x,y+Hpx],[x,y],[x+Wpx-wpx,y],[x+Wpx-wpx,y+hpx],[x+Wpx,y+hpx],[x+Wpx,y+Hpx]];
+  return poly(pts)+
+    seg(x+Wpx-wpx,y,x+Wpx,y,DASH,true)+seg(x+Wpx,y,x+Wpx,y+hpx,DASH,true)+
+    dimH(x,x+Wpx,y+Hpx+14,`W = ${W} cm`)+
+    dimV(x-14,y,y+Hpx,`H = ${H} cm`,x-26)+
+    dimH(x+Wpx-wpx,x+Wpx,y-14,`w = ${w} cm`)+
+    txt(F(x+Wpx-wpx/2),F(y+hpx/2),`h = ${h} cm`);
+}
+
+function dRectPlusTri({l,w,h_t}){
+  // Triangle on top of rectangle
+  const k=sc2(l,w+h_t,195,148);
+  const lpx=F(l*k),wpx=F(w*k),hpx=F(h_t*k);
+  const x=F(150-lpx/2),y=F(100-(wpx+hpx)/2);
+  const apex=[x+lpx/2,y],BL=[x,y+hpx],BR=[x+lpx,y+hpx];
+  return poly([apex,BL,BR])+rct(x,y+hpx,lpx,wpx)+
+    seg(x,y+hpx,x+lpx,y+hpx,GOLD,true)+   // shared edge
+    seg(apex[0],apex[1],apex[0],y+hpx,DASH,true)+ra(apex[0],y+hpx,6,'ul')+
+    txt(apex[0]+12,F(y+hpx/2),`h = ${h_t} cm`,GOLD,'start')+
+    dimH(x,x+lpx,y+hpx+wpx+14,`l = ${l} cm`)+
+    dimV(x+lpx+13,y+hpx,y+hpx+wpx,`w = ${w} cm`);
+}
+
+function dRectPlusSemi({l,w,r}){
+  // Semicircle on top of rectangle (r = w/2)
+  const k=sc2(l,w+r*2,195,148);
+  const lpx=F(l*k),wpx=F(w*k),rpx=F(r*k);
+  const cy_top=F(100-(wpx+rpx)/2);  // top of rectangle
+  const x=F(150-lpx/2);
+  // Semicircle goes up from cy_top
+  return `<path d='M${x},${cy_top} A${rpx},${rpx} 0 0,1 ${x+lpx},${cy_top} Z' fill='${FILL}' stroke='${SHPS}' stroke-width='2'/>`+
+    rct(x,cy_top,lpx,wpx)+
+    seg(x,cy_top,x+lpx,cy_top,GOLD,true)+   // shared diameter
+    dot(150,cy_top)+seg(150,cy_top,150,cy_top-rpx,GOLD)+
+    txt(162,F(cy_top-rpx/2),`r = ${r} cm`,GOLD,'start')+
+    dimH(x,x+lpx,cy_top+wpx+14,`l = ${l} cm`)+
+    dimV(x+lpx+13,cy_top,cy_top+wpx,`w = ${w} cm`);
+}
+
+function dAnnulus({R,r}){
+  const k=sc1(R,82);
+  const Rpx=F(R*k),rpx=F(r*k);
+  const cx=150,cy=100;
+  return crc(cx,cy,Rpx)+crc(cx,cy,rpx,CBGD)+dot(cx,cy)+
+    seg(cx,cy,cx+Rpx,cy,GOLD)+txt(F(cx+Rpx/2),cy-12,`R = ${R} cm`)+
+    seg(cx,cy,cx,cy-rpx,GOLD)+txt(cx+10,F(cy-rpx/2),`r = ${r} cm`,GOLD,'start');
+}
+
+function dSqMinusQC({s}){
+  const k=sc1(s,120);
+  const spx=F(s*k);
+  const sx=F(150-spx/2),sy=F(100-spx/2);
+  const qcx=sx,qcy=sy+spx;   // centre = bottom-left corner
+  return rct(sx,sy,spx,spx,FILL2)+
+    `<path d='M${qcx},${qcy} L${qcx+spx},${qcy} A${spx},${spx} 0 0,0 ${qcx},${sy} Z' fill='${CBGD}' stroke='${SHPS}' stroke-width='2'/>`+
+    dimH(sx,sx+spx,sy-14,`s = ${s} cm`)+
+    txt(sx+spx*0.75,sy+spx*0.25,'shaded',DASH);
+}
+
+function dCross({a,l}){
+  const span=2*l+a;
+  const k=sc2(span,span,185,135);
+  const apx=F(a*k),lpx=F(l*k),spx=F(span*k);
+  const ox=F(150-spx/2),oy=F(100-spx/2);
+  const vx1=ox+lpx,vx2=ox+lpx+apx,hy1=oy+lpx,hy2=oy+lpx+apx;
+  const pts=[
+    [vx1,oy],[vx2,oy],[vx2,hy1],[ox+spx,hy1],[ox+spx,hy2],[vx2,hy2],
+    [vx2,oy+spx],[vx1,oy+spx],[vx1,hy2],[ox,hy2],[ox,hy1],[vx1,hy1]
+  ];
+  return poly(pts)+
+    seg(vx1,hy1,vx2,hy1,GOLD,true)+seg(vx1,hy2,vx2,hy2,GOLD,true)+
+    dimH(ox,ox+spx,oy+spx+14,`${span} cm`)+
+    dimH(vx1,vx2,oy-14,`a = ${a} cm`)+
+    dimV(ox+spx+13,hy1,hy2,`a = ${a} cm`)+
+    dimV(ox-14,oy,oy+spx,`${span} cm`,ox-26);
+}
+
+function dRectMinusTri({W,H,nw,nh}){
+  // Rectangle with triangular notch from top centre
+  const k=sc2(W,H,200,148);
+  const Wpx=F(W*k),Hpx=F(H*k),nwpx=F(nw*k),nhpx=F(nh*k);
+  const x=F(150-Wpx/2),y=F(100-Hpx/2);
+  const n1=F(x+(Wpx-nwpx)/2),n2=F(x+(Wpx+nwpx)/2);
+  const pts=[[x,y+Hpx],[x,y],[n1,y],[150,y+nhpx],[n2,y],[x+Wpx,y],[x+Wpx,y+Hpx]];
+  return poly(pts)+
+    seg(150,y,150,y+nhpx,DASH,true)+ra(150,y,6,'dl')+
+    txt(162,F(y+nhpx/2),`nh = ${nh} cm`,GOLD,'start')+
+    dimH(n1,n2,y-14,`nw = ${nw} cm`)+
+    dimH(x,x+Wpx,y+Hpx+14,`W = ${W} cm`)+
+    dimV(x-14,y,y+Hpx,`H = ${H} cm`,x-26);
+}
+
+
+// ═══════════════════════════════════════════════════════
+//  GENERATORS  (return full question object)
+// ═══════════════════════════════════════════════════════
+const π=Math.PI;
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rndE=(a,b)=>rnd(Math.ceil(a/2),Math.floor(b/2))*2;
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+const r2=x=>Math.round(x*100)/100;
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function makeChoices(correct,wrongs,dp=0){
+  const fmt=x=>dp===0?Math.round(x):r2(x);
+  const same=(a,b)=>Math.abs(a-b)<(dp===0?0.5:0.005);
+  const c=fmt(correct);
+  const seen=[c];const out=[];
+  for(const w of wrongs){
+    if(w<=0)continue;const fw=fmt(w);
+    if(seen.some(s=>same(s,fw)))continue;
+    seen.push(fw);out.push(fw);if(out.length===3)break;
+  }
+  const pads=[correct*2,correct*0.5,correct*3,correct*1.5,correct+10,correct*0.75,correct+5];
+  for(const p of pads){
+    if(out.length>=3)break;if(p<=0)continue;
+    const fp=fmt(p);if(seen.some(s=>same(s,fp)))continue;
+    seen.push(fp);out.push(fp);
+  }
+  return shuffle([c,...out.slice(0,3)]);
+}
+
+function gSquare(){
+  const s=rnd(3,14),area=s*s;
+  return{name:'Square',variant:'normal',params:{s},area,
+    formula:'A = s²',working:`${s}² = ${area}`,
+    choices:makeChoices(area,[4*s,s*s*2,2*s])};
+}
+function gRectangle(){
+  const variant=pick(['landscape','portrait']);
+  const l=rnd(6,15),w=rnd(2,Math.min(l-2,10)),area=l*w;
+  return{name:'Rectangle',variant,params:{l,w},area,
+    formula:'A = l × w',working:`${l} × ${w} = ${area}`,
+    choices:makeChoices(area,[2*(l+w),l+w,l*l,w*w])};
+}
+function gParallelogram(){
+  const b=rnd(5,14),h=rnd(3,10),slant=rnd(h+1,h+5),area=b*h;
+  return{name:'Parallelogram',variant:'lean-right',params:{b,h,slant},area,
+    formula:'A = b × h',working:`${b} × ${h} = ${area}`,
+    choices:makeChoices(area,[b*slant,2*(b+slant),area/2])};
+}
+function gIsoscelesTri(){
+  const variant=pick(['apex-up','apex-right']);
+  const b=rndE(4,14),h=rnd(3,12),area=0.5*b*h;
+  return{name:'Isosceles Triangle',variant,params:{b,h},area,
+    formula:'A = ½ × b × h',working:`½ × ${b} × ${h} = ${area}`,
+    choices:makeChoices(area,[b*h,0.5*b*b,0.5*h*h,b+h])};
+}
+function gEquilateralTri(){
+  const a=rndE(4,14);
+  const hDisp=r2(a*Math.sqrt(3)/2);
+  const area=r2(0.5*a*hDisp);
+  return{name:'Equilateral Triangle',variant:'apex-up',params:{a,h:hDisp},area,
+    formula:'A = ½ × a × h',working:`½ × ${a} × ${hDisp} = ${area}`,
+    choices:makeChoices(area,[a*hDisp,0.5*a*a,a*a],2),isDecimal:true};
+}
+function gRightTri(){
+  const variant=pick(['BL','BR']);
+  const a=rndE(4,14),b=rnd(3,12),area=0.5*a*b;
+  return{name:'Right-angled Triangle',variant,params:{a,b},area,
+    formula:'A = ½ × a × b',working:`½ × ${a} × ${b} = ${area}`,
+    choices:makeChoices(area,[a*b,a*a+b*b,0.5*(a+b)])};
+}
+function gScaleneTri(){
+  const b=rndE(6,14),h=rnd(4,11),area=0.5*b*h;
+  return{name:'Scalene Triangle',variant:'default',params:{b,h},area,
+    formula:'A = ½ × b × h',working:`½ × ${b} × ${h} = ${area}`,
+    choices:makeChoices(area,[b*h,b*h/3,0.5*h*h])};
+}
+function gCircleR(){
+  const r=rnd(2,10),area=r2(π*r*r);
+  return{name:'Circle',variant:'radius',params:{r},area,
+    formula:'A = πr²',working:`π × ${r}² = ${area}`,
+    choices:makeChoices(area,[r2(2*π*r),r2(π*r),r2(2*π*r*r)],2),isDecimal:true};
+}
+function gCircleD(){
+  const r=rnd(2,9),d=r*2,area=r2(π*r*r);
+  return{name:'Circle',variant:'diameter',params:{d},area,
+    formula:'A = π(d ÷ 2)²',working:`π × (${d}÷2)² = π × ${r}² = ${area}`,
+    choices:makeChoices(area,[r2(π*d*d),r2(2*π*d),r2(π*d*d/2)],2),isDecimal:true};
+}
+function gTrapezium(){
+  const a=rndE(2,8),b=rndE(Math.max(a+4,6),16),h=rnd(3,10),area=0.5*(a+b)*h;
+  return{name:'Trapezium',variant:'wider-base',params:{a,b,h},area,
+    formula:'A = ½(a + b)h',working:`½ × (${a}+${b}) × ${h} = ${area}`,
+    choices:makeChoices(area,[(a+b)*h,0.5*b*h,a*h])};
+}
+function gRhombus(){
+  const d1=rndE(4,14),d2=rnd(3,10),area=0.5*d1*d2;
+  return{name:'Rhombus',variant:'wide',params:{d1,d2},area,
+    formula:'A = ½ × d₁ × d₂',working:`½ × ${d1} × ${d2} = ${area}`,
+    choices:makeChoices(area,[d1*d2,d1+d2,0.5*d1*d1])};
+}
+function gKite(){
+  const d1=rndE(6,16),d2=rndE(4,12),area=0.5*d1*d2;
+  return{name:'Kite',variant:'tall',params:{d1,d2},area,
+    formula:'A = ½ × d₁ × d₂',working:`½ × ${d1} × ${d2} = ${area}`,
+    choices:makeChoices(area,[d1*d2,d1+d2,d1*d2/4])};
+}
+function gSector(){
+  const θ=pick([60,90,120,180,270]),r=rnd(2,9);
+  const area=r2(θ/360*π*r*r);
+  return{name:'Sector',variant:`${θ}°`,params:{r,θ},area,
+    formula:'A = (θ÷360)×πr²',working:`(${θ}÷360)×π×${r}² = ${area}`,
+    choices:makeChoices(area,[r2(π*r*r),r2(θ/360*2*π*r),r2(area*2)],2),isDecimal:true};
+}
+function gLShape(){
+  const W=rnd(7,14),H=rnd(7,14),w=rnd(2,W-3),h=rnd(2,H-3),area=W*H-w*h;
+  return{name:'L-shape',variant:'notch-TR',params:{W,H,w,h},area,
+    formula:'A = W×H − w×h',working:`${W}×${H} − ${w}×${h} = ${W*H}−${w*h} = ${area}`,
+    choices:makeChoices(area,[W*H,W*H+w*h,(W-w)*(H-h)])};
+}
+function gRectPlusTri(){
+  const l=rndE(6,14),w=rnd(4,10),h_t=rndE(3,8),area=l*w+0.5*l*h_t;
+  return{name:'Rectangle + Triangle',variant:'tri-top',params:{l,w,h_t},area,
+    formula:'A = l×w + ½×l×h',working:`${l}×${w} + ½×${l}×${h_t} = ${l*w}+${0.5*l*h_t} = ${area}`,
+    choices:makeChoices(area,[l*w+l*h_t,l*(w+h_t),0.5*l*(w+h_t)])};
+}
+function gRectPlusSemi(){
+  const l=rnd(5,12),w=rndE(4,12),r=w/2;
+  const sA=r2(0.5*π*r*r),area=r2(l*w+sA);
+  return{name:'Rectangle + Semicircle',variant:'semi-top',params:{l,w,r},area,
+    formula:'A = l×w + ½πr²',working:`${l}×${w} + ½×π×${r}² = ${l*w}+${sA} = ${area}`,
+    choices:makeChoices(area,[r2(l*w+π*r*r),l*w,r2(l*w+0.5*π*w*w)],2),isDecimal:true};
+}
+function gAnnulus(){
+  const R=rnd(4,10),r=rnd(1,R-2),area=r2(π*(R*R-r*r));
+  return{name:'Annulus',variant:'concentric',params:{R,r},area,
+    formula:'A = π(R²−r²)',working:`π×(${R}²−${r}²) = π×${R*R-r*r} = ${area}`,
+    choices:makeChoices(area,[r2(π*R*R),r2(π*(R-r)*(R-r)),r2(π*r*r)],2),isDecimal:true};
+}
+function gSqMinusQC(){
+  const s=rnd(4,12),sq=s*s,qc=r2(0.25*π*s*s),area=r2(sq-qc);
+  return{name:'Square − ¼ Circle',variant:'corner-qc',params:{s},area,
+    formula:'A = s²−¼πs²',working:`${sq}−¼×π×${sq} = ${sq}−${qc} = ${area}`,
+    choices:makeChoices(area,[qc,sq,r2(sq+qc)],2),isDecimal:true};
+}
+function gCross(){
+  const a=rnd(2,6),l=rnd(2,6),area=a*a+4*a*l,span=2*l+a;
+  return{name:'Cross Shape',variant:'symmetric',params:{a,l},area,
+    formula:'A = a²+4al',working:`${a}²+4×${a}×${l} = ${a*a}+${4*a*l} = ${area}`,
+    choices:makeChoices(area,[span*span,4*a*l,a*(a+2*l)])};
+}
+function gRectMinusTri(){
+  const W=rnd(8,16),H=rnd(6,12),nw=rndE(3,W-4),nh=rnd(2,H-2),area=W*H-0.5*nw*nh;
+  return{name:'Rectangle − Triangle',variant:'notch-top',params:{W,H,nw,nh},area,
+    formula:'A = W×H−½nw×nh',working:`${W}×${H}−½×${nw}×${nh} = ${W*H}−${0.5*nw*nh} = ${area}`,
+    choices:makeChoices(area,[W*H,W*H-nw*nh,W*H+0.5*nw*nh])};
+}
+
+
+// ═══════════════════════════════════════════════════════
+//  PERIMETER — DRAW FUNCTIONS
+//  These show sides (not heights) where needed for perimeter questions.
+// ═══════════════════════════════════════════════════════
+
+// Parallelogram: shows base b and slant side s (no height dashed line)
+function dParallelogramP({b,slant}){
+  const ang=35*Math.PI/180;
+  const leanCm=slant*Math.sin(ang),hCm=slant*Math.cos(ang);
+  const k=sc2(b+leanCm,hCm,190,130);
+  const bpx=F(b*k),hpx=F(hCm*k),lean=F(leanCm*k);
+  const x=F(150-(bpx+lean)/2),y=F(100-hpx/2);
+  const BL=[x,y+hpx],BR=[x+bpx,y+hpx],TR=[x+bpx+lean,y],TL=[x+lean,y];
+  const smx=F((BL[0]+TL[0])/2),smy=F((BL[1]+TL[1])/2);
+  return poly([BL,BR,TR,TL])+
+    ticks(BL[0],BL[1],BR[0],BR[1],1)+ticks(TL[0],TL[1],TR[0],TR[1],1)+
+    ticks(BL[0],BL[1],TL[0],TL[1],2)+ticks(BR[0],BR[1],TR[0],TR[1],2)+
+    dimH(BL[0],BR[0],BL[1]+14,`b = ${b} cm`)+
+    txt(smx-10,smy,`s = ${slant} cm`,GOLD,'end');
+}
+
+// Isosceles triangle: shows base b and equal side length (no height)
+function dIsoscelesTriP({b,side},variant){
+  const h=r2(Math.sqrt(Math.max(1,side*side-(b/2)*(b/2))));
+  const k=sc2(b,h);
+  const bpx=F(b*k),hpx=F(h*k);
+  if(variant==='apex-right'){
+    const x=F(150-hpx/2),y=F(100-bpx/2);
+    const BL=[x,y+bpx],TL=[x,y],apex=[x+hpx,y+bpx/2];
+    const smx=F((TL[0]+apex[0])/2),smy=F((TL[1]+apex[1])/2);
+    return poly([BL,TL,apex])+
+      ticks(BL[0],BL[1],TL[0],TL[1],1)+
+      ticks(TL[0],TL[1],apex[0],apex[1],2)+ticks(BL[0],BL[1],apex[0],apex[1],2)+
+      dimV(BL[0]-14,TL[1],BL[1],`b = ${b} cm`,BL[0]-26)+
+      txt(smx+10,smy-10,`s = ${side} cm`,GOLD,'start');
+  }
+  const x=F(150-bpx/2),y=F(100-hpx/2);
+  const BL=[x,y+hpx],BR=[x+bpx,y+hpx],apex=[x+bpx/2,y];
+  const smx=F((BL[0]+apex[0])/2),smy=F((BL[1]+apex[1])/2);
+  return poly([BL,apex,BR])+
+    ticks(BL[0],BL[1],BR[0],BR[1],1)+
+    ticks(BL[0],BL[1],apex[0],apex[1],2)+ticks(BR[0],BR[1],apex[0],apex[1],2)+
+    dimH(BL[0],BR[0],BL[1]+14,`b = ${b} cm`)+
+    txt(smx-12,smy,`s = ${side} cm`,GOLD,'end');
+}
+
+// Right triangle: shows all three sides including labelled hypotenuse c
+function dRightTriP({a,b,c},variant){
+  const k=sc2(a,b);
+  const apx=F(a*k),bpx=F(b*k);
+  if(variant==='BR'){
+    const x=F(150-apx/2),y=F(100-bpx/2);
+    const BL=[x,y+bpx],BR=[x+apx,y+bpx],TL=[x+apx,y];
+    const hmx=F((BL[0]+TL[0])/2),hmy=F((BL[1]+TL[1])/2);
+    return poly([BL,BR,TL])+ra(BR[0],BR[1],7,'tl')+
+      dimH(BL[0],BR[0],BL[1]+14,`a = ${a} cm`)+
+      dimV(BR[0]+13,TL[1],BR[1],`b = ${b} cm`)+
+      txt(hmx-12,hmy,`c = ${c} cm`,GOLD,'end');
+  }
+  const x=F(150-apx/2),y=F(100-bpx/2);
+  const BL=[x,y+bpx],BR=[x+apx,y+bpx],TL=[x,y];
+  const hmx=F((BR[0]+TL[0])/2),hmy=F((BR[1]+TL[1])/2);
+  return poly([BL,BR,TL])+ra(BL[0],BL[1],7,'tr')+
+    dimH(BL[0],BR[0],BL[1]+14,`a = ${a} cm`)+
+    dimV(BL[0]-14,TL[1],BL[1],`b = ${b} cm`,BL[0]-26)+
+    txt(hmx+12,hmy,`c = ${c} cm`,GOLD,'start');
+}
+
+// Rhombus: shows diagonals AND the computed side length on one edge
+function dRhombusP({d1,d2,side}){
+  const k=sc2(d1,d2);
+  const h=F(d1*k/2),v=F(d2*k/2);
+  const cx=150,cy=100;
+  const smx=F(cx+h/2),smy=F(cy-v/2);
+  return poly([[cx-h,cy],[cx,cy-v],[cx+h,cy],[cx,cy+v]])+
+    dot(cx,cy)+
+    seg(cx-h,cy,cx+h,cy,GOLD)+txt(cx,cy-12,`d₁ = ${d1} cm`)+
+    seg(cx,cy-v,cx,cy+v,GOLD)+txt(cx+12,cy+v/2,`d₂ = ${d2} cm`,GOLD,'start')+
+    txt(smx+10,smy-8,`s = ${side} cm`,GOLD,'start');
+}
+
+// ═══════════════════════════════════════════════════════
+//  PERIMETER — GENERATORS
+// ═══════════════════════════════════════════════════════
+function gSquareP(){
+  const s=rnd(3,14),P=4*s;
+  return{name:'Square',variant:'normal',params:{s},area:P,
+    formula:'P = 4s',working:`4 × ${s} = ${P}`,
+    choices:makeChoices(P,[s*s,2*s,s+s+s,8*s])};
+}
+function gRectangleP(){
+  const variant=pick(['landscape','portrait']);
+  const l=rnd(6,15),w=rnd(2,Math.min(l-2,10)),P=2*(l+w);
+  return{name:'Rectangle',variant,params:{l,w},area:P,
+    formula:'P = 2(l + w)',working:`2×(${l}+${w}) = 2×${l+w} = ${P}`,
+    choices:makeChoices(P,[l*w,l+w,2*l,2*w])};
+}
+function gParallelogramP(){
+  const b=rnd(5,14),slant=rnd(4,10),P=2*(b+slant);
+  return{name:'Parallelogram',variant:'lean-right',params:{b,slant},area:P,
+    formula:'P = 2(b + s)',working:`2×(${b}+${slant}) = 2×${b+slant} = ${P}`,
+    choices:makeChoices(P,[b*slant,b+slant,2*b,2*slant])};
+}
+function gEquilateralTriP(){
+  const a=rnd(3,14),h=r2(a*Math.sqrt(3)/2),P=3*a;
+  return{name:'Equilateral Triangle',variant:'apex-up',params:{a,h},area:P,
+    formula:'P = 3a',working:`3 × ${a} = ${P}`,
+    choices:makeChoices(P,[a*a,a*h,P+a,2*a])};
+}
+function gIsoscelesTriP(){
+  const variant=pick(['apex-up','apex-right']);
+  const b=rndE(4,14),h=rnd(3,12);
+  const side=r2(Math.sqrt((b/2)**2+h**2)),P=r2(b+2*side);
+  return{name:'Isosceles Triangle',variant,params:{b,side},area:P,
+    formula:'P = b + 2s',working:`${b} + 2×${side} = ${P}`,
+    choices:makeChoices(P,[b*side,b+side,r2(3*side),r2(2*b+side)],2),isDecimal:true};
+}
+function gRightTriP(){
+  const variant=pick(['BL','BR']);
+  const a=rnd(3,12),b=rnd(3,12),c=r2(Math.sqrt(a*a+b*b)),P=r2(a+b+c);
+  return{name:'Right-angled Triangle',variant,params:{a,b,c},area:P,
+    formula:'P = a + b + c',working:`${a}+${b}+${c} = ${P}`,
+    choices:makeChoices(P,[r2(a*b/2),r2(a+b),r2(2*(a+b)),r2(c*2)],2),isDecimal:true};
+}
+function gCircleRP(){
+  const r=rnd(2,10),C=r2(2*π*r);
+  return{name:'Circle',variant:'radius',params:{r},area:C,
+    formula:'C = 2πr',working:`2×π×${r} = ${C}`,
+    choices:makeChoices(C,[r2(π*r*r),r2(π*r),r2(4*π*r)],2),isDecimal:true};
+}
+function gCircleDP(){
+  const r=rnd(2,9),d=r*2,C=r2(π*d);
+  return{name:'Circle',variant:'diameter',params:{d},area:C,
+    formula:'C = πd',working:`π×${d} = ${C}`,
+    choices:makeChoices(C,[r2(π*d*d/4),r2(2*π*d),r2(π*r)],2),isDecimal:true};
+}
+function gRhombusP(){
+  const d1=rndE(4,14),d2=rnd(3,10);
+  const side=r2(Math.sqrt((d1/2)**2+(d2/2)**2)),P=r2(4*side);
+  return{name:'Rhombus',variant:'wide',params:{d1,d2,side},area:P,
+    formula:'P = 4s',working:`4×${side} = ${P}`,
+    choices:makeChoices(P,[r2(d1*d2/2),r2(2*(d1+d2)),r2(side*side),r2(2*side)],2),isDecimal:true};
+}
+function gSectorP(){
+  const θ=pick([60,90,120,180,270]),r=rnd(2,9);
+  const arc=r2(θ/360*2*π*r),P=r2(arc+2*r);
+  return{name:'Sector',variant:`${θ}°`,params:{r,θ},area:P,
+    formula:'P = arc + 2r',working:`(${θ}÷360)×2π×${r}+2×${r} = ${arc}+${2*r} = ${P}`,
+    choices:makeChoices(P,[r2(θ/360*π*r*r),r2(arc),r2(2*r),r2(arc+r)],2),isDecimal:true};
+}
+
+// ═══════════════════════════════════════════════════════
+//  SHAPE REGISTRY
+// ═══════════════════════════════════════════════════════
+const SHAPES=[
+  // Basic — all have perimeter variants
+  {id:'square',       label:'Square',              cat:'easy',   gen:gSquare,       draw:q=>W(dSquare(q.params)),
+    genP:gSquareP,    drawP:q=>W(dSquare(q.params))},
+  {id:'rectangle',    label:'Rectangle',            cat:'easy',   gen:gRectangle,    draw:q=>W(dRectangle(q.params,q.variant)),
+    genP:gRectangleP, drawP:q=>W(dRectangle(q.params,q.variant))},
+  {id:'right-tri',    label:'Right Triangle',       cat:'easy',   gen:gRightTri,     draw:q=>W(dRightTri(q.params,q.variant)),
+    genP:gRightTriP,  drawP:q=>W(dRightTriP(q.params,q.variant))},
+  {id:'circle-r',     label:'Circle (radius)',       cat:'easy',   gen:gCircleR,      draw:q=>W(dCircleR(q.params)),
+    genP:gCircleRP,   drawP:q=>W(dCircleR(q.params))},
+  {id:'parallelogram',label:'Parallelogram',         cat:'medium', gen:gParallelogram,draw:q=>W(dParallelogram(q.params)),
+    genP:gParallelogramP, drawP:q=>W(dParallelogramP(q.params))},
+  {id:'iso-tri',      label:'Isosceles Tri',         cat:'medium', gen:gIsoscelesTri, draw:q=>W(dIsoscelesTri(q.params,q.variant)),
+    genP:gIsoscelesTriP,  drawP:q=>W(dIsoscelesTriP(q.params,q.variant))},
+  {id:'equil-tri',    label:'Equilateral Tri',       cat:'medium', gen:gEquilateralTri,draw:q=>W(dEquilateralTri(q.params)),
+    genP:gEquilateralTriP, drawP:q=>W(dEquilateralTri(q.params))},
+  {id:'scalene-tri',  label:'Scalene Tri',           cat:'medium', gen:gScaleneTri,   draw:q=>W(dScaleneTri(q.params))},
+  {id:'circle-d',     label:'Circle (diameter)',     cat:'medium', gen:gCircleD,      draw:q=>W(dCircleD(q.params)),
+    genP:gCircleDP,   drawP:q=>W(dCircleD(q.params))},
+  {id:'trapezium',    label:'Trapezium',             cat:'medium', gen:gTrapezium,    draw:q=>W(dTrapezium(q.params))},
+  {id:'rhombus',      label:'Rhombus',               cat:'medium', gen:gRhombus,      draw:q=>W(dRhombus(q.params)),
+    genP:gRhombusP,   drawP:q=>W(dRhombusP(q.params))},
+  {id:'kite',         label:'Kite',                  cat:'medium', gen:gKite,         draw:q=>W(dKite(q.params))},
+  // Composite — sector has a perimeter (arc + 2r); rest are area-only
+  {id:'sector',       label:'Sector',                cat:'hard',   gen:gSector,       draw:q=>W(dSector(q.params)),
+    genP:gSectorP,    drawP:q=>W(dSector(q.params))},
+  {id:'l-shape',      label:'L-shape',               cat:'hard',   gen:gLShape,       draw:q=>W(dLShape(q.params))},
+  {id:'rect-tri',     label:'Rect + Triangle',        cat:'hard',   gen:gRectPlusTri,  draw:q=>W(dRectPlusTri(q.params))},
+  {id:'rect-semi',    label:'Rect + Semicircle',      cat:'hard',   gen:gRectPlusSemi, draw:q=>W(dRectPlusSemi(q.params))},
+  {id:'annulus',      label:'Annulus',                cat:'hard',   gen:gAnnulus,      draw:q=>W(dAnnulus(q.params))},
+  {id:'sq-qc',        label:'Sq − ¼ Circle',          cat:'hard',   gen:gSqMinusQC,    draw:q=>W(dSqMinusQC(q.params))},
+  {id:'cross',        label:'Cross Shape',            cat:'hard',   gen:gCross,        draw:q=>W(dCross(q.params))},
+  {id:'rect-notch',   label:'Rect − Triangle',        cat:'hard',   gen:gRectMinusTri, draw:q=>W(dRectMinusTri(q.params))},
+];
+
+const SHAPE_MAP=Object.fromEntries(SHAPES.map(s=>[s.id,s]));
+const DIFF={easy:['square','rectangle','right-tri','circle-r'],
+  medium:SHAPES.filter(s=>s.cat!=='hard').map(s=>s.id),
+  all:SHAPES.map(s=>s.id)};
+
+
+// ═══════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+//  3D SVG HELPERS
+// ═══════════════════════════════════════════════════════
+const FILLR='rgba(96,165,250,0.08)',FILLT='rgba(96,165,250,0.05)';
+const OX=0.45,OY=0.30;
+
+// segV: visible 3D edge (sw=2 solid, 1.5 dashed) vs 2D seg (always 1.5)
+const segV=(x1,y1,x2,y2,c,da)=>`<line x1='${F(x1)}' y1='${F(y1)}' x2='${F(x2)}' y2='${F(y2)}' stroke='${c||SHPS}' stroke-width='${da?1.5:2}'${da?" stroke-dasharray='4,3'":""} stroke-linecap='round'/>`;
+const polyV=(pts,f,sw)=>{const s=sw===undefined?2:sw;return`<polygon points='${pts.map(p=>F(p[0])+','+F(p[1])).join(' ')}' fill='${f||FILL}' stroke='${SHPS}' stroke-width='${s}' stroke-linejoin='round'/>`;};
+const arcFront=(cx,cy,rx,ry)=>`<path d='M${F(cx-rx)},${F(cy)} A${F(rx)},${F(ry)} 0 0,1 ${F(cx+rx)},${F(cy)}' fill='none' stroke='${SHPS}' stroke-width='2'/>`;
+const arcBack=(cx,cy,rx,ry)=>`<path d='M${F(cx-rx)},${F(cy)} A${F(rx)},${F(ry)} 0 0,0 ${F(cx+rx)},${F(cy)}' fill='none' stroke='${DASH}' stroke-width='1.5' stroke-dasharray='4,3'/>`;
+const ellipseV=(cx,cy,rx,ry,f,sw)=>`<ellipse cx='${F(cx)}' cy='${F(cy)}' rx='${F(rx)}' ry='${F(ry)}' fill='${f||FILL}' stroke='${SHPS}' stroke-width='${sw||2}'/>`;
+const ellipseJoin=(cx,cy,rx,ry)=>`<ellipse cx='${F(cx)}' cy='${F(cy)}' rx='${F(rx)}' ry='${F(ry)}' fill='none' stroke='${GOLD}' stroke-width='1.5' stroke-dasharray='5,3'/>`;
+
+function cylBody(cx,cy_top,cy_bot,rp){
+  return `<rect x='${F(cx-rp)}' y='${F(cy_top)}' width='${F(rp*2)}' height='${F(cy_bot-cy_top)}' fill='${FILL}' stroke='none'/>`+
+    segV(cx-rp,cy_top,cx-rp,cy_bot,SHPS)+segV(cx+rp,cy_top,cx+rp,cy_bot,SHPS);
+}
+function dimOblique(p1,p2,d,lbl){
+  const ex=p2[0]-p1[0],ey=p2[1]-p1[1],len=Math.sqrt(ex*ex+ey*ey),eu=ex/len,ev=ey/len;
+  const px=-ev,py=eu,ox=px*d,oy=py*d,tk=5;
+  const q1=[p1[0]+ox,p1[1]+oy],q2=[p2[0]+ox,p2[1]+oy];
+  return seg(q1[0],q1[1],q2[0],q2[1],GOLD)+
+    seg(q1[0]-eu*tk/2,q1[1]-ev*tk/2,q1[0]+eu*tk/2,q1[1]+ev*tk/2,GOLD)+
+    seg(q2[0]-eu*tk/2,q2[1]-ev*tk/2,q2[0]+eu*tk/2,q2[1]+ev*tk/2,GOLD)+
+    txt((q1[0]+q2[0])/2+px*11,(q1[1]+q2[1])/2+py*11,lbl);
+}
+function mkCuboid(cx,cy,lp,wp,hp){
+  const dx=wp*OX,dy=-wp*OY;
+  const FBL=[cx-lp/2,cy+hp/2],FBR=[cx+lp/2,cy+hp/2],FTR=[cx+lp/2,cy-hp/2],FTL=[cx-lp/2,cy-hp/2];
+  const sh=p=>[p[0]+dx,p[1]+dy];
+  const[BBL,BBR,BTR,BTL]=[FBL,FBR,FTR,FTL].map(sh);
+  return{FBL,FBR,FTR,FTL,BBL,BBR,BTR,BTL,dx,dy};
+}
+function cuboidSVG(cx,cy,lp,wp,hp){
+  const o=mkCuboid(cx,cy,lp,wp,hp);const{FBL,FBR,FTR,FTL,BBL,BBR,BTR,BTL}=o;
+  return seg(BBL[0],BBL[1],BBR[0],BBR[1],DASH,true)+seg(BBL[0],BBL[1],BTL[0],BTL[1],DASH,true)+seg(BBL[0],BBL[1],FBL[0],FBL[1],DASH,true)+
+    polyV([FBR,BBR,BTR,FTR],FILLR)+polyV([FTL,FTR,BTR,BTL],FILLT)+polyV([FBL,FBR,FTR,FTL]);
+}
+function scV(l,w,h,mxW,mxH){mxW=mxW||182;mxH=mxH||128;return Math.min(17,Math.max(5,Math.min(mxW/(l+w*OX),mxH/(h+w*OY))));}
+function scCyl(r,h,xH){xH=xH||0;return Math.min(14,Math.max(5,Math.min(60/r,118/(h+xH+r*0.65))));}
+
+// ═══════════════════════════════════════════════════════
+//  3D DRAW FUNCTIONS  (return SVG content; W() added in registry)
+// ═══════════════════════════════════════════════════════
+function dvCube({s}){
+  const k=scV(s,s,s),sp=F(s*k),dx=F(sp*OX),dy=F(-sp*OY),cx=F(150-dx/2),cy=F(100-dy/2);
+  const o=mkCuboid(cx,cy,sp,sp,sp);const{FBL,FBR,FTR,FTL,BBR,BTR,BTL}=o;
+  const tk=(p1,p2)=>{const sz=4,mx=(p1[0]+p2[0])/2,my=(p1[1]+p2[1])/2,ex=p2[0]-p1[0],ey=p2[1]-p1[1],len=Math.sqrt(ex*ex+ey*ey),px=-ey/len*sz,py=ex/len*sz;return seg(mx-px,my-py,mx+px,my+py,SHPS);};
+  return cuboidSVG(cx,cy,sp,sp,sp)+tk(FBL,FBR)+tk(FBR,FTR)+tk(FTL,FTR)+tk(FBL,FTL)+tk(FBR,BBR)+tk(FTR,BTR)+tk(FTL,BTL)+tk(BTL,BTR)+dimH(FBL[0],FBR[0],FBL[1]+16,`${s} cm`);
+}
+function dvRectPrism({l,w,h}){
+  const k=scV(l,w,h,168,118),lp=F(l*k),wp=F(w*k),hp=F(h*k),dx=F(wp*OX),dy=F(-wp*OY),cx=F(150-dx/2),cy=F(100-dy/2);
+  const o=mkCuboid(cx,cy,lp,wp,hp);const{FBL,FBR,FTR,BBR}=o;
+  return cuboidSVG(cx,cy,lp,wp,hp)+dimH(FBL[0],FBR[0],FBL[1]+16,`${l} cm`)+dimV(FBR[0]+12,FTR[1],FBR[1],`${h} cm`)+dimOblique(FBR,BBR,13,`${w} cm`);
+}
+function dvCylinder({r,h}){
+  const k=scCyl(r,h),rp=F(r*k),hp=F(h*k),ry=F(rp*0.30),cx=150,cy_top=F(100-(hp+2*ry)/2+ry),cy_bot=F(cy_top+hp);
+  return `<rect x='${F(cx-rp)}' y='${F(cy_top)}' width='${F(rp*2)}' height='${F(hp)}' fill='${FILL}' stroke='none'/>`+
+    arcBack(cx,cy_bot,rp,ry)+segV(cx-rp,cy_top,cx-rp,cy_bot,SHPS)+segV(cx+rp,cy_top,cx+rp,cy_bot,SHPS)+
+    arcFront(cx,cy_bot,rp,ry)+ellipseV(cx,cy_top,rp,ry)+
+    seg(cx,cy_top,cx+rp,cy_top,GOLD)+dot(cx,cy_top)+txt(cx+rp/2,cy_top-12,`${r} cm`)+dimV(cx+rp+13,cy_top,cy_bot,`${h} cm`);
+}
+function dvCone({r,h}){
+  const k=Math.min(12,Math.max(5,Math.min(55/r,108/h))),rp=F(r*k),hp=F(h*k),ry=F(rp*0.30),cx=150,cy_bot=F(100+hp*0.52),cy_top=F(cy_bot-hp);
+  return `<polygon points='${F(cx)},${F(cy_top)} ${F(cx-rp)},${F(cy_bot)} ${F(cx+rp)},${F(cy_bot)}' fill='${FILL}' stroke='none'/>`+
+    arcBack(cx,cy_bot,rp,ry)+segV(cx,cy_top,cx-rp,cy_bot,SHPS)+segV(cx,cy_top,cx+rp,cy_bot,SHPS)+arcFront(cx,cy_bot,rp,ry)+
+    seg(cx,cy_top,cx,cy_bot,DASH,true)+ra(cx,cy_bot,6,'dl')+txt(cx+11,F((cy_top+cy_bot)/2),`${h} cm`,GOLD,'start')+
+    seg(cx,cy_bot,cx+rp,cy_bot,GOLD)+dot(cx,cy_bot)+txt(F(cx+rp/2),cy_bot+13,`${r} cm`);
+}
+function dvSphere({r}){
+  const k=Math.min(14,Math.max(5,72/r)),rp=F(r*k),ry=F(rp*0.30),cx=150,cy=97;
+  return `<circle cx='${cx}' cy='${cy}' r='${rp}' fill='${FILL}' stroke='${SHPS}' stroke-width='2'/>`+
+    `<ellipse cx='${cx}' cy='${cy}' rx='${rp}' ry='${ry}' fill='none' stroke='${DASH}' stroke-width='1.5' stroke-dasharray='4,3'/>`+
+    seg(cx,cy,cx+rp,cy,GOLD)+dot(cx,cy)+txt(F(cx+rp/2),cy-13,`${r} cm`);
+}
+function dvTriPrismRA({b,h_t,l}){
+  const k=Math.min(13,Math.max(5,Math.min(162/(b+l*OX),115/(h_t+l*OY))));
+  const bp=F(b*k),h_tp=F(h_t*k),lp=F(l*k),dx=F(lp*OX),dy=F(-lp*OY),cx=F(150-dx/2),cy=F(100-dy/2);
+  const A=[cx-bp/2,cy+h_tp/2],B=[cx+bp/2,cy+h_tp/2],C=[cx-bp/2,cy-h_tp/2];
+  const Ap=[A[0]+dx,A[1]+dy],Bp=[B[0]+dx,B[1]+dy],Cp=[C[0]+dx,C[1]+dy];
+  return seg(Ap[0],Ap[1],Bp[0],Bp[1],DASH,true)+seg(Ap[0],Ap[1],Cp[0],Cp[1],DASH,true)+seg(Bp[0],Bp[1],Cp[0],Cp[1],DASH,true)+
+    polyV([A,B,Bp,Ap],FILLR)+polyV([B,C,Cp,Bp],FILLR)+polyV([A,B,C])+
+    segV(A[0],A[1],Ap[0],Ap[1],SHPS)+segV(B[0],B[1],Bp[0],Bp[1],SHPS)+segV(C[0],C[1],Cp[0],Cp[1],SHPS)+
+    `<path d='M${F(A[0]+7)},${F(A[1])} L${F(A[0]+7)},${F(A[1]-7)} L${F(A[0])},${F(A[1]-7)}' fill='none' stroke='${SHPS}' stroke-width='1.5'/>`+
+    dimH(A[0],B[0],A[1]+16,`${b} cm`)+dimV(A[0]-13,C[1],A[1],`${h_t} cm`,A[0]-26)+txt(F((B[0]+Bp[0])/2+5),F((B[1]+Bp[1])/2+10),`${l} cm`,GOLD,'start');
+}
+function dvTriPrismISO({b,h_t,l}){
+  const k=Math.min(13,Math.max(5,Math.min(162/(b+l*OX),115/(h_t+l*OY))));
+  const bp=F(b*k),h_tp=F(h_t*k),lp=F(l*k),dx=F(lp*OX),dy=F(-lp*OY),cx=F(150-dx/2),cy=F(100-dy/2);
+  const A=[cx-bp/2,cy+h_tp/2],B=[cx+bp/2,cy+h_tp/2],C=[cx,cy-h_tp/2];
+  const Ap=[A[0]+dx,A[1]+dy],Bp=[B[0]+dx,B[1]+dy],Cp=[C[0]+dx,C[1]+dy];
+  const baseMx=(A[0]+B[0])/2,baseMy=A[1];
+  return seg(Ap[0],Ap[1],Bp[0],Bp[1],DASH,true)+seg(Ap[0],Ap[1],Cp[0],Cp[1],DASH,true)+seg(Bp[0],Bp[1],Cp[0],Cp[1],DASH,true)+
+    polyV([A,B,Bp,Ap],FILLR)+polyV([B,C,Cp,Bp],FILLR)+polyV([A,B,C])+
+    segV(A[0],A[1],Ap[0],Ap[1],SHPS)+segV(B[0],B[1],Bp[0],Bp[1],SHPS)+segV(C[0],C[1],Cp[0],Cp[1],SHPS)+
+    seg(C[0],C[1],baseMx,baseMy,DASH,true)+ra(baseMx,baseMy,6,'dl')+txt(C[0]+12,F((C[1]+baseMy)/2),`${h_t} cm`,GOLD,'start')+
+    dimH(A[0],B[0],A[1]+16,`${b} cm`)+txt(F((B[0]+Bp[0])/2+5),F((B[1]+Bp[1])/2+10),`${l} cm`,GOLD,'start');
+}
+function dvSqPyramid({s,h}){
+  const k=scV(s,s,h),sp=F(s*k),hp=F(h*k),dx=F(sp*OX),dy=F(-sp*OY),cy_base=F(100+hp/2-dy/4),cx=F(150-dx/2);
+  const FBL=[cx-sp/2,cy_base],FBR=[cx+sp/2,cy_base],BBL=[FBL[0]+dx,FBL[1]+dy],BBR=[FBR[0]+dx,FBR[1]+dy];
+  const baseCx=(FBL[0]+FBR[0]+BBL[0]+BBR[0])/4,baseCy=(FBL[1]+FBR[1]+BBL[1]+BBR[1])/4,APX=[baseCx,baseCy-hp];
+  return seg(BBL[0],BBL[1],BBR[0],BBR[1],DASH,true)+seg(FBL[0],FBL[1],BBL[0],BBL[1],DASH,true)+seg(APX[0],APX[1],BBL[0],BBL[1],DASH,true)+
+    polyV([FBR,BBR,APX],FILLR)+polyV([FBL,FBR,APX])+
+    segV(FBL[0],FBL[1],FBR[0],FBR[1],SHPS)+segV(FBR[0],FBR[1],BBR[0],BBR[1],SHPS)+
+    seg(APX[0],APX[1],baseCx,baseCy,DASH,true)+ra(baseCx,baseCy,6,'dr')+
+    txt(F(baseCx+2),F((APX[1]+baseCy)/2),`${h} cm`,GOLD,'start')+dimH(FBL[0],FBR[0],FBL[1]+15,`${s} cm`);
+}
+function dvCylHemi({r,h}){
+  const k=scCyl(r,h,r),rp=F(r*k),hp=F(h*k),ry=F(rp*0.30),cx=150,totalH=rp+hp+ry;
+  const cy_bot=F(100+totalH/2-ry),cy_top=F(cy_bot-hp);
+  return cylBody(cx,cy_top,cy_bot,rp)+arcBack(cx,cy_bot,rp,ry)+arcFront(cx,cy_bot,rp,ry)+ellipseJoin(cx,cy_top,rp,ry)+
+    `<path d='M${F(cx-rp)},${F(cy_top)} A${F(rp)},${F(rp)} 0 0,1 ${F(cx+rp)},${F(cy_top)} Z' fill='${FILL}' stroke='none'/>`+
+    `<path d='M${F(cx-rp)},${F(cy_top)} A${F(rp)},${F(rp)} 0 0,1 ${F(cx+rp)},${F(cy_top)}' fill='none' stroke='${SHPS}' stroke-width='2'/>`+
+    seg(cx,cy_top,cx+rp,cy_top,GOLD)+dot(cx,cy_top)+txt(cx+rp/2,cy_top-13,`${r} cm`)+dimV(cx+rp+13,cy_top,cy_bot,`${h} cm`)+
+    seg(cx,cy_top,cx,cy_top-rp*0.9,GOLD,true)+txt(cx+9,cy_top-rp/2,`${r} cm`,GOLD,'start');
+}
+function dvConeCyl({r,h1,h2}){
+  const k=scCyl(r,h1,h2),rp=F(r*k),hp_cyl=F(h1*k),hp_cone=F(h2*k),ry=F(rp*0.30),cx=150;
+  const cy_bot=F(100+(hp_cyl+hp_cone+ry)/2-ry),cy_mid=F(cy_bot-hp_cyl),cy_apex=F(cy_mid-hp_cone);
+  return cylBody(cx,cy_mid,cy_bot,rp)+arcBack(cx,cy_bot,rp,ry)+arcFront(cx,cy_bot,rp,ry)+ellipseJoin(cx,cy_mid,rp,ry)+
+    `<polygon points='${F(cx)},${F(cy_apex)} ${F(cx-rp)},${F(cy_mid)} ${F(cx+rp)},${F(cy_mid)}' fill='${FILL}' stroke='none'/>`+
+    segV(cx,cy_apex,cx-rp,cy_mid,SHPS)+segV(cx,cy_apex,cx+rp,cy_mid,SHPS)+
+    seg(cx,cy_mid,cx+rp,cy_mid,GOLD)+dot(cx,cy_mid)+txt(cx+rp/2,cy_mid+14,`${r} cm`)+
+    dimV(cx+rp+13,cy_mid,cy_bot,`h₁=${h1}cm`)+
+    seg(cx-rp-13,cy_apex,cx-rp-13,cy_mid,GOLD)+seg(cx-rp-17,cy_apex,cx-rp-9,cy_apex,GOLD)+seg(cx-rp-17,cy_mid,cx-rp-9,cy_mid,GOLD)+
+    txt(cx-rp-18,F((cy_apex+cy_mid)/2),`h₂=${h2}cm`,GOLD,'end');
+}
+function dvHousePrism({b,h_r,h_t,l}){
+  const k=Math.min(13,Math.max(5,Math.min(158/(b+l*OX),110/((h_r+h_t)+l*OY))));
+  const bp=F(b*k),h_rp=F(h_r*k),h_tp=F(h_t*k),lp=F(l*k),dx=F(lp*OX),dy=F(-lp*OY),cx=F(150-dx/2),cy=F(100-dy/2),H=h_rp+h_tp;
+  const BL=[cx-bp/2,cy+H/2],BR=[cx+bp/2,cy+H/2],MR=[cx+bp/2,cy+H/2-h_rp],ML=[cx-bp/2,cy+H/2-h_rp],APX=[cx,cy-H/2];
+  const sh=p=>[p[0]+dx,p[1]+dy];const[BLb,BRb,MRb,MLb,APXb]=[BL,BR,MR,ML,APX].map(sh);
+  return seg(BLb[0],BLb[1],BRb[0],BRb[1],DASH,true)+seg(BLb[0],BLb[1],MLb[0],MLb[1],DASH,true)+
+    seg(MLb[0],MLb[1],APXb[0],APXb[1],DASH,true)+seg(BL[0],BL[1],BLb[0],BLb[1],DASH,true)+seg(ML[0],ML[1],MLb[0],MLb[1],DASH,true)+
+    polyV([BL,BR,BRb,BLb],FILLR)+polyV([BR,MR,MRb,BRb],FILLR)+polyV([MR,APX,APXb,MRb],FILLR)+polyV([BL,BR,MR,APX,ML])+
+    segV(BR[0],BR[1],BRb[0],BRb[1],SHPS)+segV(MR[0],MR[1],MRb[0],MRb[1],SHPS)+segV(APX[0],APX[1],APXb[0],APXb[1],SHPS)+
+    seg(ML[0],ML[1],MR[0],MR[1],GOLD,true)+
+    dimH(BL[0],BR[0],BL[1]+16,`${b} cm`)+dimV(BL[0]-14,ML[1],BL[1],`${h_r} cm`,BL[0]-27)+dimV(ML[0]-14,APX[1],ML[1],`${h_t} cm`,ML[0]-27)+
+    txt(F((MR[0]+MRb[0])/2+5),F((MR[1]+MRb[1])/2+10),`${l} cm`,GOLD,'start');
+}
+function dvHollowCyl({R,r,h}){
+  const k=Math.min(12,Math.max(5,Math.min(54/R,112/(h+R*0.65))));
+  const Rp=F(R*k),rp=F(r*k),hp=F(h*k),ry_R=F(Rp*0.30),ry_r=F(rp*0.30),cx=150;
+  const cy_top=F(100-(hp+2*ry_R)/2+ry_R),cy_bot=F(cy_top+hp);
+  return `<rect x='${F(cx-Rp)}' y='${F(cy_top)}' width='${F(Rp*2)}' height='${F(hp)}' fill='${FILL}' stroke='none'/>`+
+    arcBack(cx,cy_bot,Rp,ry_R)+segV(cx-Rp,cy_top,cx-Rp,cy_bot,SHPS)+segV(cx+Rp,cy_top,cx+Rp,cy_bot,SHPS)+arcFront(cx,cy_bot,Rp,ry_R)+
+    segV(cx-rp,cy_top,cx-rp,cy_bot,SHPS)+segV(cx+rp,cy_top,cx+rp,cy_bot,SHPS)+arcBack(cx,cy_bot,rp,ry_r)+arcFront(cx,cy_bot,rp,ry_r)+
+    `<path fill-rule='evenodd' d='M${F(cx-Rp)},${F(cy_top)} A${F(Rp)},${F(ry_R)} 0 1,0 ${F(cx+Rp)},${F(cy_top)} A${F(Rp)},${F(ry_R)} 0 1,0 ${F(cx-Rp)},${F(cy_top)} Z M${F(cx-rp)},${F(cy_top)} A${F(rp)},${F(ry_r)} 0 1,1 ${F(cx+rp)},${F(cy_top)} A${F(rp)},${F(ry_r)} 0 1,1 ${F(cx-rp)},${F(cy_top)} Z' fill='${FILL}' stroke='none'/>`+
+    `<ellipse cx='${F(cx)}' cy='${F(cy_top)}' rx='${F(Rp)}' ry='${F(ry_R)}' fill='none' stroke='${SHPS}' stroke-width='2'/>`+
+    `<ellipse cx='${F(cx)}' cy='${F(cy_top)}' rx='${F(rp)}' ry='${F(ry_r)}' fill='none' stroke='${SHPS}' stroke-width='1.5'/>`+
+    seg(cx,cy_top,cx+Rp,cy_top,GOLD)+dot(cx,cy_top)+txt(F(cx+Rp*0.55),cy_top-13,`R=${R} cm`)+
+    seg(cx,cy_top,cx+rp,cy_top,GOLD)+txt(F(cx+rp*0.5),cy_top+13,`r=${r} cm`)+dimV(cx+Rp+13,cy_top,cy_bot,`${h} cm`);
+}
+function dvFrustum({R,r,h}){
+  const k=Math.min(12,Math.max(5,Math.min(54/R,110/h))),Rp=F(R*k),rp=F(r*k),hp=F(h*k),ry_R=F(Rp*0.30),ry_r=F(rp*0.30),cx=150;
+  const cy_top=F(100-(hp+ry_R+ry_r)/2+ry_r),cy_bot=F(cy_top+hp);
+  return `<polygon points='${F(cx-rp)},${F(cy_top)} ${F(cx+rp)},${F(cy_top)} ${F(cx+Rp)},${F(cy_bot)} ${F(cx-Rp)},${F(cy_bot)}' fill='${FILL}' stroke='none'/>`+
+    arcBack(cx,cy_bot,Rp,ry_R)+segV(cx-rp,cy_top,cx-Rp,cy_bot,SHPS)+segV(cx+rp,cy_top,cx+Rp,cy_bot,SHPS)+arcFront(cx,cy_bot,Rp,ry_R)+
+    ellipseV(cx,cy_top,rp,ry_r)+seg(cx,cy_top,cx,cy_bot,DASH,true)+ra(cx,cy_bot,6,'dl')+txt(cx+10,F((cy_top+cy_bot)/2),`${h} cm`,GOLD,'start')+
+    seg(cx,cy_bot,cx+Rp,cy_bot,GOLD)+dot(cx,cy_bot)+txt(F(cx+Rp/2),cy_bot+13,`R=${R} cm`)+
+    seg(cx,cy_top,cx+rp,cy_top,GOLD)+dot(cx,cy_top)+txt(F(cx+rp/2),cy_top-12,`r=${r} cm`);
+}
+
+// ═══════════════════════════════════════════════════════
+//  3D GENERATORS  (area field stores volume value)
+// ═══════════════════════════════════════════════════════
+function gVCube(){const s=rnd(2,9),area=s**3;return{name:'Cube',params:{s},area,formula:'V = s³',working:`${s}³ = ${area}`,choices:makeChoices(area,[s*s,3*s*s,4*s*s]),isDecimal:false};}
+function gVRectPrism(){const l=rnd(3,12),w=rnd(2,8),h=rnd(3,10),area=l*w*h;return{name:'Rectangular Prism',params:{l,w,h},area,formula:'V = l × w × h',working:`${l}×${w}×${h} = ${area}`,choices:makeChoices(area,[l*w,l*h,2*(l*w+l*h+w*h)]),isDecimal:false};}
+function gVCylinder(){const r=rnd(2,7),h=rnd(4,13),area=r2(Math.PI*r*r*h);return{name:'Cylinder',params:{r,h},area,formula:'V = πr²h',working:`π × ${r}² × ${h} = ${area}`,choices:makeChoices(area,[r2(Math.PI*r*h),r2(Math.PI*(r*2)**2*h),r2(2*Math.PI*r*h)],2),isDecimal:true};}
+function gVCone(){const r=rnd(2,7),h=rnd(4,12),area=r2(Math.PI*r*r*h/3);return{name:'Cone',params:{r,h},area,formula:'V = ⅓πr²h',working:`⅓ × π × ${r}² × ${h} = ${area}`,choices:makeChoices(area,[r2(Math.PI*r*r*h),r2(Math.PI*r*h/3),r2(Math.PI*r*r*h/2)],2),isDecimal:true};}
+function gVSphere(){const r=rnd(2,8),area=r2(4/3*Math.PI*r**3);return{name:'Sphere',params:{r},area,formula:'V = ⁴⁄₃πr³',working:`⁴⁄₃ × π × ${r}³ = ${area}`,choices:makeChoices(area,[r2(Math.PI*r**3),r2(4*Math.PI*r**2),r2(4/3*Math.PI*(r*2)**3)],2),isDecimal:true};}
+function gVTriPrismRA(){const b=rnd(3,9),h_t=rnd(3,8),l=rnd(5,12),area=r2(0.5*b*h_t*l);const dec=area%1!==0;return{name:'Triangular Prism',params:{b,h_t,l},area,formula:'V = ½ b × h × l',working:`½ × ${b} × ${h_t} × ${l} = ${area}`,choices:makeChoices(area,[r2(b*h_t*l),r2(0.5*b*l),r2(0.5*h_t*l)],dec?2:0),isDecimal:dec};}
+function gVTriPrismISO(){const b=rnd(3,9),h_t=rnd(3,8),l=rnd(5,12),area=r2(0.5*b*h_t*l);const dec=area%1!==0;return{name:'Triangular Prism',params:{b,h_t,l},area,formula:'V = ½ b × h × l',working:`½ × ${b} × ${h_t} × ${l} = ${area}`,choices:makeChoices(area,[r2(b*h_t*l),r2(b*h_t*l/3),r2(h_t*l)],dec?2:0),isDecimal:dec};}
+function gVSqPyramid(){const s=rnd(3,9),h=rnd(4,12),area=r2(s*s*h/3);const dec=area%1!==0;return{name:'Square Pyramid',params:{s,h},area,formula:'V = ⅓s²h',working:`⅓ × ${s}² × ${h} = ${area}`,choices:makeChoices(area,[r2(s*s*h),r2(s*h/3),r2(s*s*h/2)],dec?2:0),isDecimal:dec};}
+function gVCylHemi(){const r=rnd(2,6),h=rnd(3,9),cyl=Math.PI*r*r*h,hemi=2/3*Math.PI*r**3,area=r2(cyl+hemi);return{name:'Cylinder + Hemisphere',params:{r,h},area,formula:'V = πr²h + ⅔πr³',working:`π×${r}²×${h} + ⅔π×${r}³ = ${area}`,choices:makeChoices(area,[r2(cyl),r2(cyl+4/3*Math.PI*r**3),r2(cyl+Math.PI*r**3)],2),isDecimal:true};}
+function gVConeCyl(){const r=rnd(2,6),h1=rnd(4,9),h2=rnd(3,7),cyl=Math.PI*r*r*h1,cone=Math.PI*r*r*h2/3,area=r2(cyl+cone);return{name:'Cone + Cylinder',params:{r,h1,h2},area,formula:'V = πr²h₁ + ⅓πr²h₂',working:`π×${r}²×${h1} + ⅓π×${r}²×${h2} = ${area}`,choices:makeChoices(area,[r2(cyl),r2(cone),r2(Math.PI*r*r*(h1+h2))],2),isDecimal:true};}
+function gVHousePrism(){const b=rnd(4,9),h_r=rnd(3,7),h_t=rnd(2,5),l=rnd(5,11),area=r2((b*h_r+0.5*b*h_t)*l);const dec=area%1!==0;return{name:'House Prism',params:{b,h_r,h_t,l},area,formula:'V = (bh₁ + ½bh₂) × l',working:`(${b}×${h_r} + ½×${b}×${h_t})×${l} = ${area}`,choices:makeChoices(area,[r2(b*(h_r+h_t)*l),r2(b*h_r*l),r2(0.5*b*(h_r+h_t)*l)],dec?2:0),isDecimal:dec};}
+function gVHollowCyl(){const R=rnd(4,8),r=rnd(1,R-2),h=rnd(4,11),area=r2(Math.PI*(R*R-r*r)*h);return{name:'Hollow Cylinder',params:{R,r,h},area,formula:'V = π(R²−r²)h',working:`π×(${R}²−${r}²)×${h} = ${area}`,choices:makeChoices(area,[r2(Math.PI*R*R*h),r2(Math.PI*(R-r)**2*h),r2(Math.PI*(R*R+r*r)*h)],2),isDecimal:true};}
+function gVFrustum(){const R=rnd(4,8),r=rnd(1,R-2),h=rnd(4,10),area=r2(Math.PI*h/3*(R*R+R*r+r*r));return{name:'Frustum',params:{R,r,h},area,formula:'V = ⅓πh(R²+Rr+r²)',working:`⅓×π×${h}×(${R*R}+${R*r}+${r*r}) = ${area}`,choices:makeChoices(area,[r2(Math.PI*h/3*(R*R+r*r)),r2(Math.PI*h*(R*R+R*r+r*r)),r2(Math.PI*h/3*(R+r)**2)],2),isDecimal:true};}
+
+// ═══════════════════════════════════════════════════════
+//  VOL_SHAPES REGISTRY
+// ═══════════════════════════════════════════════════════
+const VOL_SHAPES=[
+  {id:'v-cube',     label:'Cube',              cat:'basic',    genV:gVCube,       drawV:q=>W(dvCube(q.params))},
+  {id:'v-rect',     label:'Rect Prism',         cat:'basic',    genV:gVRectPrism,  drawV:q=>W(dvRectPrism(q.params))},
+  {id:'v-cyl',      label:'Cylinder',           cat:'basic',    genV:gVCylinder,   drawV:q=>W(dvCylinder(q.params))},
+  {id:'v-cone',     label:'Cone',               cat:'basic',    genV:gVCone,       drawV:q=>W(dvCone(q.params))},
+  {id:'v-sph',      label:'Sphere',             cat:'basic',    genV:gVSphere,     drawV:q=>W(dvSphere(q.params))},
+  {id:'v-tri-ra',   label:'Prism (right-ang)',  cat:'basic',    genV:gVTriPrismRA, drawV:q=>W(dvTriPrismRA(q.params))},
+  {id:'v-tri-iso',  label:'Prism (isosceles)',  cat:'basic',    genV:gVTriPrismISO,drawV:q=>W(dvTriPrismISO(q.params))},
+  {id:'v-pyramid',  label:'Sq Pyramid',         cat:'basic',    genV:gVSqPyramid,  drawV:q=>W(dvSqPyramid(q.params))},
+  {id:'v-cyl-hemi', label:'Cyl + Hemisphere',  cat:'compound', genV:gVCylHemi,    drawV:q=>W(dvCylHemi(q.params))},
+  {id:'v-cone-cyl', label:'Cone + Cylinder',   cat:'compound', genV:gVConeCyl,    drawV:q=>W(dvConeCyl(q.params))},
+  {id:'v-house',    label:'House Prism',        cat:'compound', genV:gVHousePrism, drawV:q=>W(dvHousePrism(q.params))},
+  {id:'v-hollow',   label:'Hollow Cylinder',    cat:'compound', genV:gVHollowCyl,  drawV:q=>W(dvHollowCyl(q.params))},
+  {id:'v-frustum',  label:'Frustum',            cat:'compound', genV:gVFrustum,    drawV:q=>W(dvFrustum(q.params))},
+];
+const DIFF_V={
+  easy:['v-cube','v-rect','v-cyl','v-cone','v-sph'],
+  medium:VOL_SHAPES.filter(s=>s.cat==='basic').map(s=>s.id),
+  all:VOL_SHAPES.map(s=>s.id)
+};
+
+// ═══════════════════════════════════════════════════════
+//  QUIZ STATE
+// ═══════════════════════════════════════════════════════
+let MODE='mc',TOPIC='area';
+let ENABLED=new Set(DIFF.easy),ENABLED_V=new Set(DIFF_V.easy);
+let score={c:0,t:0},streak=0,currentQ=null,answered=false;
+let timerStart=0,timerInterval=null,CUSTOM_OPEN=false;
+function unit(){return TOPIC==='volume'?'cm³':TOPIC==='perimeter'?'cm':'cm²';}
+
+// ── Category chips ─────────────────────────────────────
+function buildCats(){
+  const wrap=document.getElementById('cats-wrap');wrap.innerHTML='';
+  const shapes=TOPIC==='volume'?VOL_SHAPES:SHAPES;
+  const enabled=TOPIC==='volume'?ENABLED_V:ENABLED;
+  shapes.forEach(s=>{
+    if(TOPIC==='perimeter'&&!s.genP)return;
+    const b=document.createElement('button');
+    b.className='pill cat-pill'+(enabled.has(s.id)?' active':'');
+    b.textContent=s.label;
+    b.onclick=()=>{enabled.has(s.id)?enabled.delete(s.id):enabled.add(s.id);b.classList.toggle('active');};
+    wrap.appendChild(b);
+  });
+}
+function toggleCustom(){
+  CUSTOM_OPEN=!CUSTOM_OPEN;
+  document.getElementById('cats-wrap').classList.toggle('open',CUSTOM_OPEN);
+  document.getElementById('btn-custom').textContent=CUSTOM_OPEN?'Custom ▴':'Custom ▾';
+}
+function setDiff(d){
+  if(TOPIC==='volume'){ENABLED_V=new Set(DIFF_V[d]||DIFF_V.all);}
+  else{ENABLED=new Set(DIFF[d]||DIFF.all);}
+  document.querySelectorAll('.diff-pill').forEach((b,i)=>{b.classList.toggle('active',['easy','medium','all','custom'][i]===d);});
+  if(d==='custom'){CUSTOM_OPEN=true;document.getElementById('cats-wrap').classList.add('open');}
+  buildCats();
+}
+function setMode(m){
+  MODE=m;
+  document.getElementById('btn-mc').classList.toggle('active',m==='mc');
+  document.getElementById('btn-type').classList.toggle('active',m==='type');
+  if(currentQ&&!answered)renderAnswerArea();
+}
+function setTopic(t){
+  TOPIC=t;
+  document.getElementById('btn-area').classList.toggle('active',t==='area');
+  document.getElementById('btn-peri').classList.toggle('active',t==='perimeter');
+  document.getElementById('btn-vol').classList.toggle('active',t==='volume');
+  score={c:0,t:0};streak=0;updateStats();
+  setDiff('easy');
+  nextQ();
+}
+
+// ── Timer ──────────────────────────────────────────────
+function startTimer(){timerStart=Date.now();clearInterval(timerInterval);timerInterval=setInterval(()=>{document.getElementById('stat-timer').textContent=Math.floor((Date.now()-timerStart)/1000)+'s';},500);}
+function stopTimer(){clearInterval(timerInterval);}
+
+// ── Stats ──────────────────────────────────────────────
+function updateStats(){
+  document.getElementById('stat-score').textContent=`${score.c} / ${score.t}`;
+  document.getElementById('stat-streak').textContent=streak;
+}
+
+// ── Next question ──────────────────────────────────────
+function showNoShapes(){
+  document.getElementById('svg-wrap').innerHTML='';
+  document.getElementById('answer-area').innerHTML='<div class="no-shapes">Select at least one shape above.</div>';
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('next-btn').style.display='none';
+}
+function nextQ(){
+  let avail,shape;
+  if(TOPIC==='volume'){
+    avail=VOL_SHAPES.filter(s=>ENABLED_V.has(s.id));
+    if(!avail.length){showNoShapes();return;}
+    shape=pick(avail);
+    currentQ=shape.genV();
+    currentQ._draw=()=>shape.drawV(currentQ);
+  } else {
+    avail=SHAPES.filter(s=>ENABLED.has(s.id)&&(TOPIC==='area'||s.genP));
+    if(!avail.length){showNoShapes();return;}
+    shape=pick(avail);
+    currentQ=TOPIC==='area'?shape.gen():shape.genP();
+    currentQ._draw=()=>(TOPIC==='area'?shape.draw:(shape.drawP||shape.draw))(currentQ);
+  }
+  answered=false;
+  document.getElementById('svg-wrap').innerHTML=currentQ._draw();
+  document.getElementById('shape-label').textContent=currentQ.name;
+  const prompts={area:'Find the area. Give your answer in cm².',perimeter:'Find the perimeter. Give your answer in cm.',volume:'Find the volume. Give your answer in cm³.'};
+  document.getElementById('prompt').textContent=prompts[TOPIC];
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('next-btn').style.display='none';
+  renderAnswerArea();
+  startTimer();
+}
+
+function renderAnswerArea(){
+  const el=document.getElementById('answer-area');
+  const u=unit();
+  if(MODE==='mc'){
+    const dp=currentQ.isDecimal?2:0;
+    const fmt=x=>dp===0?String(Math.round(x)):Number(x).toFixed(2);
+    const btns=currentQ.choices.map((c,i)=>`<button class="mc-btn" id="mc${i}" onclick="checkMC(${c})">${fmt(c)} ${u}</button>`).join('');
+    el.innerHTML=`<div class="mc-grid">${btns}</div>`;
+  } else {
+    const ph=TOPIC==='volume'?`Enter volume in cm³`:TOPIC==='perimeter'?'Enter perimeter in cm':'Enter area in cm²';
+    el.innerHTML=`<div class="type-hint">${currentQ.isDecimal?'Give your answer to 2 decimal places.':''}</div><div class="type-row"><input class="type-input" id="type-input" type="number" step="any" placeholder="${ph}" onkeydown="if(event.key==='Enter')checkType()"><button class="submit-btn" onclick="checkType()">Check</button></div>`;
+    setTimeout(()=>document.getElementById('type-input')?.focus(),50);
+  }
+}
+
+// ── Check answer ───────────────────────────────────────
+function checkMC(chosen){
+  if(answered)return;answered=true;stopTimer();score.t++;
+  const dp=currentQ.isDecimal?2:0,tol=currentQ.isDecimal?0.06:0.5;
+  const correct=Math.abs(chosen-currentQ.area)<tol;
+  if(correct)score.c++;streak=correct?streak+1:0;updateStats();
+  currentQ.choices.forEach((c,i)=>{
+    const b=document.getElementById('mc'+i);if(!b)return;
+    const isC=Math.abs(Number(c)-currentQ.area)<tol;
+    if(Math.abs(Number(c)-chosen)<0.001)b.classList.add(isC?'correct':'wrong');
+    else if(isC)b.classList.add('correct');
+    b.disabled=true;
+  });
+  showFeedback(correct);
+}
+function checkType(){
+  if(answered)return;
+  const inp=document.getElementById('type-input');if(!inp)return;
+  const val=parseFloat(inp.value);if(isNaN(val)){inp.focus();return;}
+  answered=true;stopTimer();score.t++;
+  const tol=currentQ.isDecimal?0.06:0.5;
+  const correct=Math.abs(val-currentQ.area)<tol;
+  if(correct)score.c++;streak=correct?streak+1:0;updateStats();
+  inp.classList.add(correct?'correct':'wrong');inp.disabled=true;
+  document.querySelector('.submit-btn').disabled=true;
+  showFeedback(correct);
+}
+function showFeedback(correct){
+  const dp=currentQ.isDecimal?2:0,fmt=x=>dp===0?Math.round(x):Number(x).toFixed(2),u=unit();
+  document.getElementById('fb-banner').className='fb-banner '+(correct?'ok':'err');
+  document.getElementById('fb-banner').textContent=correct?`✓ Correct!  ${fmt(currentQ.area)} ${u}`:`✗ Answer: ${fmt(currentQ.area)} ${u}`;
+  document.getElementById('fb-formula').textContent=currentQ.formula;
+  document.getElementById('fb-working').textContent='= '+currentQ.working;
+  document.getElementById('feedback').style.display='block';
+  document.getElementById('next-btn').style.display='block';
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+buildCats();
+nextQ();
+</script>
+</body>
+</html>
