@@ -50,6 +50,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .next-btn{width:100%;padding:13px;border-radius:12px;border:none;background:var(--gold);color:#0f0f13;font-family:'Space Mono',monospace;font-size:0.88rem;font-weight:700;cursor:pointer;display:none;}
 .next-btn:hover{opacity:.88;}
 .no-shapes{text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;}
+.formula-display{font-family:'Space Mono',monospace;font-size:1.5rem;color:var(--gold);text-align:center;padding:24px;line-height:1.5;width:100%;}
+.formula-mc-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px;}
+.formula-mc-btn{text-align:left;font-size:0.8rem;padding:10px 14px;}
+
 </style>
 </head>
 <body>
@@ -67,10 +71,23 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <button class="pill active" id="btn-area" onclick="setTopic('area')">Area</button>
       <button class="pill" id="btn-peri" onclick="setTopic('perimeter')">Perimeter</button>
       <button class="pill" id="btn-vol"  onclick="setTopic('volume')">Volume</button>
+      <button class="pill" id="btn-sa"      onclick="setTopic('surface-area')">Surf. Area</button>
+      <button class="pill" id="btn-formula" onclick="setTopic('formula')">Formula</button>
     </div>
-    <div class="pill-row">
+    <div class="pill-row" id="mode-row">
       <button class="pill active" id="btn-mc" onclick="setMode('mc')">Multiple Choice</button>
       <button class="pill" id="btn-type" onclick="setMode('type')">Type In</button>
+    </div>
+    <div class="pill-row" id="dir-row" style="display:none">
+      <button class="pill active" id="btn-s2f" onclick="setFDir('shape2formula')">Shape &#x2192; Formula</button>
+      <button class="pill" id="btn-f2s" onclick="setFDir('formula2shape')">Formula &#x2192; Shape</button>
+      <button class="pill" id="btn-fmix" onclick="setFDir('mix')">Mix</button>
+    </div>
+    <div class="pill-row" id="ftopic-row" style="display:none">
+      <button class="pill active" id="btn-ft-area" onclick="setFTopic('area')">Area</button>
+      <button class="pill" id="btn-ft-vol" onclick="setFTopic('volume')">Volume</button>
+      <button class="pill" id="btn-ft-sa"  onclick="setFTopic('surface-area')">Surf. Area</button>
+      <button class="pill" id="btn-ft-mix" onclick="setFTopic('mix')">Mix</button>
     </div>
     <div class="pill-row">
       <button class="pill diff-pill active" onclick="setDiff('easy')">Easy</button>
@@ -79,6 +96,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <button class="pill diff-pill" id="btn-custom" onclick="toggleCustom()">Custom &#x25be;</button>
     </div>
     <div class="cats-wrap" id="cats-wrap"></div>
+    <div class="pill-row" id="sa-view-row" style="display:none">
+      <button class="pill active" id="btn-sa-3d" onclick="setSAView('3d')">3D View</button>
+      <button class="pill" id="btn-sa-net" onclick="setSAView('net')">Net</button>
+    </div>
   </div>
   <div class="q-card">
     <div class="shape-label" id="shape-label"></div>
@@ -208,7 +229,8 @@ function dParallelogram({b,h,slant}){
 }
 
 function dIsoscelesTri({b,h},variant){
-  const k=sc2(b,h);
+  // apex-right: b is vertical, h is horizontal — swap args so scale respects orientation
+  const k=variant==='apex-right'?sc2(h,b):sc2(b,h);
   const bpx=F(b*k),hpx=F(h*k);
   if(variant==='apex-right'){
     // Base vertical on left, apex points right
@@ -404,7 +426,7 @@ function dRectPlusSemi({l,w,r}){
   // Semicircle on top of rectangle (r = w/2)
   const k=sc2(l,w+r*2,195,148);
   const lpx=F(l*k),wpx=F(w*k),rpx=F(r*k);
-  const cy_top=F(100-(wpx+rpx)/2);  // top of rectangle
+  const cy_top=F(100-(wpx-rpx)/2);  // top of rectangle, centred on visible span
   const x=F(150-lpx/2);
   // Semicircle goes up from cy_top
   return `<path d='M${x},${cy_top} A${rpx},${rpx} 0 0,1 ${x+lpx},${cy_top} Z' fill='${FILL}' stroke='${SHPS}' stroke-width='2'/>`+
@@ -469,6 +491,318 @@ function dRectMinusTri({W,H,nw,nh}){
     dimV(x-14,y,y+Hpx,`H = ${H} cm`,x-26);
 }
 
+
+// ═══════════════════════════════════════════════════════
+//  DRAW FUNCTIONS — 3D SURFACE AREA VARIANTS
+// ═══════════════════════════════════════════════════════
+// Cone SA: shows r (base) and l (slant height) instead of h
+function dvConeSA({r,l}){
+  const h=Math.sqrt(Math.max(1,l*l-r*r));
+  const k=Math.min(12,Math.max(5,Math.min(55/r,104/h)));
+  const rp=F(r*k),hp=F(h*k),ry=F(rp*0.30);
+  const cx=150,cy_bot=F(100+hp*0.52),cy_top=F(cy_bot-hp);
+  const smx=F((cx+cx+rp)/2)+10,smy=F((cy_top+cy_bot)/2);
+  return W(
+    `<polygon points='${F(cx)},${F(cy_top)} ${F(cx-rp)},${F(cy_bot)} ${F(cx+rp)},${F(cy_bot)}' fill='${FILL}' stroke='none'/>`+
+    arcBack(cx,cy_bot,rp,ry)+seg(cx,cy_top,cx-rp,cy_bot,SHPS)+seg(cx,cy_top,cx+rp,cy_bot,SHPS)+arcFront(cx,cy_bot,rp,ry)+
+    seg(cx,cy_bot,cx+rp,cy_bot,GOLD)+dot(cx,cy_bot)+txt(F(cx+rp/2),cy_bot+13,`${r} cm`)+
+    txt(smx,smy,`l = ${l} cm`,GOLD,'start')
+  );
+}
+// Square Pyramid SA: shows s (base edge) and l (slant height of triangular face)
+function dvSqPyramidSA({s,l}){
+  const h=Math.sqrt(Math.max(1,l*l-(s/2)*(s/2)));
+  const k=scV(s,s,h);
+  const sp=F(s*k),hp=F(h*k);
+  const dx=F(sp*OX),dy=F(-sp*OY);
+  const cy_base=F(100+hp/2-dy/4),cx=F(150-dx/2);
+  const FBL=[cx-sp/2,cy_base],FBR=[cx+sp/2,cy_base];
+  const BBL=[FBL[0]+dx,FBL[1]+dy],BBR=[FBR[0]+dx,FBR[1]+dy];
+  const bx=(FBL[0]+FBR[0]+BBL[0]+BBR[0])/4,by=(FBL[1]+FBR[1]+BBL[1]+BBR[1])/4;
+  const APX=[bx,by-hp];
+  const slx=F((APX[0]+FBR[0])/2)+10,sly=F((APX[1]+FBR[1])/2);
+  return W(
+    seg(BBL[0],BBL[1],BBR[0],BBR[1],DASH,true)+seg(FBL[0],FBL[1],BBL[0],BBL[1],DASH,true)+
+    seg(APX[0],APX[1],BBL[0],BBL[1],DASH,true)+
+    poly([FBR,BBR,APX],FILLR)+poly([FBL,FBR,APX])+
+    seg(FBL[0],FBL[1],FBR[0],FBR[1],SHPS)+seg(FBR[0],FBR[1],BBR[0],BBR[1],SHPS)+
+    txt(slx,sly,`l = ${l} cm`,GOLD,'start')+
+    dimH(FBL[0],FBR[0],FBL[1]+15,`${s} cm`)
+  );
+}
+// Cone+Cylinder SA: shows r, cylinder h1, cone slant l2
+function dvConeCylSA({r,h1,l2}){
+  const h2=Math.sqrt(Math.max(1,l2*l2-r*r));
+  const k=scCyl(r,h1,h2);
+  const rp=F(r*k),hp_cyl=F(h1*k),hp_cone=F(h2*k),ry=F(rp*0.30);
+  const cx=150,totalH=hp_cyl+hp_cone+ry;
+  const cy_bot=F(100+totalH/2-ry),cy_mid=F(cy_bot-hp_cyl),cy_apex=F(cy_mid-hp_cone);
+  const slx=F((cx+cx+rp)/2)+8,sly=F((cy_apex+cy_mid)/2);
+  return W(
+    cylBody(cx,cy_mid,cy_bot,rp)+arcBack(cx,cy_bot,rp,ry)+arcFront(cx,cy_bot,rp,ry)+
+    ellipseJoin(cx,cy_mid,rp,ry)+
+    `<polygon points='${F(cx)},${F(cy_apex)} ${F(cx-rp)},${F(cy_mid)} ${F(cx+rp)},${F(cy_mid)}' fill='${FILL}' stroke='none'/>`+
+    seg(cx,cy_apex,cx-rp,cy_mid,SHPS)+seg(cx,cy_apex,cx+rp,cy_mid,SHPS)+
+    seg(cx,cy_mid,cx+rp,cy_mid,GOLD)+dot(cx,cy_mid)+txt(cx+rp/2,cy_mid+14,`${r} cm`)+
+    dimV(cx+rp+13,cy_mid,cy_bot,`h\u2081=${h1} cm`)+
+    txt(slx,sly,`l\u2082=${l2} cm`,GOLD,'start')
+  );
+}
+// House Prism SA: same as dvHousePrism but adds roof slant label
+function dvHousePrismSA({b,h_r,h_t,l,roof_side}){
+  const k=Math.min(13,Math.max(5,Math.min(158/(b+l*OX),108/((h_r+h_t)+l*OY))));
+  const bp=F(b*k),h_rp=F(h_r*k),h_tp=F(h_t*k),lp=F(l*k);
+  const dx=F(lp*OX),dy=F(-lp*OY);
+  const cx=F(150-dx/2),cy=F(100-dy/2),H=h_rp+h_tp;
+  const BL=[cx-bp/2,cy+H/2],BR=[cx+bp/2,cy+H/2];
+  const MR=[cx+bp/2,cy+H/2-h_rp],ML=[cx-bp/2,cy+H/2-h_rp],APX=[cx,cy-H/2];
+  const sh=p=>[p[0]+dx,p[1]+dy];
+  const [BLb,BRb,MRb,MLb,APXb]=[BL,BR,MR,ML,APX].map(sh);
+  const smx=F((MR[0]+APX[0])/2)+8,smy=F((MR[1]+APX[1])/2);
+  return W(
+    seg(BLb[0],BLb[1],BRb[0],BRb[1],DASH,true)+seg(BLb[0],BLb[1],MLb[0],MLb[1],DASH,true)+
+    seg(MLb[0],MLb[1],APXb[0],APXb[1],DASH,true)+seg(BL[0],BL[1],BLb[0],BLb[1],DASH,true)+
+    seg(ML[0],ML[1],MLb[0],MLb[1],DASH,true)+
+    poly([BL,BR,BRb,BLb],FILLR)+poly([BR,MR,MRb,BRb],FILLR)+poly([MR,APX,APXb,MRb],FILLR)+poly([BL,BR,MR,APX,ML])+
+    seg(BR[0],BR[1],BRb[0],BRb[1],SHPS)+seg(MR[0],MR[1],MRb[0],MRb[1],SHPS)+seg(APX[0],APX[1],APXb[0],APXb[1],SHPS)+
+    seg(ML[0],ML[1],MR[0],MR[1],GOLD,true)+
+    dimH(BL[0],BR[0],BL[1]+16,`${b} cm`)+
+    dimV(BL[0]-14,ML[1],BL[1],`${h_r} cm`,BL[0]-27)+dimV(ML[0]-14,APX[1],ML[1],`${h_t} cm`,ML[0]-27)+
+    txt(smx,smy,`s = ${roof_side} cm`,GOLD,'start')+
+    txt(F((MR[0]+MRb[0])/2+5),F((MR[1]+MRb[1])/2+10),`${l} cm`,GOLD,'start')
+  );
+}
+// Frustum SA: shows R, r, and slant l (no vertical height)
+function dvFrustumSA({R,r,l}){
+  const h=Math.sqrt(Math.max(1,l*l-(R-r)*(R-r)));
+  const k=Math.min(12,Math.max(5,Math.min(54/R,108/h)));
+  const Rp=F(R*k),rp=F(r*k),hp=F(h*k);
+  const ry_R=F(Rp*0.30),ry_r=F(rp*0.30),cx=150;
+  const totalH=hp+ry_R+ry_r;
+  const cy_top=F(100-totalH/2+ry_r),cy_bot=F(cy_top+hp);
+  const slx=F((cx+rp+cx+Rp)/2)+8,sly=F((cy_top+cy_bot)/2);
+  return W(
+    `<polygon points='${F(cx-rp)},${F(cy_top)} ${F(cx+rp)},${F(cy_top)} ${F(cx+Rp)},${F(cy_bot)} ${F(cx-Rp)},${F(cy_bot)}' fill='${FILL}' stroke='none'/>`+
+    arcBack(cx,cy_bot,Rp,ry_R)+seg(cx-rp,cy_top,cx-Rp,cy_bot,SHPS)+seg(cx+rp,cy_top,cx+Rp,cy_bot,SHPS)+
+    arcFront(cx,cy_bot,Rp,ry_R)+ellipse(cx,cy_top,rp,ry_r)+
+    seg(cx,cy_bot,cx+Rp,cy_bot,GOLD)+dot(cx,cy_bot)+txt(F(cx+Rp/2),cy_bot+13,`R=${R} cm`)+
+    seg(cx,cy_top,cx+rp,cy_top,GOLD)+dot(cx,cy_top)+txt(F(cx+rp/2),cy_top-12,`r=${r} cm`)+
+    txt(slx,sly,`l = ${l} cm`,GOLD,'start')
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════
+//  DRAW FUNCTIONS — NETS (surface area unfolded views)
+//  These return SVG CONTENT only (no W wrapper)
+// ═══════════════════════════════════════════════════════
+function dvNetCube({s}){
+  const k=Math.min(186/(4*s),128/(3*s));
+  const sp=F(s*k);
+  const ox=F(150-2*sp),oy=F(100-1.5*sp);
+  const sq=(x,y)=>rct(x,y,sp,sp);
+  return sq(ox+sp,oy)+sq(ox,oy+sp)+sq(ox+sp,oy+sp)+
+         sq(ox+2*sp,oy+sp)+sq(ox+3*sp,oy+sp)+sq(ox+sp,oy+2*sp)+
+         dimH(ox+sp,ox+2*sp,oy-12,`s = ${s} cm`)+
+         ticks(ox+sp,oy+sp,ox+2*sp,oy+sp,1)+ticks(ox+sp,oy+sp,ox+sp,oy+2*sp,1);
+}
+function dvNetRectPrism({l,w,h}){
+  const k=Math.min(220/(2*(l+w)),150/(2*w+h));
+  const lp=F(l*k),wp=F(w*k),hp=F(h*k);
+  const ox=F(150-(l+w)*k),oy1=F(100-hp/2);
+  const oy0=F(oy1-wp),oy2=F(oy1+hp);
+  return rct(ox+wp,oy0,lp,wp)+rct(ox,oy1,wp,hp)+rct(ox+wp,oy1,lp,hp)+
+         rct(ox+wp+lp,oy1,wp,hp)+rct(ox+2*wp+lp,oy1,lp,hp)+rct(ox+wp,oy2,lp,wp)+
+         dimH(ox+wp,ox+wp+lp,oy0-12,`l = ${l} cm`)+
+         dimV(ox+wp-12,oy0,oy1,`w = ${w} cm`,ox+wp-24)+
+         dimV(ox-12,oy1,oy2,`h = ${h} cm`,ox-24);
+}
+function dvNetCylinder({r,h}){
+  const k=Math.min(170/(h+2*r),210/(2*Math.PI*r));
+  const rp=F(r*k),hp=F(h*k),rw=F(2*Math.PI*r*k);
+  const rx=F(150-rw/2),ry=F(100-hp/2);
+  const cyt=F(ry-rp-8),cyb=F(ry+hp+rp+8);
+  const circ=r2(2*Math.PI*r);
+  return rct(rx,ry,rw,hp)+crc(150,cyt,rp)+crc(150,cyb,rp)+
+         dimH(rx,rx+rw,ry-12,`2\u03c0r = ${circ} cm`)+
+         dimV(rx+rw+12,ry,ry+hp,`${h} cm`)+
+         seg(150,cyt,150+rp,cyt,GOLD)+dot(150,cyt)+txt(150+rp/2,cyt-12,`r = ${r} cm`);
+}
+function dvNetCone({r,l}){
+  const \u03b8=360*r/l;
+  const k=Math.min(65/l,45/r);
+  const lp=F(l*k),rp=F(r*k);
+  const cx=90;
+  const sa=D2R(270-\u03b8/2); // left radius angle
+  const cy_tip=F(185-lp*Math.max(0,Math.sin(sa)));
+  const [lx,ly]=[F(cx+lp*Math.cos(sa)),F(cy_tip+lp*Math.sin(sa))];
+  const [rx,ry]=[F(cx+lp*Math.cos(D2R(270+\u03b8/2))),F(cy_tip+lp*Math.sin(D2R(270+\u03b8/2)))];
+  const la=\u03b8>180?1:0;
+  const sector=`<path d='M ${lx},${ly} A ${lp},${lp} 0 ${la},1 ${rx},${ry} L ${cx},${cy_tip} Z' fill='${FILL}' stroke='${SHPS}' stroke-width='1.5'/>`;
+  const cx_c=F(cx+lp+rp+18),cy_c=100;
+  return sector+crc(cx_c,cy_c,rp)+
+         seg(cx,cy_tip,lx,ly,GOLD)+txt(F((cx+lx)/2)-8,F((cy_tip+ly)/2),`l = ${l} cm`,GOLD,'end')+
+         seg(cx_c,cy_c,cx_c+rp,cy_c,GOLD)+dot(cx_c,cy_c)+txt(cx_c+rp/2,cy_c-12,`r = ${r} cm`);
+}
+function dvNetSphere({r}){
+  const rp=32,gap=8;
+  const cx1=150-rp-gap/2,cx2=150+rp+gap/2;
+  const cy1=100-rp-gap/2,cy2=100+rp+gap/2;
+  return crc(cx1,cy1,rp)+crc(cx2,cy1,rp)+crc(cx1,cy2,rp)+crc(cx2,cy2,rp)+
+         seg(cx2,cy1,cx2+rp,cy1,GOLD)+dot(cx2,cy1)+txt(cx2+rp/2,cy1-12,`r = ${r} cm`)+
+         txt(150,cy2+rp+15,'SA = 4\u03c0r\u00b2 \u2192 area of 4 circles',GOLD,'middle');
+}
+function dvNetTriPrismRA({b,h_t,c,l}){
+  const k=Math.min(220/(b+h_t+c),148/(l+2*b));
+  const bp=F(b*k),h_tp=F(h_t*k),cp=F(c*k),lp=F(l*k);
+  const ox=F(150-(b+h_t+c)*k/2),oy=F(100-lp/2);
+  // Three rectangular faces
+  const rects=rct(ox,oy,bp,lp)+rct(ox+bp,oy,h_tp,lp)+rct(ox+bp+h_tp,oy,cp,lp);
+  // Right-angle triangles above/below the h_t\xd7l rect
+  // Attached by h_t edge; right angle at left, other leg (b) goes perpendicular
+  const tTop=poly([[ox+bp,oy],[ox+bp+h_tp,oy],[ox+bp,oy-bp]]);
+  const tBot=poly([[ox+bp,oy+lp],[ox+bp+h_tp,oy+lp],[ox+bp,oy+lp+bp]]);
+  const raTop=ra(ox+bp,oy,6,'ur'),raBot=ra(ox+bp,oy+lp,6,'dr');
+  // Labels
+  const lbls=dimH(ox,ox+bp,oy+lp+14,`${b}`)+dimH(ox+bp,ox+bp+h_tp,oy+lp+14,`${h_t}`)+
+    dimH(ox+bp+h_tp,ox+bp+h_tp+cp,oy+lp+14,`${c} cm`)+
+    dimV(ox+bp+h_tp+cp+10,oy,oy+lp,`l = ${l} cm`);
+  return rects+tTop+tBot+raTop+raBot+lbls;
+}
+function dvNetTriPrismISO({b,h_t,side,l}){
+  const k=Math.min(220/(b+2*side),148/(l+2*h_t));
+  const bp=F(b*k),sp=F(side*k),h_tp=F(h_t*k),lp=F(l*k);
+  const ox=F(150-(b+2*side)*k/2),oy=F(100-lp/2);
+  // Three rectangular faces
+  const rects=rct(ox,oy,sp,lp)+rct(ox+sp,oy,bp,lp)+rct(ox+sp+bp,oy,sp,lp);
+  // Isosceles triangles above/below the b\xd7l rect
+  const tTop=poly([[ox+sp,oy],[ox+sp+bp,oy],[ox+sp+bp/2,oy-h_tp]]);
+  const tBot=poly([[ox+sp,oy+lp],[ox+sp+bp,oy+lp],[ox+sp+bp/2,oy+lp+h_tp]]);
+  // Labels
+  const lbls=dimH(ox+sp,ox+sp+bp,oy+lp+14,`b = ${b} cm`)+
+    dimH(ox,ox+sp,oy-12,`s = ${side} cm`)+
+    dimV(ox+2*sp+bp+10,oy,oy+lp,`l = ${l} cm`);
+  return rects+tTop+tBot+lbls;
+}
+function dvNetSqPyramid({s,l}){
+  const k=155/(s+2*l);
+  const sp=F(s*k),lp=F(l*k);
+  const ox=F(150-sp/2),oy=F(100-sp/2);
+  const base=rct(ox,oy,sp,sp);
+  const tT=poly([[ox,oy],[ox+sp,oy],[ox+sp/2,oy-lp]]);
+  const tB=poly([[ox,oy+sp],[ox+sp,oy+sp],[ox+sp/2,oy+sp+lp]]);
+  const tL=poly([[ox,oy],[ox,oy+sp],[ox-lp,oy+sp/2]]);
+  const tR=poly([[ox+sp,oy],[ox+sp,oy+sp],[ox+sp+lp,oy+sp/2]]);
+  const lbls=dimH(ox,ox+sp,oy-12,`s = ${s} cm`)+
+    seg(ox+sp,oy+sp/2,ox+sp+lp,oy+sp/2,GOLD)+
+    txt(ox+sp+lp/2,oy+sp/2-13,`l = ${l} cm`);
+  return base+tT+tB+tL+tR+lbls;
+}
+
+
+// ═══════════════════════════════════════════════════════
+//  DRAW FUNCTIONS — NETS (compound shapes)
+// ═══════════════════════════════════════════════════════
+// Cylinder + Hemisphere: circle (πr²) + rectangle (2πrh) + dashed circle (2πr²)
+function dvNetCylHemi({r,h}){
+  const k=Math.min(22.4/r,80/h);
+  const rp=F(r*k),rw=F(2*Math.PI*r*k),hp=F(h*k);
+  const totalW=4*rp+rw+20;
+  const ox=F(150-totalW/2);
+  const cx1=F(ox+rp),rx=F(ox+2*rp+8),cx2=F(rx+rw+8+rp);
+  const cy=100;
+  const circ1=crc(cx1,cy,rp);
+  const rect=rct(rx,F(cy-hp/2),rw,hp);
+  const hemi=`<circle cx='${cx2}' cy='${cy}' r='${rp}' fill='${FILL}' stroke='${SHPS}' stroke-width='1.5' stroke-dasharray='5,3'/>`;
+  const c=r2(2*Math.PI*r);
+  return circ1+rect+hemi+
+    txt(cx1,cy+rp+14,'\u03c0r\u00b2',GOLD,'middle')+
+    txt(rx+rw/2,F(cy-hp/2)-12,'2\u03c0r = '+c+' cm',GOLD,'middle')+
+    dimV(rx+rw+6,F(cy-hp/2),F(cy+hp/2),h+' cm')+
+    txt(cx2,cy+rp+14,'2\u03c0r\u00b2',GOLD,'middle')+
+    txt(cx2,cy,'\u223c',GOLD,'middle');
+}
+// Cone + Cylinder: base circle + cone sector + cylinder rectangle
+function dvNetConeCyl({r,h1,l2}){
+  const \u03b8=360*r/l2;
+  const k=Math.min(120/(2*Math.PI*r),50/l2,20/r);
+  const rp=F(r*k),l2p=F(l2*k),rw=F(2*Math.PI*r*k),hp=F(h1*k);
+  const cx=60;
+  const cy_circ=F(rp+15);
+  const sa=D2R(270-\u03b8/2);
+  const cy_tip=F(185-l2p*Math.max(0,Math.sin(sa)));
+  const [lx,ly]=[F(cx+l2p*Math.cos(sa)),F(cy_tip+l2p*Math.sin(sa))];
+  const [rx2,ry2]=[F(cx+l2p*Math.cos(D2R(270+\u03b8/2))),F(cy_tip+l2p*Math.sin(D2R(270+\u03b8/2)))];
+  const la=\u03b8>180?1:0;
+  const sector=`<path d='M ${lx},${ly} A ${l2p},${l2p} 0 ${la},1 ${rx2},${ry2} L ${cx},${cy_tip} Z' fill='${FILL}' stroke='${SHPS}' stroke-width='1.5'/>`;
+  const rx=F(cx+l2p+20);
+  const c=r2(2*Math.PI*r);
+  return crc(cx,cy_circ,rp)+sector+rct(rx,F(100-hp/2),rw,hp)+
+    seg(cx,cy_circ,cx+rp,cy_circ,GOLD)+dot(cx,cy_circ)+txt(cx+rp/2,cy_circ-12,'r = '+r+' cm')+
+    txt(cx,cy_circ+rp+12,'\u03c0r\u00b2',GOLD,'middle')+
+    txt(F((cx+lx)/2)-8,F((cy_tip+ly)/2),'l\u2082='+l2,GOLD,'end')+
+    txt(rx+rw/2,F(100-hp/2)-12,'2\u03c0r = '+c+' cm',GOLD,'middle')+
+    dimV(rx+rw+6,F(100-hp/2),F(100+hp/2),'h\u2081='+h1+' cm');
+}
+// House Prism: strip of 5 rectangular faces + 2 pentagonal end faces
+function dvNetHousePrism({b,h_r,h_t,l,roof_side}){
+  const totalW=2*roof_side+2*h_r+b;
+  const totalH=l+2*(h_r+h_t);
+  const k=Math.min(230/totalW,150/totalH);
+  const bp=F(b*k),h_rp=F(h_r*k),h_tp=F(h_t*k),lp=F(l*k),rsp=F(roof_side*k);
+  const ox=F(150-totalW*k/2),oy=F(100-lp/2);
+  const xl=ox,xw=F(ox+rsp),xb=F(ox+rsp+h_rp),xwr=F(ox+rsp+h_rp+bp),xrr=F(ox+2*rsp+2*h_rp+bp);
+  const rects=rct(xl,oy,rsp,lp)+rct(xw,oy,h_rp,lp)+rct(xb,oy,bp,lp)+rct(xwr,oy,h_rp,lp)+rct(xrr,oy,rsp,lp);
+  const pentTop=poly([[xb,oy],[xb+bp,oy],[xb+bp,oy-h_rp],[xb+bp/2,oy-h_rp-h_tp],[xb,oy-h_rp]]);
+  const pentBot=poly([[xb,oy+lp],[xb+bp,oy+lp],[xb+bp,oy+lp+h_rp],[xb+bp/2,oy+lp+h_rp+h_tp],[xb,oy+lp+h_rp]]);
+  return rects+pentTop+pentBot+
+    dimH(xb,xb+bp,oy+lp+h_rp+h_tp+12,`b = ${b} cm`)+
+    dimH(xl,xl+rsp,oy-12,`s = ${roof_side} cm`)+
+    dimV(xrr+rsp+10,oy,oy+lp,`l = ${l} cm`);
+}
+// Hollow Cylinder: outer rect + inner rect + annular ring (×2)
+function dvNetHollowCyl({R,r,h}){
+  const k=Math.min(160/(2*Math.PI*R),45/h,28/R);
+  const Rk=F(R*k),rk=F(r*k),hp=F(h*k);
+  const outerW=F(2*Math.PI*R*k),innerW=F(2*Math.PI*r*k);
+  const gap=12,totalH=2*hp+gap;
+  const oy_out=F(100-totalH/2),oy_in=F(oy_out+hp+gap);
+  const outR=rct(10,oy_out,outerW,hp),inR=rct(10,oy_in,innerW,hp);
+  const k_ann=Math.min(35/R,35/R);
+  const Ra=F(R*k_ann),ra2=F(r*k_ann);
+  const cx_a=F(10+outerW+Ra+15),cy_a=100;
+  const ring=`<circle cx='${cx_a}' cy='${cy_a}' r='${Ra}' fill='${FILL}' stroke='${SHPS}' stroke-width='1.5'/>` +
+             `<circle cx='${cx_a}' cy='${cy_a}' r='${ra2}' fill='${CBGD}' stroke='${SHPS}' stroke-width='1.5'/>`;
+  const c_out=r2(2*Math.PI*R),c_in=r2(2*Math.PI*r);
+  return outR+inR+ring+
+    txt(10+outerW/2,oy_out-12,'2\u03c0R = '+c_out+' cm',GOLD,'middle')+
+    dimV(10+outerW+6,oy_out,oy_out+hp,h+' cm')+
+    txt(10+innerW/2,oy_in-12,'2\u03c0r = '+c_in+' cm',GOLD,'middle')+
+    seg(cx_a,cy_a,cx_a+Ra,cy_a,GOLD)+dot(cx_a,cy_a)+txt(cx_a+Ra/2,cy_a-12,'R = '+R+' cm')+
+    txt(cx_a,cy_a-ra2-8,'r = '+r+' cm',GOLD,'middle')+
+    txt(cx_a,cy_a+Ra+14,'\u00d7 2 faces',GOLD,'middle');
+}
+// Frustum: annular sector (lateral) + 2 circles (top & bottom)
+function dvNetFrustum({R,r,l}){
+  const L1=r2(l*R/(R-r)),L2=r2(l*r/(R-r));
+  const \u03b8=360*R/L1;
+  const k=Math.min(55/L1,75/(2*R));
+  const L1k=F(L1*k),L2k=F(L2*k),Rk=F(R*k),rk=F(r*k);
+  const cx=65;
+  const sa=D2R(270-\u03b8/2);
+  const cy_tip=F(185-L1k*Math.max(0,Math.sin(sa)));
+  const [lox,loy]=[F(cx+L1k*Math.cos(sa)),F(cy_tip+L1k*Math.sin(sa))];
+  const [rox,roy]=[F(cx+L1k*Math.cos(D2R(270+\u03b8/2))),F(cy_tip+L1k*Math.sin(D2R(270+\u03b8/2)))];
+  const [lix,liy]=[F(cx+L2k*Math.cos(sa)),F(cy_tip+L2k*Math.sin(sa))];
+  const [rix,riy]=[F(cx+L2k*Math.cos(D2R(270+\u03b8/2))),F(cy_tip+L2k*Math.sin(D2R(270+\u03b8/2)))];
+  const la=\u03b8>180?1:0;
+  const sector=`<path d='M ${lox},${loy} A ${L1k},${L1k} 0 ${la},1 ${rox},${roy} L ${rix},${riy} A ${L2k},${L2k} 0 ${la},0 ${lix},${liy} Z' fill='${FILL}' stroke='${SHPS}' stroke-width='1.5'/>`;
+  const cx_R=F(cx+L1k+Rk+15),cx_r=F(cx_R+Rk+rk+12);
+  return sector+crc(cx_R,100,Rk)+crc(cx_r,100,rk)+
+    txt(F((cx+lox)/2)-8,F((cy_tip+loy)/2),'l='+l,GOLD,'end')+
+    seg(cx_R,100,cx_R+Rk,100,GOLD)+dot(cx_R,100)+txt(cx_R+Rk/2,88,'R='+R+' cm')+
+    seg(cx_r,100,cx_r+rk,100,GOLD)+dot(cx_r,100)+txt(cx_r+rk/2,88,'r='+r+' cm');
+}
 
 // ═══════════════════════════════════════════════════════
 //  GENERATORS  (return full question object)
@@ -653,7 +987,7 @@ function dParallelogramP({b,slant}){
 // Isosceles triangle: shows base b and equal side length (no height)
 function dIsoscelesTriP({b,side},variant){
   const h=r2(Math.sqrt(Math.max(1,side*side-(b/2)*(b/2))));
-  const k=sc2(b,h);
+  const k=variant==='apex-right'?sc2(h,b):sc2(b,h);
   const bpx=F(b*k),hpx=F(h*k);
   if(variant==='apex-right'){
     const x=F(150-hpx/2),y=F(100-bpx/2);
@@ -1008,35 +1342,277 @@ function gVHousePrism(){const b=rnd(4,9),h_r=rnd(3,7),h_t=rnd(2,5),l=rnd(5,11),a
 function gVHollowCyl(){const R=rnd(4,8),r=rnd(1,R-2),h=rnd(4,11),area=r2(Math.PI*(R*R-r*r)*h);return{name:'Hollow Cylinder',params:{R,r,h},area,formula:'V = π(R²−r²)h',working:`π×(${R}²−${r}²)×${h} = ${area}`,choices:makeChoices(area,[r2(Math.PI*R*R*h),r2(Math.PI*(R-r)**2*h),r2(Math.PI*(R*R+r*r)*h)],2),isDecimal:true};}
 function gVFrustum(){const R=rnd(4,8),r=rnd(1,R-2),h=rnd(4,10),area=r2(Math.PI*h/3*(R*R+R*r+r*r));return{name:'Frustum',params:{R,r,h},area,formula:'V = ⅓πh(R²+Rr+r²)',working:`⅓×π×${h}×(${R*R}+${R*r}+${r*r}) = ${area}`,choices:makeChoices(area,[r2(Math.PI*h/3*(R*R+r*r)),r2(Math.PI*h*(R*R+R*r+r*r)),r2(Math.PI*h/3*(R+r)**2)],2),isDecimal:true};}
 
+
+// ═══════════════════════════════════════════════════════
+//  GENERATORS — 3D SURFACE AREA
+// ═══════════════════════════════════════════════════════
+function gSACube(){
+  const s=rnd(2,9),ans=6*s*s;
+  return{name:'Cube',params:{s},area:ans,formula:'SA = 6s\u00b2',
+    working:`6 \u00d7 ${s}\u00b2 = 6 \u00d7 ${s*s} = ${ans}`,
+    choices:makeChoices(ans,[4*s*s,5*s*s,s**3]),isDecimal:false};
+}
+function gSARectPrism(){
+  const l=rnd(3,10),w=rnd(2,7),h=rnd(2,8);
+  const ans=2*(l*w+l*h+w*h);
+  return{name:'Rectangular Prism',params:{l,w,h},area:ans,
+    formula:'SA = 2(lw + lh + wh)',
+    working:`2(${l}\u00d7${w} + ${l}\u00d7${h} + ${w}\u00d7${h}) = 2(${l*w}+${l*h}+${w*h}) = ${ans}`,
+    choices:makeChoices(ans,[l*w+l*h+w*h,2*(l+w+h),l*w*h]),isDecimal:false};
+}
+function gSACylinder(){
+  const r=rnd(2,7),h=rnd(3,12),ans=r2(2*π*r*r+2*π*r*h);
+  return{name:'Cylinder',params:{r,h},area:ans,formula:'SA = 2\u03c0r\u00b2 + 2\u03c0rh',
+    working:`2\u03c0\u00d7${r}\u00b2 + 2\u03c0\u00d7${r}\u00d7${h} = ${ans}`,
+    choices:makeChoices(ans,[r2(2*π*r*h),r2(π*r*r+2*π*r*h),r2(π*r*r*h)],2),isDecimal:true};
+}
+function gSASphere(){
+  const r=rnd(2,8),ans=r2(4*π*r*r);
+  return{name:'Sphere',params:{r},area:ans,formula:'SA = 4\u03c0r\u00b2',
+    working:`4 \u00d7 \u03c0 \u00d7 ${r}\u00b2 = ${ans}`,
+    choices:makeChoices(ans,[r2(2*π*r*r),r2(π*r*r),r2(4/3*π*r**3)],2),isDecimal:true};
+}
+function gSACone(){
+  // Pythagorean triples [r, l_slant] where (s/2)^2+h^2=l^2
+  const cases=[[3,5],[4,5],[5,13],[6,10],[8,10],[9,15],[12,13]];
+  const [r,l]=pick(cases);
+  const ans=r2(π*r*r+π*r*l);
+  return{name:'Cone',params:{r,l},area:ans,formula:'SA = \u03c0r\u00b2 + \u03c0rl',
+    working:`\u03c0\u00d7${r}\u00b2 + \u03c0\u00d7${r}\u00d7${l} = ${ans}`,
+    choices:makeChoices(ans,[r2(π*r*l),r2(2*π*r*r+π*r*l),r2(π*r*(r+l)/2)],2),isDecimal:true};
+}
+function gSASqPyramid(){
+  // [s, l_slant] where (s/2)^2+h^2=l^2: s=6,l=5(h=4); s=8,l=5(h=3); s=10,l=13(h=12); s=12,l=10(h=8); s=16,l=10(h=6)
+  const cases=[{s:6,l:5},{s:8,l:5},{s:10,l:13},{s:12,l:10},{s:16,l:10}];
+  const {s,l}=pick(cases);
+  const ans=s*s+2*s*l;
+  return{name:'Square Pyramid',params:{s,l},area:ans,formula:'SA = s\u00b2 + 2sl',
+    working:`${s}\u00b2 + 2\u00d7${s}\u00d7${l} = ${s*s}+${2*s*l} = ${ans}`,
+    choices:makeChoices(ans,[s*s+4*s*l,2*s*l,s*s+s*l]),isDecimal:false};
+}
+function gSATriPrismRA(){
+  // Pythagorean triples [b, h_t, c] for the right-triangle face
+  const faces=[[3,4,5],[5,12,13],[6,8,10],[8,15,17],[9,12,15]];
+  const [b,h_t,c]=pick(faces);
+  const l=rnd(4,12);
+  const ans=b*h_t+(b+h_t+c)*l;
+  return{name:'Triangular Prism',params:{b,h_t,c,l},area:ans,
+    formula:'SA = bh + (b+h+c)l',
+    working:`${b}\u00d7${h_t} + (${b}+${h_t}+${c})\u00d7${l} = ${b*h_t}+${(b+h_t+c)*l} = ${ans}`,
+    choices:makeChoices(ans,[(b+h_t+c)*l,b*h_t*l,b*h_t+(b+h_t)*l]),isDecimal:false};
+}
+function gSATriPrismISO(){
+  // [b, h_t, side] where (b/2)^2+h_t^2=side^2
+  const faces=[[6,4,5],[8,3,5],[10,12,13],[16,6,10],[12,8,10]];
+  const [b,h_t,side]=pick(faces);
+  const l=rnd(4,12);
+  const ans=b*h_t+(b+2*side)*l;
+  return{name:'Triangular Prism',params:{b,h_t,side,l},area:ans,
+    formula:'SA = bh + (b + 2s)l',
+    working:`${b}\u00d7${h_t} + (${b}+2\u00d7${side})\u00d7${l} = ${b*h_t}+${(b+2*side)*l} = ${ans}`,
+    choices:makeChoices(ans,[(b+2*side)*l,b*h_t*l,b*h_t+(b+side)*l]),isDecimal:false};
+}
+function gSACylHemi(){
+  const r=rnd(2,6),h=rnd(3,9),ans=r2(3*π*r*r+2*π*r*h);
+  return{name:'Cylinder + Hemisphere',params:{r,h},area:ans,
+    formula:'SA = 3\u03c0r\u00b2 + 2\u03c0rh',
+    working:`3\u03c0\u00d7${r}\u00b2 + 2\u03c0\u00d7${r}\u00d7${h} = ${ans}`,
+    choices:makeChoices(ans,[r2(2*π*r*r+2*π*r*h),r2(4*π*r*r+2*π*r*h),r2(3*π*r*r*h)],2),isDecimal:true};
+}
+function gSAConeCyl(){
+  // [r, h2_of_cone, l2_slant] Pythagorean
+  const cases=[[3,4,5],[4,3,5],[5,12,13],[6,8,10],[8,6,10]];
+  const [r,,l2]=pick(cases);
+  const h1=rnd(3,9);
+  const ans=r2(π*r*r+2*π*r*h1+π*r*l2);
+  return{name:'Cone + Cylinder',params:{r,h1,l2},area:ans,
+    formula:'SA = \u03c0r\u00b2 + 2\u03c0rh\u2081 + \u03c0rl\u2082',
+    working:`\u03c0\u00d7${r}\u00b2 + 2\u03c0\u00d7${r}\u00d7${h1} + \u03c0\u00d7${r}\u00d7${l2} = ${ans}`,
+    choices:makeChoices(ans,[r2(2*π*r*r+2*π*r*h1+π*r*l2),r2(π*r*r+2*π*r*h1),r2(π*r*l2+2*π*r*h1)],2),isDecimal:true};
+}
+function gSAHousePrism(){
+  // roof [b, h_t, roof_side] where (b/2)^2+h_t^2=roof_side^2
+  const roofs=[[6,4,5],[8,3,5],[10,12,13],[16,6,10],[12,8,10]];
+  const [b,h_t,roof_side]=pick(roofs);
+  const h_r=rnd(2,6),l=rnd(4,10);
+  const ans=2*(b*h_r+0.5*b*h_t)+(b+2*h_r+2*roof_side)*l;
+  return{name:'House Prism',params:{b,h_r,h_t,l,roof_side},area:ans,
+    formula:'SA = 2(bh\u2081 + \u00bdbh\u2082) + (b+2h\u2081+2s)l',
+    working:`2(${b}\u00d7${h_r}+\u00bd\u00d7${b}\u00d7${h_t}) + (${b}+2\u00d7${h_r}+2\u00d7${roof_side})\u00d7${l} = ${ans}`,
+    choices:makeChoices(ans,[(b+2*h_r+2*roof_side)*l,2*(b*h_r+b*h_t)+(b+2*h_r+2*roof_side)*l,2*(b*h_r+0.5*b*h_t)+(b+2*roof_side)*l]),isDecimal:false};
+}
+function gSAHollowCyl(){
+  const R=rnd(4,8),r=rnd(1,R-2),h=rnd(4,11),ans=r2(2*π*h*(R+r)+2*π*(R*R-r*r));
+  return{name:'Hollow Cylinder',params:{R,r,h},area:ans,
+    formula:'SA = 2\u03c0h(R+r) + 2\u03c0(R\u00b2\u2212r\u00b2)',
+    working:`2\u03c0\u00d7${h}\u00d7(${R}+${r}) + 2\u03c0\u00d7(${R*R}\u2212${r*r}) = ${ans}`,
+    choices:makeChoices(ans,[r2(2*π*h*(R+r)),r2(2*π*R*h+2*π*(R*R-r*r)),r2(2*π*h*(R-r)+2*π*(R*R-r*r))],2),isDecimal:true};
+}
+function gSAFrustum(){
+  // [R, r, l] where (R-r)^2+h^2=l^2
+  const cases=[[6,2,5],[8,4,5],[10,4,10],[7,3,5],[9,3,10]];
+  const [R,r,l]=pick(cases);
+  const ans=r2(π*R*R+π*r*r+π*(R+r)*l);
+  return{name:'Frustum',params:{R,r,l},area:ans,
+    formula:'SA = \u03c0R\u00b2 + \u03c0r\u00b2 + \u03c0(R+r)l',
+    working:`\u03c0\u00d7${R}\u00b2 + \u03c0\u00d7${r}\u00b2 + \u03c0\u00d7(${R}+${r})\u00d7${l} = ${ans}`,
+    choices:makeChoices(ans,[r2(π*(R+r)*l),r2(π*R*R+π*(R+r)*l),r2(π*R*R+π*r*r+π*R*l)],2),isDecimal:true};
+}
+
 // ═══════════════════════════════════════════════════════
 //  VOL_SHAPES REGISTRY
 // ═══════════════════════════════════════════════════════
 const VOL_SHAPES=[
-  {id:'v-cube',     label:'Cube',              cat:'basic',    genV:gVCube,       drawV:q=>W(dvCube(q.params))},
-  {id:'v-rect',     label:'Rect Prism',         cat:'basic',    genV:gVRectPrism,  drawV:q=>W(dvRectPrism(q.params))},
-  {id:'v-cyl',      label:'Cylinder',           cat:'basic',    genV:gVCylinder,   drawV:q=>W(dvCylinder(q.params))},
-  {id:'v-cone',     label:'Cone',               cat:'basic',    genV:gVCone,       drawV:q=>W(dvCone(q.params))},
-  {id:'v-sph',      label:'Sphere',             cat:'basic',    genV:gVSphere,     drawV:q=>W(dvSphere(q.params))},
-  {id:'v-tri-ra',   label:'Prism (right-ang)',  cat:'basic',    genV:gVTriPrismRA, drawV:q=>W(dvTriPrismRA(q.params))},
-  {id:'v-tri-iso',  label:'Prism (isosceles)',  cat:'basic',    genV:gVTriPrismISO,drawV:q=>W(dvTriPrismISO(q.params))},
-  {id:'v-pyramid',  label:'Sq Pyramid',         cat:'basic',    genV:gVSqPyramid,  drawV:q=>W(dvSqPyramid(q.params))},
-  {id:'v-cyl-hemi', label:'Cyl + Hemisphere',  cat:'compound', genV:gVCylHemi,    drawV:q=>W(dvCylHemi(q.params))},
-  {id:'v-cone-cyl', label:'Cone + Cylinder',   cat:'compound', genV:gVConeCyl,    drawV:q=>W(dvConeCyl(q.params))},
-  {id:'v-house',    label:'House Prism',        cat:'compound', genV:gVHousePrism, drawV:q=>W(dvHousePrism(q.params))},
-  {id:'v-hollow',   label:'Hollow Cylinder',    cat:'compound', genV:gVHollowCyl,  drawV:q=>W(dvHollowCyl(q.params))},
-  {id:'v-frustum',  label:'Frustum',            cat:'compound', genV:gVFrustum,    drawV:q=>W(dvFrustum(q.params))},
+  {id:'v-cube',     label:'Cube',              cat:'basic',    genV:gVCube,       drawV:q=>W(dvCube(q.params)),
+   genSA:gSACube,      drawSA:q=>W(dvCube(q.params)),
+   drawNet:q=>W(dvNetCube(q.params))},
+  {id:'v-rect',     label:'Rect Prism',         cat:'basic',    genV:gVRectPrism,  drawV:q=>W(dvRectPrism(q.params)),
+   genSA:gSARectPrism, drawSA:q=>W(dvRectPrism(q.params)),
+   drawNet:q=>W(dvNetRectPrism(q.params))},
+  {id:'v-cyl',      label:'Cylinder',           cat:'basic',    genV:gVCylinder,   drawV:q=>W(dvCylinder(q.params)),
+   genSA:gSACylinder,  drawSA:q=>W(dvCylinder(q.params)),
+   drawNet:q=>W(dvNetCylinder(q.params))},
+  {id:'v-cone',     label:'Cone',               cat:'basic',    genV:gVCone,       drawV:q=>W(dvCone(q.params)),
+   genSA:gSACone,      drawSA:q=>W(dvConeSA(q.params)),
+   drawNet:q=>W(dvNetCone(q.params))},
+  {id:'v-sph',      label:'Sphere',             cat:'basic',    genV:gVSphere,     drawV:q=>W(dvSphere(q.params)),
+   genSA:gSASphere,    drawSA:q=>W(dvSphere(q.params)),
+   drawNet:q=>W(dvNetSphere(q.params))},
+  {id:'v-tri-ra',   label:'Prism (right-ang)',  cat:'basic',    genV:gVTriPrismRA, drawV:q=>W(dvTriPrismRA(q.params)),
+   genSA:gSATriPrismRA,drawSA:q=>W(dvTriPrismRA(q.params)),
+   drawNet:q=>W(dvNetTriPrismRA(q.params))},
+  {id:'v-tri-iso',  label:'Prism (isosceles)',  cat:'basic',    genV:gVTriPrismISO,drawV:q=>W(dvTriPrismISO(q.params)),
+   genSA:gSATriPrismISO,drawSA:q=>W(dvTriPrismISO(q.params)),
+   drawNet:q=>W(dvNetTriPrismISO(q.params))},
+  {id:'v-pyramid',  label:'Sq Pyramid',         cat:'basic',    genV:gVSqPyramid,  drawV:q=>W(dvSqPyramid(q.params)),
+   genSA:gSASqPyramid, drawSA:q=>W(dvSqPyramidSA(q.params)),
+   drawNet:q=>W(dvNetSqPyramid(q.params))},
+  {id:'v-cyl-hemi', label:'Cyl + Hemisphere',  cat:'compound', genV:gVCylHemi,    drawV:q=>W(dvCylHemi(q.params)),
+   genSA:gSACylHemi,   drawSA:q=>W(dvCylHemi(q.params)),   drawNet:q=>W(dvNetCylHemi(q.params))},
+  {id:'v-cone-cyl', label:'Cone + Cylinder',   cat:'compound', genV:gVConeCyl,    drawV:q=>W(dvConeCyl(q.params)),
+   genSA:gSAConeCyl,   drawSA:q=>W(dvConeCylSA(q.params)),  drawNet:q=>W(dvNetConeCyl(q.params))},
+  {id:'v-house',    label:'House Prism',        cat:'compound', genV:gVHousePrism, drawV:q=>W(dvHousePrism(q.params)),
+   genSA:gSAHousePrism,drawSA:q=>W(dvHousePrismSA(q.params)),drawNet:q=>W(dvNetHousePrism(q.params))},
+  {id:'v-hollow',   label:'Hollow Cylinder',    cat:'compound', genV:gVHollowCyl,  drawV:q=>W(dvHollowCyl(q.params)),
+   genSA:gSAHollowCyl, drawSA:q=>W(dvHollowCyl(q.params)),  drawNet:q=>W(dvNetHollowCyl(q.params))},
+  {id:'v-frustum',  label:'Frustum',            cat:'compound', genV:gVFrustum,    drawV:q=>W(dvFrustum(q.params)),
+   genSA:gSAFrustum,   drawSA:q=>W(dvFrustumSA(q.params)),  drawNet:q=>W(dvNetFrustum(q.params))},
 ];
 const DIFF_V={
   easy:['v-cube','v-rect','v-cyl','v-cone','v-sph'],
   medium:VOL_SHAPES.filter(s=>s.cat==='basic').map(s=>s.id),
   all:VOL_SHAPES.map(s=>s.id)
 };
+const DIFF_SA={
+  easy:['v-cube','v-rect','v-cyl','v-sph'],
+  medium:['v-cube','v-rect','v-cyl','v-sph','v-cone','v-pyramid','v-tri-ra','v-tri-iso'],
+  all:VOL_SHAPES.map(s=>s.id)
+};
 
+
+// ── Formula quiz registry ──────────────────────────────
+const FORMULA_ITEMS=[
+  // AREA — easy
+  {id:'fa-sq',        name:'Square',           topic:'area',  cat:'easy',
+    formula:'A = s²',             draw:'square',      wrongs:['fa-rect','fa-cross','fa-para']},
+  {id:'fa-rect',      name:'Rectangle',         topic:'area',  cat:'easy',
+    formula:'A = l × w',          draw:'rectangle',   wrongs:['fa-sq','fa-para','fa-trap']},
+  {id:'fa-tri',       name:'Triangle',          topic:'area',  cat:'easy',
+    formula:'A = ½ × b × h',    draw:'iso-tri',     wrongs:['fa-para','fa-trap','fa-rect']},
+  {id:'fa-circle',    name:'Circle',            topic:'area',  cat:'easy',
+    formula:'A = πr²',        draw:'circle-r',    wrongs:['fa-sector','fa-annulus','fa-rect-semi']},
+  // AREA — medium
+  {id:'fa-para',      name:'Parallelogram',      topic:'area',  cat:'medium',
+    formula:'A = b × h',          draw:'parallelogram',wrongs:['fa-rect','fa-tri','fa-trap']},
+  {id:'fa-trap',      name:'Trapezium',          topic:'area',  cat:'medium',
+    formula:'A = ½(a + b)h',      draw:'trapezium',   wrongs:['fa-para','fa-tri','fa-rhombus']},
+  {id:'fa-rhombus',   name:'Rhombus / Kite',     topic:'area',  cat:'medium',
+    formula:'A = ½ × d₁ × d₂', draw:'rhombus', wrongs:['fa-trap','fa-tri','fa-para']},
+  {id:'fa-sector',    name:'Sector',             topic:'area',  cat:'medium',
+    formula:'A = (θ/360) × πr²', draw:'sector', wrongs:['fa-circle','fa-annulus','fa-rect-semi']},
+  // AREA — hard
+  {id:'fa-annulus',   name:'Annulus',            topic:'area',  cat:'hard',
+    formula:'A = π(R² − r²)', draw:'annulus', wrongs:['fa-circle','fa-sector','fa-rect-semi']},
+  {id:'fa-lshape',    name:'L-shape',            topic:'area',  cat:'hard',
+    formula:'A = WH − wh',        draw:'l-shape',     wrongs:['fa-rect','fa-rect-notch','fa-cross']},
+  {id:'fa-rect-tri',  name:'Rect + Triangle',     topic:'area',  cat:'hard',
+    formula:'A = lw + ½lh',       draw:'rect-tri',    wrongs:['fa-rect-semi','fa-trap','fa-rect']},
+  {id:'fa-rect-semi', name:'Rect + Semicircle',   topic:'area',  cat:'hard',
+    formula:'A = lw + ½πr²', draw:'rect-semi', wrongs:['fa-rect-tri','fa-annulus','fa-circle']},
+  {id:'fa-rect-notch',name:'Rect − Triangle',topic:'area',  cat:'hard',
+    formula:'A = WH − ½nw·nh', draw:'rect-notch', wrongs:['fa-lshape','fa-rect-tri','fa-cross']},
+  {id:'fa-cross',     name:'Cross Shape',         topic:'area',  cat:'hard',
+    formula:'A = a² + 4al',       draw:'cross',       wrongs:['fa-sq','fa-lshape','fa-rect']},
+  // VOLUME — easy
+  {id:'fv-cube',      name:'Cube',               topic:'volume',cat:'easy',
+    formula:'V = s³',             draw:'v-cube',      wrongs:['fv-rect','fv-pyramid','fv-sphere']},
+  {id:'fv-rect',      name:'Rect Prism',          topic:'volume',cat:'easy',
+    formula:'V = l × w × h', draw:'v-rect',      wrongs:['fv-cube','fv-tri-prism','fv-pyramid']},
+  {id:'fv-cyl',       name:'Cylinder',            topic:'volume',cat:'easy',
+    formula:'V = πr²h',      draw:'v-cyl',       wrongs:['fv-cone','fv-sphere','fv-hollow']},
+  {id:'fv-cone',      name:'Cone',               topic:'volume',cat:'easy',
+    formula:'V = ⅓πr²h',draw:'v-cone',      wrongs:['fv-cyl','fv-pyramid','fv-frustum']},
+  {id:'fv-sphere',    name:'Sphere',             topic:'volume',cat:'easy',
+    formula:'V = ⁴⁄₃πr³', draw:'v-sph', wrongs:['fv-cyl','fv-cone','fv-cylhemi']},
+  // VOLUME — medium
+  {id:'fv-tri-prism', name:'Triangular Prism',    topic:'volume',cat:'medium',
+    formula:'V = ½ × b × h × l', draw:'v-tri-ra', wrongs:['fv-rect','fv-pyramid','fv-house']},
+  {id:'fv-pyramid',   name:'Square Pyramid',       topic:'volume',cat:'medium',
+    formula:'V = ⅓s²h',      draw:'v-pyramid',   wrongs:['fv-cone','fv-rect','fv-tri-prism']},
+  // VOLUME — hard
+  {id:'fv-hollow',    name:'Hollow Cylinder',     topic:'volume',cat:'hard',
+    formula:'V = π(R²−r²)h',  draw:'v-hollow',  wrongs:['fv-cyl','fv-frustum','fv-cylhemi']},
+  {id:'fv-cylhemi',   name:'Cyl + Hemisphere',    topic:'volume',cat:'hard',
+    formula:'V = πr²h + ⅔πr³', draw:'v-cylhemi', wrongs:['fv-sphere','fv-cyl','fv-conecyl']},
+  {id:'fv-conecyl',   name:'Cone + Cylinder',     topic:'volume',cat:'hard',
+    formula:'V = πr²h₁ + ⅓πr²h₂', draw:'v-conecyl', wrongs:['fv-cylhemi','fv-cone','fv-cyl']},
+  {id:'fv-house',     name:'House Prism',          topic:'volume',cat:'hard',
+    formula:'V = (bh₁ + ½bh₂)l',   draw:'v-house',   wrongs:['fv-tri-prism','fv-rect','fv-conecyl']},
+  {id:'fv-frustum',   name:'Frustum',             topic:'volume',cat:'hard',
+    formula:'V = ⅓πh(R²+Rr+r²)', draw:'v-frustum', wrongs:['fv-cone','fv-cyl','fv-hollow']},
+  // SURFACE AREA — easy
+  {id:'fsa-cube',    name:'Cube',              topic:'surface-area',cat:'easy',
+    formula:'SA = 6s²',            draw:'v-cube',     wrongs:['fsa-rect','fv-cube','fsa-cyl']},
+  {id:'fsa-rect',    name:'Rect Prism',         topic:'surface-area',cat:'easy',
+    formula:'SA = 2(lw+lh+wh)',       draw:'v-rect',     wrongs:['fsa-cube','fsa-cyl','fv-rect']},
+  {id:'fsa-cyl',     name:'Cylinder',           topic:'surface-area',cat:'easy',
+    formula:'SA = 2πr² + 2πrh',   draw:'v-cyl',      wrongs:['fsa-sphere','fv-cyl','fsa-cone']},
+  {id:'fsa-sphere',  name:'Sphere',             topic:'surface-area',cat:'easy',
+    formula:'SA = 4πr²',            draw:'v-sph',      wrongs:['fsa-cyl','fv-sphere','fsa-cone']},
+  // SURFACE AREA — medium
+  {id:'fsa-cone',    name:'Cone',               topic:'surface-area',cat:'medium',
+    formula:'SA = πr² + πrl',         draw:'v-cone',     wrongs:['fsa-cyl','fsa-pyramid','fv-cone']},
+  {id:'fsa-pyramid', name:'Square Pyramid',      topic:'surface-area',cat:'medium',
+    formula:'SA = s² + 2sl',             draw:'v-pyramid',  wrongs:['fsa-cone','fsa-cube','fv-pyramid']},
+  {id:'fsa-tri-ra',  name:'Tri Prism (right)',   topic:'surface-area',cat:'medium',
+    formula:'SA = bh + (b+h+c)l',    draw:'v-tri-ra',   wrongs:['fsa-tri-iso','fsa-rect','fv-tri-prism']},
+  {id:'fsa-tri-iso', name:'Tri Prism (iso)',     topic:'surface-area',cat:'medium',
+    formula:'SA = bh + (b+2s)l',     draw:'v-tri-iso',  wrongs:['fsa-tri-ra','fsa-rect','fv-tri-prism']},
+  // SURFACE AREA — hard
+  {id:'fsa-cylhemi', name:'Cyl + Hemisphere',    topic:'surface-area',cat:'hard',
+    formula:'SA = 3πr² + 2πrh',       draw:'v-cylhemi',  wrongs:['fsa-cyl','fsa-sphere','fv-cylhemi']},
+  {id:'fsa-conecyl', name:'Cone + Cylinder',     topic:'surface-area',cat:'hard',
+    formula:'SA = πr² + 2πrh₁ + πrl₂',  draw:'v-conecyl',  wrongs:['fsa-cylhemi','fsa-cyl','fv-conecyl']},
+  {id:'fsa-house',   name:'House Prism',          topic:'surface-area',cat:'hard',
+    formula:'SA = 2(bh₁+½bh₂)+(b+2h₁+2s)l', draw:'v-house', wrongs:['fsa-tri-ra','fsa-rect','fv-house']},
+  {id:'fsa-hollow',  name:'Hollow Cylinder',     topic:'surface-area',cat:'hard',
+    formula:'SA = 2πh(R+r)+2π(R²−r²)', draw:'v-hollow', wrongs:['fsa-cyl','fsa-frustum','fv-hollow']},
+  {id:'fsa-frustum', name:'Frustum',             topic:'surface-area',cat:'hard',
+    formula:'SA = πR²+πr²+π(R+r)l',    draw:'v-frustum',  wrongs:['fsa-cone','fsa-hollow','fv-frustum']},
+];
+const FDIFF={
+  easy:  FORMULA_ITEMS.filter(fi=>fi.cat==='easy').map(fi=>fi.id),
+  medium:FORMULA_ITEMS.filter(fi=>fi.cat!=='hard').map(fi=>fi.id),
+  all:   FORMULA_ITEMS.map(fi=>fi.id),
+};
 // ═══════════════════════════════════════════════════════
 //  QUIZ STATE
 // ═══════════════════════════════════════════════════════
 let MODE='mc',TOPIC='area';
-let ENABLED=new Set(DIFF.easy),ENABLED_V=new Set(DIFF_V.easy);
+let ENABLED=new Set(DIFF.easy),ENABLED_V=new Set(DIFF_V.easy),ENABLED_SA=new Set(DIFF_SA.easy);
+let FDIRECTION='shape2formula',FTOPIC_F='area';
+let ENABLED_F=new Set(FDIFF.easy.filter(id=>FORMULA_ITEMS.find(fi=>fi.id===id&&fi.topic==='area')));
+let SA_VIEW='3d';
 let score={c:0,t:0},streak=0,currentQ=null,answered=false;
 let timerStart=0,timerInterval=null,CUSTOM_OPEN=false;
 function unit(){return TOPIC==='volume'?'cm³':TOPIC==='perimeter'?'cm':'cm²';}
@@ -1044,6 +1620,26 @@ function unit(){return TOPIC==='volume'?'cm³':TOPIC==='perimeter'?'cm':'cm²';}
 // ── Category chips ─────────────────────────────────────
 function buildCats(){
   const wrap=document.getElementById('cats-wrap');wrap.innerHTML='';
+  if(TOPIC==='surface-area'){
+    VOL_SHAPES.forEach(s=>{
+      const b=document.createElement('button');
+      b.className='pill cat-pill'+(ENABLED_SA.has(s.id)?' active':'');
+      b.textContent=s.label;
+      b.onclick=()=>{ENABLED_SA.has(s.id)?ENABLED_SA.delete(s.id):ENABLED_SA.add(s.id);b.classList.toggle('active');};
+      wrap.appendChild(b);
+    });return;
+  }
+  if(TOPIC==='formula'){
+    const items=FORMULA_ITEMS.filter(fi=>FTOPIC_F==='mix'||fi.topic===FTOPIC_F);
+    items.forEach(fi=>{
+      const b=document.createElement('button');
+      b.className='pill cat-pill'+(ENABLED_F.has(fi.id)?' active':'');
+      b.textContent=fi.name;
+      b.onclick=()=>{ENABLED_F.has(fi.id)?ENABLED_F.delete(fi.id):ENABLED_F.add(fi.id);b.classList.toggle('active');};
+      wrap.appendChild(b);
+    });
+    return;
+  }
   const shapes=TOPIC==='volume'?VOL_SHAPES:SHAPES;
   const enabled=TOPIC==='volume'?ENABLED_V:ENABLED;
   shapes.forEach(s=>{
@@ -1061,9 +1657,13 @@ function toggleCustom(){
   document.getElementById('btn-custom').textContent=CUSTOM_OPEN?'Custom ▴':'Custom ▾';
 }
 function setDiff(d){
-  if(TOPIC==='volume'){ENABLED_V=new Set(DIFF_V[d]||DIFF_V.all);}
+  if(TOPIC==='surface-area'){ENABLED_SA=new Set(DIFF_SA[d]||DIFF_SA.all);}
+  else if(TOPIC==='formula'){
+    const base=FDIFF[d]||FDIFF.all;
+    ENABLED_F=new Set(base.filter(id=>{const fi=FORMULA_ITEMS.find(f=>f.id===id);return fi&&(FTOPIC_F==='mix'||fi.topic===FTOPIC_F);}));
+  } else if(TOPIC==='volume'){ENABLED_V=new Set(DIFF_V[d]||DIFF_V.all);}
   else{ENABLED=new Set(DIFF[d]||DIFF.all);}
-  document.querySelectorAll('.diff-pill').forEach((b,i)=>{b.classList.toggle('active',['easy','medium','all','custom'][i]===d);});
+  document.querySelectorAll('.diff-pill').forEach((b,i)=>{b.classList.toggle('active',['easy','medium','all'][i]===d);});
   if(d==='custom'){CUSTOM_OPEN=true;document.getElementById('cats-wrap').classList.add('open');}
   buildCats();
 }
@@ -1075,14 +1675,42 @@ function setMode(m){
 }
 function setTopic(t){
   TOPIC=t;
-  document.getElementById('btn-area').classList.toggle('active',t==='area');
-  document.getElementById('btn-peri').classList.toggle('active',t==='perimeter');
-  document.getElementById('btn-vol').classList.toggle('active',t==='volume');
+  ['area','peri','vol','sa','formula'].forEach(k=>document.getElementById('btn-'+k)?.classList.toggle('active',t===({peri:'perimeter',vol:'volume',sa:'surface-area',formula:'formula',area:'area'}[k]||k)));
+  const isFormula=t==='formula';
+  document.getElementById('sa-view-row').style.display=t==='surface-area'?'flex':'none';
+  document.getElementById('mode-row').style.display=isFormula?'none':'flex';
+  document.getElementById('dir-row').style.display=isFormula?'flex':'none';
+  document.getElementById('ftopic-row').style.display=isFormula?'flex':'none';
   score={c:0,t:0};streak=0;updateStats();
   setDiff('easy');
   nextQ();
 }
 
+function setFDir(d){
+  FDIRECTION=d;
+  ['s2f','f2s','fmix'].forEach((k,i)=>document.getElementById('btn-'+k)?.classList.toggle('active',['shape2formula','formula2shape','mix'][i]===d));
+  if(currentQ&&!answered)nextQ();
+}
+function setFTopic(t){
+  FTOPIC_F=t;
+  ['area','vol','sa','mix'].forEach((k,i)=>document.getElementById('btn-ft-'+k)?.classList.toggle('active',['area','volume','surface-area','mix'][i]===t));
+  setDiff('easy');
+  nextQ();
+}
+function setSAView(v){
+  SA_VIEW=v;
+  document.getElementById('btn-sa-3d').classList.toggle('active',v==='3d');
+  document.getElementById('btn-sa-net').classList.toggle('active',v==='net');
+  if(!currentQ||TOPIC!=='surface-area')return;
+  if(v==='net'&&currentQ._drawNet){
+    document.getElementById('svg-wrap').innerHTML=currentQ._drawNet();
+    document.getElementById('shape-label').textContent='Net view';
+  } else {
+    if(v==='net'){SA_VIEW='3d';document.getElementById('btn-sa-net').classList.remove('active');document.getElementById('btn-sa-3d').classList.add('active');}
+    document.getElementById('svg-wrap').innerHTML=currentQ._draw3d();
+    document.getElementById('shape-label').textContent=currentQ.name;
+  }
+}
 // ── Timer ──────────────────────────────────────────────
 function startTimer(){timerStart=Date.now();clearInterval(timerInterval);timerInterval=setInterval(()=>{document.getElementById('stat-timer').textContent=Math.floor((Date.now()-timerStart)/1000)+'s';},500);}
 function stopTimer(){clearInterval(timerInterval);}
@@ -1101,8 +1729,19 @@ function showNoShapes(){
   document.getElementById('next-btn').style.display='none';
 }
 function nextQ(){
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('next-btn').style.display='none';
+  if(TOPIC==='formula'){nextQFormula();return;}
   let avail,shape;
-  if(TOPIC==='volume'){
+  if(TOPIC==='surface-area'){
+    avail=VOL_SHAPES.filter(s=>ENABLED_SA.has(s.id));
+    if(!avail.length){showNoShapes();return;}
+    shape=pick(avail);
+    currentQ=shape.genSA();
+    currentQ._draw3d=()=>shape.drawSA(currentQ);
+    currentQ._drawNet=shape.drawNet?()=>shape.drawNet(currentQ):null;
+    currentQ._draw=SA_VIEW==='net'&&currentQ._drawNet?currentQ._drawNet:currentQ._draw3d;
+  } else if(TOPIC==='volume'){
     avail=VOL_SHAPES.filter(s=>ENABLED_V.has(s.id));
     if(!avail.length){showNoShapes();return;}
     shape=pick(avail);
@@ -1118,12 +1757,78 @@ function nextQ(){
   answered=false;
   document.getElementById('svg-wrap').innerHTML=currentQ._draw();
   document.getElementById('shape-label').textContent=currentQ.name;
-  const prompts={area:'Find the area. Give your answer in cm².',perimeter:'Find the perimeter. Give your answer in cm.',volume:'Find the volume. Give your answer in cm³.'};
+  const prompts={area:'Find the area. Give your answer in cm².',perimeter:'Find the perimeter. Give your answer in cm.',volume:'Find the volume. Give your answer in cm³.','surface-area':'Find the surface area. Give your answer in cm².'};
   document.getElementById('prompt').textContent=prompts[TOPIC];
-  document.getElementById('feedback').style.display='none';
-  document.getElementById('next-btn').style.display='none';
   renderAnswerArea();
   startTimer();
+}
+
+
+// ── Formula quiz logic ─────────────────────────────────
+function nextQFormula(){
+  const dir=FDIRECTION==='mix'?pick(['shape2formula','formula2shape']):FDIRECTION;
+  const avail=FORMULA_ITEMS.filter(fi=>ENABLED_F.has(fi.id)&&(FTOPIC_F==='mix'||fi.topic===FTOPIC_F));
+  if(!avail.length){showNoShapes();return;}
+  const item=pick(avail);
+  const getWrongs=()=>item.wrongs.map(wid=>FORMULA_ITEMS.find(fi=>fi.id===wid)).filter(Boolean);
+  answered=false;
+  if(dir==='shape2formula'){
+    // Draw shape, pick formula
+    const entry=[...SHAPES,...VOL_SHAPES].find(s=>s.id===item.draw);
+    const qData=item.topic==='volume'?entry.genV():entry.gen();
+    const svgStr=item.topic==='volume'?entry.drawV(qData):entry.draw(qData);
+    document.getElementById('svg-wrap').innerHTML=svgStr;
+    document.getElementById('shape-label').textContent='';
+    document.getElementById('prompt').textContent='Which formula gives the '+item.topic+' of this shape?';
+    const correct=item.formula;
+    const wrongs=getWrongs().map(w=>w.formula);
+    currentQ={_type:dir,_item:item,correct,choices:shuffle([correct,...wrongs.slice(0,3)])};
+  } else {
+    // Show formula, pick shape name
+    document.getElementById('svg-wrap').innerHTML=`<div class="formula-display">${item.formula}</div>`;
+    document.getElementById('shape-label').textContent='';
+    document.getElementById('prompt').textContent='Which shape does this formula calculate?';
+    const correct=item.name;
+    const wrongs=getWrongs().map(w=>w.name);
+    currentQ={_type:dir,_item:item,correct,choices:shuffle([correct,...wrongs.slice(0,3)])};
+  }
+  renderFormulaAnswerArea();
+  startTimer();
+}
+function renderFormulaAnswerArea(){
+  const el=document.getElementById('answer-area');
+  const isS2F=currentQ._type==='shape2formula';
+  const gridCls=isS2F?'formula-mc-grid':'mc-grid';
+  const btnCls=isS2F?'mc-btn formula-mc-btn':'mc-btn';
+  const btns=currentQ.choices.map((c,i)=>
+    `<button class="${btnCls}" id="fmc${i}" onclick="checkFormulaMC(${i})">${c}</button>`
+  ).join('');
+  el.innerHTML=`<div class="${gridCls}">${btns}</div>`;
+}
+function checkFormulaMC(idx){
+  if(answered)return;answered=true;stopTimer();score.t++;
+  const chosen=currentQ.choices[idx];
+  const correct=chosen===currentQ.correct;
+  if(correct)score.c++;streak=correct?streak+1:0;updateStats();
+  currentQ.choices.forEach((c,i)=>{
+    const b=document.getElementById('fmc'+i);if(!b)return;
+    const isC=c===currentQ.correct;
+    if(i===idx)b.classList.add(isC?'correct':'wrong');
+    else if(isC)b.classList.add('correct');
+    b.disabled=true;
+  });
+  showFormulaFeedback(correct);
+}
+function showFormulaFeedback(correct){
+  const item=currentQ._item;
+  document.getElementById('fb-banner').className='fb-banner '+(correct?'ok':'err');
+  document.getElementById('fb-banner').textContent=correct
+    ?'✓ Correct!'
+    :(currentQ._type==='shape2formula'?`✗ Formula: ${item.formula}`:`✗ Shape: ${item.name}`);
+  document.getElementById('fb-formula').textContent=item.formula;
+  document.getElementById('fb-working').textContent='Shape: '+item.name;
+  document.getElementById('feedback').style.display='block';
+  document.getElementById('next-btn').style.display='block';
 }
 
 function renderAnswerArea(){
