@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ratio Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f13;--card:#1a1a22;--card2:#22222e;--border:#2e2e3e;
+  --gold:#fbbf24;--blue:#60a5fa;--green:#34d399;--red:#f87171;
+  --purple:#a78bfa;--text:#e2e0f0;--muted:#8884a8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;
+  min-height:100vh;display:flex;justify-content:center;padding:16px 12px 60px;}
+.app{width:100%;max-width:460px;}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:14px 0 12px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.hdr h1{font-family:'Space Mono',monospace;color:var(--gold);font-size:1rem;font-weight:700;}
+.stats{display:flex;gap:10px;font-size:0.78rem;color:var(--muted);}
+.stat strong{color:var(--text);font-family:'Space Mono',monospace;}
+
+.controls{margin-bottom:14px;display:flex;flex-direction:column;gap:8px;}
+.pill-row{display:flex;gap:6px;flex-wrap:wrap;}
+.pill{padding:5px 14px;border-radius:99px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:0.78rem;font-family:'DM Sans',sans-serif;
+  cursor:pointer;transition:all .15s;}
+.pill.active{background:var(--blue);border-color:var(--blue);color:#0f0f13;font-weight:600;}
+
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 14px 12px;margin-bottom:12px;}
+.svg-wrap{width:100%;aspect-ratio:3/2;background:var(--card2);border-radius:8px;
+  overflow:hidden;margin-bottom:10px;display:flex;align-items:center;justify-content:center;}
+.svg-wrap svg{width:100%;height:100%;}
+.prompt{font-size:0.88rem;color:var(--muted);text-align:center;line-height:1.5;padding:0 4px;}
+.shape-label{font-family:'Space Mono',monospace;color:var(--gold);font-size:0.78rem;
+  text-align:center;margin-bottom:6px;}
+
+.formula-display{font-family:'Space Mono',monospace;font-size:1.6rem;color:var(--gold);
+  text-align:center;padding:20px;line-height:1.5;width:100%;letter-spacing:0.02em;}
+
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.mc-btn{padding:12px 8px;border-radius:10px;border:1px solid var(--border);
+  background:var(--card);color:var(--text);font-family:'Space Mono',monospace;
+  font-size:0.85rem;text-align:center;cursor:pointer;transition:all .15s;}
+.mc-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);}
+.mc-btn.correct{border-color:var(--green);background:rgba(52,211,153,0.12);color:var(--green);}
+.mc-btn.wrong{border-color:var(--red);background:rgba(248,113,113,0.08);color:var(--red);}
+.mc-btn:disabled{cursor:default;}
+
+.word-display{font-family:'DM Sans',sans-serif;font-size:1.02rem;color:var(--text);
+  text-align:center;padding:18px;line-height:1.55;width:100%;}
+
+.type-row{display:flex;gap:8px;margin-bottom:12px;align-items:center;}
+.ratio-input-group{display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap;}
+.ratio-input{width:60px;padding:11px 6px;border-radius:10px;border:1px solid var(--border);
+  background:var(--card);color:var(--text);font-family:'Space Mono',monospace;font-size:1rem;
+  text-align:center;outline:none;}
+.ratio-input:focus{border-color:var(--blue);}
+.ratio-input.correct{border-color:var(--green);}
+.ratio-input.wrong{border-color:var(--red);}
+.ratio-colon{color:var(--muted);font-family:'Space Mono',monospace;font-size:1.1rem;font-weight:700;}
+.submit-btn{padding:11px 18px;border-radius:10px;border:none;background:var(--blue);
+  color:#0f0f13;font-family:'Space Mono',monospace;font-size:0.82rem;font-weight:700;cursor:pointer;}
+.submit-btn:hover{opacity:.88;}
+.submit-btn:disabled{opacity:.5;cursor:default;}
+
+.feedback{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px;margin-bottom:12px;display:none;}
+.fb-banner{font-weight:700;font-size:0.95rem;margin-bottom:10px;}
+.fb-banner.ok{color:var(--green);}
+.fb-banner.err{color:var(--red);}
+.fb-formula{font-family:'Space Mono',monospace;color:var(--purple);font-size:0.78rem;margin-bottom:4px;}
+.fb-working{font-family:'Space Mono',monospace;color:var(--muted);font-size:0.76rem;line-height:1.5;}
+
+.next-btn{width:100%;padding:13px;border-radius:12px;border:none;background:var(--gold);
+  color:#0f0f13;font-family:'Space Mono',monospace;font-size:0.88rem;font-weight:700;
+  cursor:pointer;display:none;}
+.next-btn:hover{opacity:.88;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <h1>Ratio Quiz</h1>
+    <div class="stats">
+      <span class="stat"><strong id="stat-score">0 / 0</strong> correct</span>
+      <span class="stat">🔥&nbsp;<strong id="stat-streak">0</strong></span>
+      <span class="stat">⏱&nbsp;<strong id="stat-timer">0s</strong></span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="pill-row">
+      <button class="pill active" id="btn-simplify" onclick="setTopic('simplify')">Simplify</button>
+      <button class="pill" id="btn-divide" onclick="setTopic('divide')">Divide</button>
+      <button class="pill" id="btn-ratio-word" onclick="setTopic('ratio-word')">Word Probs</button>
+      <button class="pill" id="btn-unitary" onclick="setTopic('unitary')">Unitary</button>
+      <button class="pill" id="btn-rate" onclick="setTopic('rate')">Rate</button>
+      <button class="pill" id="btn-speed" onclick="setTopic('speed')">Speed</button>
+      <button class="pill" id="btn-mix" onclick="setTopic('mix')">Mix</button>
+    </div>
+    <div class="pill-row">
+      <button class="pill active" id="btn-mc" onclick="setMode('mc')">Multiple Choice</button>
+      <button class="pill" id="btn-type" onclick="setMode('type')">Type In</button>
+    </div>
+    <div class="pill-row">
+      <button class="pill diff-pill active" onclick="setDiff('easy')">Easy</button>
+      <button class="pill diff-pill" onclick="setDiff('medium')">Medium</button>
+      <button class="pill diff-pill" onclick="setDiff('all')">All (+3-part)</button>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="shape-label" id="shape-label"></div>
+    <div class="svg-wrap" id="svg-wrap"></div>
+    <p class="prompt" id="prompt"></p>
+  </div>
+
+  <div id="answer-area"></div>
+  <div class="feedback" id="feedback">
+    <div class="fb-banner" id="fb-banner"></div>
+    <div class="fb-formula" id="fb-formula"></div>
+    <div class="fb-working" id="fb-working"></div>
+  </div>
+  <button class="next-btn" id="next-btn" onclick="nextQ()">Next Question →</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  SVG HELPERS (bar model)
+// ═══════════════════════════════════════════════════════
+const FILL='rgba(96,165,250,0.15)',SHPS='#60a5fa',GOLD='#fbbf24';
+const FONT="font-family='Space Mono,monospace' font-size='12'";
+const F=n=>parseFloat(n.toFixed(1));
+const W=c=>`<svg viewBox='0 0 300 200' width='100%' height='100%'>${c}</svg>`;
+const txt=(x,y,t,c,a)=>{c=c||GOLD;a=a||'middle';return`<text x='${F(x)}' y='${F(y)}' text-anchor='${a}' dominant-baseline='middle' fill='${c}' ${FONT}>${t}</text>`;};
+
+function drawRatioBar(parts){
+  const total=parts.reduce((a,b)=>a+b,0);
+  const barX=25,barY=95,barW=250,barH=42;
+  const palette=['rgba(96,165,250,0.18)','rgba(167,139,250,0.18)','rgba(52,211,153,0.15)'];
+  let x=barX,segs='';
+  parts.forEach((p,i)=>{
+    const w=F(barW*p/total);
+    segs+=`<rect x='${F(x)}' y='${barY}' width='${w}' height='${barH}' fill='${palette[i%palette.length]}' stroke='${SHPS}' stroke-width='1.5'/>`;
+    segs+=txt(F(x+w/2),F(barY+barH/2),`${p}`,GOLD,'middle');
+    x+=w;
+  });
+  const border=`<rect x='${barX}' y='${barY}' width='${barW}' height='${barH}' fill='none' stroke='${SHPS}' stroke-width='2'/>`;
+  const label=txt(150,barY-18,`Ratio  ${parts.join(' : ')}`,GOLD,'middle');
+  return W(segs+border+label);
+}
+
+// ═══════════════════════════════════════════════════════
+//  SHARED UTILS
+// ═══════════════════════════════════════════════════════
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function gcd2(a,b){return b===0?a:gcd2(b,a%b);}
+function arraysEqual(a,b){return a.length===b.length&&a.every((v,i)=>v===b[i]);}
+
+function randCoprimePair(maxVal){
+  let a,b;
+  do{a=rnd(1,maxVal);b=rnd(1,maxVal);}while(gcd2(a,b)!==1);
+  return[a,b];
+}
+function randCoprimeTriple(maxVal){
+  let a,b,c;
+  do{a=rnd(1,maxVal);b=rnd(1,maxVal);c=rnd(1,maxVal);}while(gcd2(gcd2(a,b),c)!==1);
+  return[a,b,c];
+}
+
+function makeRatioChoices(correct,wrongsList){
+  const fmt=p=>p.join(' : ');
+  const seen=[fmt(correct)];
+  const out=[{label:fmt(correct),parts:correct}];
+  for(const w of wrongsList){
+    const lbl=fmt(w);
+    if(seen.includes(lbl))continue;
+    seen.push(lbl);out.push({label:lbl,parts:w});
+    if(out.length===4)break;
+  }
+  let guard=0;
+  while(out.length<4&&guard<20){
+    guard++;
+    const idx=rnd(0,correct.length-1);
+    const variant=correct.slice();
+    variant[idx]=Math.max(1,variant[idx]+rnd(1,4)*(Math.random()<0.5?1:-1));
+    const lbl=fmt(variant);
+    if(!seen.includes(lbl)){seen.push(lbl);out.push({label:lbl,parts:variant});}
+  }
+  return shuffle(out);
+}
+
+// ═══════════════════════════════════════════════════════
+//  DIFFICULTY RANGES
+// ═══════════════════════════════════════════════════════
+function simplifyRanges(tier){
+  if(tier==='easy')return{maxVal:6,multRange:[2,6]};
+  if(tier==='medium')return{maxVal:12,multRange:[2,9]};
+  return{maxVal:12,multRange:[2,9]};
+}
+function divideRanges(tier){
+  if(tier==='easy')return{maxVal:6,kRange:[2,6]};
+  if(tier==='medium')return{maxVal:12,kRange:[2,10]};
+  return{maxVal:12,kRange:[2,12]};
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENERATOR — SIMPLIFY RATIO
+// ═══════════════════════════════════════════════════════
+function gSimplify(nParts,tier){
+  const{maxVal,multRange}=simplifyRanges(tier);
+  const mv=nParts===3?Math.min(maxVal,9):maxVal;
+  const parts=nParts===2?randCoprimePair(mv):randCoprimeTriple(mv);
+  const mult=rnd(multRange[0],multRange[1]);
+  const original=parts.map(p=>p*mult);
+  const correct=parts;
+
+  const wrongsList=[];
+  wrongsList.push([...correct].reverse());
+  const factors=[];
+  for(let f=2;f<mult;f++){if(mult%f===0)factors.push(f);}
+  if(factors.length){
+    const f=pick(factors);
+    const scaleBack=mult/f;
+    wrongsList.push(original.map(o=>o/scaleBack));
+  }else{
+    wrongsList.push(original.slice());
+  }
+  const idx=rnd(0,correct.length-1);
+  const offBy1=correct.slice();offBy1[idx]=Math.max(1,offBy1[idx]+(Math.random()<0.5?1:-1));
+  wrongsList.push(offBy1);
+  wrongsList.push(original.slice());
+
+  return{
+    name:'Simplify Ratio',topicKind:'simplify',nParts,
+    display:original.join(' : '),
+    prompt:'Simplify this ratio. Give your answer in its simplest form.',
+    correct,
+    formula:'Divide every part by the highest common factor (HCF).',
+    working:`HCF(${original.join(', ')}) = ${mult} \u2192 ${original.join(' : ')} \u00f7 ${mult} = ${correct.join(' : ')}`,
+    choices:makeRatioChoices(correct,wrongsList)
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENERATOR — DIVIDE IN A RATIO
+// ═══════════════════════════════════════════════════════
+const DIVIDE_TEMPLATES_2=[
+  (t,a,b)=>`Share ${t} sweets between Alex and Ben in the ratio ${a} : ${b}. Find each share.`,
+  (t,a,b)=>`Divide \u00a3${t} between Sam and Jess in the ratio ${a} : ${b}. Find each amount.`,
+  (t,a,b)=>`A ${t} cm ribbon is cut in the ratio ${a} : ${b}. Find the length of each piece.`,
+  (t,a,b)=>`A ${t} ml mixture of water and juice is made in the ratio ${a} : ${b}. Find the amount of each liquid.`,
+  (t,a,b)=>`Share ${t} stickers between two friends in the ratio ${a} : ${b}. Find each share.`,
+];
+const DIVIDE_TEMPLATES_3=[
+  (t,a,b,c)=>`Share ${t} marbles between three friends in the ratio ${a} : ${b} : ${c}. Find each share.`,
+  (t,a,b,c)=>`Divide \u00a3${t} between three people in the ratio ${a} : ${b} : ${c}. Find each amount.`,
+  (t,a,b,c)=>`A ${t} m plank of wood is cut into three pieces in the ratio ${a} : ${b} : ${c}. Find the length of each piece.`,
+  (t,a,b,c)=>`A cordial mix of ${t} ml is made from three ingredients in the ratio ${a} : ${b} : ${c}. Find each amount.`,
+];
+
+function gDivide(nParts,tier){
+  const{maxVal,kRange}=divideRanges(tier);
+  const mv=nParts===3?Math.min(maxVal,9):maxVal;
+  const parts=nParts===2?randCoprimePair(mv):randCoprimeTriple(mv);
+  const sum=parts.reduce((a,b)=>a+b,0);
+  const k=rnd(kRange[0],kRange[1]);
+  const total=sum*k;
+  const correct=parts.map(p=>p*k);
+  const prompt=nParts===2
+    ?pick(DIVIDE_TEMPLATES_2)(total,parts[0],parts[1])
+    :pick(DIVIDE_TEMPLATES_3)(total,parts[0],parts[1],parts[2]);
+
+  const wrongsList=[];
+  wrongsList.push([...correct].reverse());
+  const equal=Math.round(total/nParts);
+  wrongsList.push(new Array(nParts).fill(equal));
+  const idx=rnd(0,nParts-1);
+  const off=correct.slice();off[idx]=Math.max(1,off[idx]+(Math.random()<0.5?k:-k));
+  wrongsList.push(off);
+  wrongsList.push(parts.slice());
+
+  return{
+    name:'Divide in a Ratio',topicKind:'divide',nParts,total,ratioParts:parts,
+    display:null,
+    prompt,
+    correct,
+    formula:'Find the value of one part, then multiply by each ratio number.',
+    working:`Total parts = ${parts.join(' + ')} = ${sum}. ${total} \u00f7 ${sum} = ${k} per part. ${parts.map(p=>`${p}\u00d7${k}=${p*k}`).join(', ')}`,
+    choices:makeRatioChoices(correct,wrongsList)
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENERATOR — RATIO WORD PROBLEMS
+// ═══════════════════════════════════════════════════════
+function rwRanges(tier){
+  if(tier==='easy')return{maxVal:6,kRange:[2,6]};
+  if(tier==='medium')return{maxVal:10,kRange:[2,10]};
+  return{maxVal:10,kRange:[2,12]};
+}
+
+// RW1: given one part, find the other part
+const RW1_TEMPLATES=[
+  (a,b,given)=>`The ratio of red to blue counters in a bag is ${a} : ${b}. There are ${given} red counters. How many blue counters are there?`,
+  (a,b,given)=>`A fruit basket has apples and oranges in the ratio ${a} : ${b}. There are ${given} apples. How many oranges are there?`,
+  (a,b,given)=>`In a class, the ratio of boys to girls is ${a} : ${b}. There are ${given} boys. How many girls are there?`,
+  (a,b,given)=>`A paint mix uses blue and white paint in the ratio ${a} : ${b}. ${given} litres of blue paint are used. How many litres of white paint are needed?`,
+];
+function gRatioWord1(tier){
+  const{maxVal,kRange}=rwRanges(tier);
+  const[a,b]=randCoprimePair(maxVal);
+  const k=rnd(kRange[0],kRange[1]);
+  const given=a*k,find=b*k;
+  const display=pick(RW1_TEMPLATES)(a,b,given);
+
+  const wrongsList=[];
+  wrongsList.push(Math.round(given*a/b));
+  wrongsList.push(given+(b-a));
+  wrongsList.push(given+find);
+  wrongsList.push(Math.max(1,find+k));
+
+  return{
+    name:'Ratio Problem',topicKind:'ratio-word',
+    display,
+    prompt:'Use the given ratio to find the missing amount.',
+    correct:[find],
+    formula:'Multiply the given amount by the ratio scale factor.',
+    working:`${given} \u00f7 ${a} = ${k} (value of 1 part). ${b} \u00d7 ${k} = ${find}`,
+    choices:makeRatioChoices([find],wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+// RW2: given one part, find the total
+const RW2_TEMPLATES=[
+  (a,b,given)=>`A fruit drink is made from concentrate and water in the ratio ${a} : ${b}. ${given} ml of concentrate is used. What is the total volume of the drink?`,
+  (a,b,given)=>`Money is shared between two charities in the ratio ${a} : ${b}. One charity receives \u00a3${given}. What is the total amount shared?`,
+  (a,b,given)=>`A garden has roses and tulips in the ratio ${a} : ${b}. There are ${given} roses. How many flowers are there in total?`,
+  (a,b,given)=>`Concrete is mixed from cement and sand in the ratio ${a} : ${b}. ${given} kg of cement is used. What is the total mass of the mixture?`,
+];
+function gRatioWord2(tier){
+  const{maxVal,kRange}=rwRanges(tier);
+  const[a,b]=randCoprimePair(maxVal);
+  const k=rnd(kRange[0],kRange[1]);
+  const given=a*k,total=(a+b)*k;
+  const display=pick(RW2_TEMPLATES)(a,b,given);
+
+  const wrongsList=[];
+  wrongsList.push(given*2);
+  wrongsList.push(b*k);
+  wrongsList.push(Math.round(given*(a+b)/b));
+  wrongsList.push(total+k);
+
+  return{
+    name:'Ratio Problem',topicKind:'ratio-word',
+    display,
+    prompt:'Use the given ratio to find the total amount.',
+    correct:[total],
+    formula:'Find the value of 1 part, then multiply by the sum of all ratio parts.',
+    working:`${given} \u00f7 ${a} = ${k} (value of 1 part). Total parts = ${a}+${b} = ${a+b}. ${a+b} \u00d7 ${k} = ${total}`,
+    choices:makeRatioChoices([total],wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+// RW3: difference between two parts \u2192 find both parts
+const RW3_TEMPLATES=[
+  (a,b,diff)=>`Two numbers are in the ratio ${a} : ${b}. The larger number is ${diff} more than the smaller. Find both numbers (smallest first).`,
+  (a,b,diff)=>`A shop stocks red and blue pens in the ratio ${a} : ${b}. There are ${diff} more blue pens than red pens. How many of each colour are there? (red, blue)`,
+  (a,b,diff)=>`Two friends share stickers in the ratio ${a} : ${b}. The friend with more has ${diff} more stickers than the friend with fewer. How many does each friend have? (fewer, more)`,
+];
+function gRatioWord3(tier){
+  const{maxVal,kRange}=rwRanges(tier);
+  let a,b;
+  do{[a,b]=randCoprimePair(maxVal);}while(a>=b);
+  const k=rnd(kRange[0],kRange[1]);
+  const diff=(b-a)*k;
+  const correct=[a*k,b*k];
+  const display=pick(RW3_TEMPLATES)(a,b,diff);
+
+  const wrongsList=[];
+  wrongsList.push([correct[1],correct[0]]);
+  wrongsList.push([a,b]);
+  wrongsList.push([a*diff,b*diff]);
+  const idx=rnd(0,1);
+  const off=correct.slice();off[idx]=Math.max(1,off[idx]+(Math.random()<0.5?k:-k));
+  wrongsList.push(off);
+
+  return{
+    name:'Ratio Problem',topicKind:'ratio-word',
+    display,
+    prompt:'Find both amounts.',
+    correct,
+    formula:'Find the value of 1 part from the difference, then multiply.',
+    working:`Difference in parts = ${b}\u2212${a} = ${b-a}. ${diff} \u00f7 ${b-a} = ${k} (value of 1 part). ${a}\u00d7${k}=${a*k}, ${b}\u00d7${k}=${b*k}`,
+    choices:makeRatioChoices(correct,wrongsList)
+  };
+}
+
+// RW4: combine two ratios (a:b and b:c \u2192 a:b:c) \u2014 'all' tier only
+function gRatioWord4(){
+  const[a,b]=randCoprimePair(6);
+  let bp,c;
+  do{[bp,c]=randCoprimePair(6);}while(bp===b);
+  const lcm=(x,y)=>x*y/gcd2(x,y);
+  const L=lcm(b,bp);
+  const s1=L/b,s2=L/bp;
+  let A=a*s1,B=b*s1,C=c*s2;
+  const g=[A,B,C].reduce((x,y)=>gcd2(x,y));
+  A/=g;B/=g;C/=g;
+  const correct=[A,B,C];
+  const display=`If a : b = ${a} : ${b} and b : c = ${bp} : ${c}, find a : b : c in its simplest form.`;
+
+  const wrongsList=[];
+  wrongsList.push([a,b,c]);
+  wrongsList.push([C,B,A]);
+  const idx=rnd(0,2);
+  const off=correct.slice();off[idx]=Math.max(1,off[idx]+(Math.random()<0.5?1:-1));
+  wrongsList.push(off);
+  wrongsList.push([A,B,c]);
+
+  return{
+    name:'Combine Ratios',topicKind:'ratio-word',
+    display,
+    prompt:'Scale both ratios so the shared term (b) matches, then combine.',
+    correct,
+    formula:'Find the LCM of both b values, scale each ratio, then combine.',
+    working:`LCM(${b}, ${bp}) = ${L}. Scale a:b by \u00d7${s1} \u2192 ${a*s1}:${b*s1}. Scale b:c by \u00d7${s2} \u2192 ${bp*s2}:${c*s2}. Combined a:b:c = ${a*s1}:${b*s1}:${c*s2}${g>1?` = ${correct.join(':')} (simplified)`:''}`,
+    choices:makeRatioChoices(correct,wrongsList)
+  };
+}
+
+function gRatioWord(tier){
+  if(tier==='all'&&Math.random()<0.25)return gRatioWord4();
+  const r=Math.random();
+  if(r<0.34)return gRatioWord1(tier);
+  if(r<0.67)return gRatioWord2(tier);
+  return gRatioWord3(tier);
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENERATOR — UNITARY METHOD
+// ═══════════════════════════════════════════════════════
+function unitaryRanges(tier){
+  if(tier==='easy')return{valRange:[2,6],cRange:[2,8]};
+  if(tier==='medium')return{valRange:[2,10],cRange:[2,12]};
+  return{valRange:[2,15],cRange:[2,15]};
+}
+
+// U1: scale a known A\u2192B relationship to a new A
+const U1_TEMPLATES=[
+  (unitsA,amountB,newUnitsA)=>`A recipe for ${unitsA} people uses ${amountB}g of sugar. How much sugar is needed for ${newUnitsA} people?`,
+  (unitsA,amountB,newUnitsA)=>`${unitsA} identical tiles cover ${amountB} cm\u00b2 of wall. How much wall would ${newUnitsA} tiles cover?`,
+  (unitsA,amountB,newUnitsA)=>`A printer uses ${unitsA} ink cartridges to print ${amountB} pages. How many pages can it print using ${newUnitsA} cartridges?`,
+  (unitsA,amountB,newUnitsA)=>`${unitsA} sacks of cement make ${amountB} kg of concrete. How much concrete would ${newUnitsA} sacks make?`,
+];
+function gUnitary1(tier){
+  const{valRange,cRange}=unitaryRanges(tier);
+  const v=rnd(valRange[0],valRange[1]);
+  const unitsA=rnd(cRange[0],cRange[1]);
+  const amountB=unitsA*v;
+  let newUnitsA;
+  do{newUnitsA=rnd(cRange[0],cRange[1]);}while(newUnitsA===unitsA);
+  const correct=[newUnitsA*v];
+  const display=pick(U1_TEMPLATES)(unitsA,amountB,newUnitsA);
+
+  const wrongsList=[];
+  wrongsList.push(amountB);
+  wrongsList.push(Math.round(amountB*unitsA/newUnitsA));
+  wrongsList.push(amountB+(newUnitsA-unitsA));
+  wrongsList.push(correct[0]+v);
+
+  return{
+    name:'Unitary Method',topicKind:'unitary',
+    display,
+    prompt:'Find the value of 1 unit, then scale up (or down).',
+    correct,
+    formula:'Divide to find 1 unit, then multiply by the new number of units.',
+    working:`${amountB} \u00f7 ${unitsA} = ${v} (value of 1 unit). ${v} \u00d7 ${newUnitsA} = ${correct[0]}`,
+    choices:makeRatioChoices(correct,wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+// U2: find the value of one unit
+const U2_TEMPLATES=[
+  (unitsA,amountB)=>`${unitsA} identical notebooks cost \u00a3${amountB} in total. What is the cost of one notebook?`,
+  (unitsA,amountB)=>`${amountB} litres of paint are shared equally among ${unitsA} tins. How much paint is in each tin?`,
+  (unitsA,amountB)=>`${unitsA} workers share a prize of \u00a3${amountB} equally. How much does one worker receive?`,
+  (unitsA,amountB)=>`A box of ${unitsA} chocolates weighs ${amountB}g in total. What is the weight of one chocolate?`,
+];
+function gUnitary2(tier){
+  const{valRange,cRange}=unitaryRanges(tier);
+  const v=rnd(valRange[0],valRange[1]);
+  const unitsA=rnd(cRange[0],cRange[1]);
+  const amountB=unitsA*v;
+  const correct=[v];
+  const display=pick(U2_TEMPLATES)(unitsA,amountB);
+
+  const wrongsList=[];
+  wrongsList.push(amountB);
+  wrongsList.push(v+1);
+  wrongsList.push(Math.max(1,v-1));
+  wrongsList.push(Math.round(amountB/(unitsA+1)));
+
+  return{
+    name:'Unitary Method',topicKind:'unitary',
+    display,
+    prompt:'Find the value of one unit.',
+    correct,
+    formula:'Divide the total by the number of units.',
+    working:`${amountB} \u00f7 ${unitsA} = ${v}`,
+    choices:makeRatioChoices(correct,wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+// U3: find the number of units from the total and unit value
+const U3_TEMPLATES=[
+  (v,total)=>`Each box holds ${v} apples. A crate contains ${total} apples in full boxes. How many boxes are there?`,
+  (v,total)=>`Each ticket costs \u00a3${v}. A group spends \u00a3${total} in total. How many tickets did they buy?`,
+  (v,total)=>`Each shelf holds ${v} books. A bookcase holds ${total} books in full shelves. How many shelves are there?`,
+  (v,total)=>`Each minibus seats ${v} passengers. ${total} passengers travel in full minibuses. How many minibuses are needed?`,
+];
+function gUnitary3(tier){
+  const{valRange,cRange}=unitaryRanges(tier);
+  const v=rnd(valRange[0],valRange[1]);
+  const numUnits=rnd(cRange[0],cRange[1]);
+  const total=v*numUnits;
+  const correct=[numUnits];
+  const display=pick(U3_TEMPLATES)(v,total);
+
+  const wrongsList=[];
+  wrongsList.push(v);
+  wrongsList.push(total);
+  wrongsList.push(numUnits+1);
+  wrongsList.push(Math.max(1,numUnits-1));
+
+  return{
+    name:'Unitary Method',topicKind:'unitary',
+    display,
+    prompt:'Find the number of units.',
+    correct,
+    formula:'Divide the total by the value of one unit.',
+    working:`${total} \u00f7 ${v} = ${numUnits}`,
+    choices:makeRatioChoices(correct,wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+function gUnitary(tier){
+  const r=Math.random();
+  if(r<0.4)return gUnitary1(tier);
+  if(r<0.7)return gUnitary2(tier);
+  return gUnitary3(tier);
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENERATOR — RATE
+// ═══════════════════════════════════════════════════════
+const RATE_ITEMS=['apples','pens','notebooks','oranges','chocolate bars','stickers','tickets','bottles of water'];
+
+function rateRanges(tier){
+  if(tier==='easy')return{rateRange:[2,8],qtyRange:[2,8]};
+  if(tier==='medium')return{rateRange:[2,12],qtyRange:[2,12]};
+  return{rateRange:[2,15],qtyRange:[2,15]};
+}
+
+// R1: calculate the rate from two totals
+const R1_TEMPLATES=[
+  (unitsA,amountB)=>`A car uses ${unitsA} litres of petrol to travel ${amountB} km. What is the fuel consumption, in km per litre?`,
+  (unitsA,amountB)=>`A tap fills a tank with ${amountB} litres of water in ${unitsA} minutes. What is the flow rate, in litres per minute?`,
+  (unitsA,amountB)=>`A typist types ${amountB} words in ${unitsA} minutes. What is their typing speed, in words per minute?`,
+  (unitsA,amountB)=>`A factory produces ${amountB} toys using ${unitsA} hours of work. What is the production rate, in toys per hour?`,
+];
+function gRate1(tier){
+  const{rateRange,qtyRange}=rateRanges(tier);
+  const rate=rnd(rateRange[0],rateRange[1]);
+  const unitsA=rnd(qtyRange[0],qtyRange[1]);
+  const amountB=unitsA*rate;
+  const correct=[rate];
+  const display=pick(R1_TEMPLATES)(unitsA,amountB);
+
+  const wrongsList=[];
+  wrongsList.push(amountB);
+  wrongsList.push(unitsA);
+  wrongsList.push(rate+1);
+  wrongsList.push(Math.max(1,rate-1));
+
+  return{
+    name:'Rate',topicKind:'rate',
+    display,
+    prompt:'Divide to find the rate (amount per unit).',
+    correct,
+    formula:'Rate = total amount \u00f7 number of units.',
+    working:`${amountB} \u00f7 ${unitsA} = ${rate}`,
+    choices:makeRatioChoices(correct,wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+// R2: best value comparison
+function gRate2(tier){
+  const{rateRange,qtyRange}=rateRanges(tier);
+  let rateA,rateB;
+  do{rateA=rnd(rateRange[0],rateRange[1]);rateB=rnd(rateRange[0],rateRange[1]);}while(rateA===rateB);
+  const qtyA=rnd(qtyRange[0],qtyRange[1]);
+  const qtyB=rnd(qtyRange[0],qtyRange[1]);
+  const priceA=rateA*qtyA,priceB=rateB*qtyB;
+  const item=pick(RATE_ITEMS);
+  const cheaper=Math.min(rateA,rateB);
+  const correct=[cheaper];
+  const display=`Shop A sells ${qtyA} ${item} for ${priceA}p. Shop B sells ${qtyB} ${item} for ${priceB}p. What is the price per item at the better-value shop, in pence?`;
+
+  const wrongsList=[];
+  wrongsList.push(Math.max(rateA,rateB));
+  wrongsList.push(Math.round((rateA+rateB)/2));
+  wrongsList.push(rateA+rateB);
+  wrongsList.push(Math.max(1,cheaper+1));
+
+  return{
+    name:'Best Value',topicKind:'rate',
+    display,
+    prompt:'Find the price per item for each shop, then compare.',
+    correct,
+    formula:'Unit price = total price \u00f7 quantity. Compare, then pick the smaller.',
+    working:`Shop A: ${priceA} \u00f7 ${qtyA} = ${rateA}p each. Shop B: ${priceB} \u00f7 ${qtyB} = ${rateB}p each. Better value = ${cheaper}p each.`,
+    choices:makeRatioChoices(correct,wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+// R3: apply a rate forward (rate + units \u2192 total)
+const RP1_TEMPLATES=[
+  (rate,timeGiven)=>`Water flows into a tank at a rate of ${rate} litres per minute. How much water is in the tank after ${timeGiven} minutes?`,
+  (rate,timeGiven)=>`A machine produces ${rate} bottles per hour. How many bottles does it produce in ${timeGiven} hours?`,
+  (rate,timeGiven)=>`A photocopier makes ${rate} copies per minute. How many copies does it make in ${timeGiven} minutes?`,
+  (rate,timeGiven)=>`A worker earns \u00a3${rate} per hour. How much do they earn in ${timeGiven} hours?`,
+];
+function gRate3(tier){
+  const{rateRange,qtyRange}=rateRanges(tier);
+  const rate=rnd(rateRange[0],rateRange[1]);
+  const timeGiven=rnd(qtyRange[0],qtyRange[1]);
+  const correct=[rate*timeGiven];
+  const display=pick(RP1_TEMPLATES)(rate,timeGiven);
+
+  const wrongsList=[];
+  wrongsList.push(rate+timeGiven);
+  wrongsList.push(rate);
+  wrongsList.push(Math.round(timeGiven/rate));
+  wrongsList.push(correct[0]+rate);
+
+  return{
+    name:'Rate Problem',topicKind:'rate',
+    display,
+    prompt:'Multiply the rate by the number of units.',
+    correct,
+    formula:'Total = rate \u00d7 number of units.',
+    working:`${rate} \u00d7 ${timeGiven} = ${correct[0]}`,
+    choices:makeRatioChoices(correct,wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+// R4: apply a rate backward (rate + total \u2192 units)
+const RP2_TEMPLATES=[
+  (rate,total)=>`Petrol costs \u00a3${rate} per litre. A driver spends \u00a3${total} on petrol. How many litres did they buy?`,
+  (rate,total)=>`A printer prints ${rate} pages per minute. A document has ${total} pages in total. How many minutes does it take to print?`,
+  (rate,total)=>`A parking fee is \u00a3${rate} per hour. A driver pays \u00a3${total} in total. How many hours did they park?`,
+  (rate,total)=>`Tickets cost \u00a3${rate} each. A group spends \u00a3${total} in total. How many tickets did they buy?`,
+];
+function gRate4(tier){
+  const{rateRange,qtyRange}=rateRanges(tier);
+  const rate=rnd(rateRange[0],rateRange[1]);
+  const qty=rnd(qtyRange[0],qtyRange[1]);
+  const total=rate*qty;
+  const correct=[qty];
+  const display=pick(RP2_TEMPLATES)(rate,total);
+
+  const wrongsList=[];
+  wrongsList.push(rate);
+  wrongsList.push(total);
+  wrongsList.push(qty+1);
+  wrongsList.push(Math.max(1,qty-1));
+
+  return{
+    name:'Rate Problem',topicKind:'rate',
+    display,
+    prompt:'Divide the total by the rate.',
+    correct,
+    formula:'Number of units = total \u00f7 rate.',
+    working:`${total} \u00f7 ${rate} = ${qty}`,
+    choices:makeRatioChoices(correct,wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+function gRate(tier){
+  const r=Math.random();
+  if(r<0.25)return gRate1(tier);
+  if(r<0.5)return gRate2(tier);
+  if(r<0.75)return gRate3(tier);
+  return gRate4(tier);
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENERATOR — SPEED
+// ═══════════════════════════════════════════════════════
+const SPEED_SYS=[
+  {speedUnit:'km/h',distUnit:'km',timeUnit:'hours',subj:['A car','A cyclist','A bus'],vRange:[10,120],tRange:[1,8]},
+  {speedUnit:'m/s',distUnit:'m',timeUnit:'seconds',subj:['A sprinter','A cheetah','A swimmer'],vRange:[2,30],tRange:[2,20]},
+  {speedUnit:'mph',distUnit:'miles',timeUnit:'hours',subj:['A plane','A train','A ship'],vRange:[10,90],tRange:[1,6]},
+];
+
+function scaledRange([lo,hi],tier){
+  if(tier==='easy')return[lo,Math.max(lo,Math.round(lo+(hi-lo)*0.4))];
+  if(tier==='medium')return[lo,Math.max(lo,Math.round(lo+(hi-lo)*0.7))];
+  return[lo,hi];
+}
+
+function gSpeed1(tier){ // find speed, given distance & time
+  const sys=pick(SPEED_SYS);
+  const vR=scaledRange(sys.vRange,tier),tR=scaledRange(sys.tRange,tier);
+  const v=rnd(vR[0],vR[1]),t=rnd(tR[0],tR[1]);
+  const d=v*t;
+  const subj=pick(sys.subj);
+  const display=`${subj} travels ${d} ${sys.distUnit} in ${t} ${sys.timeUnit}. What is its average speed in ${sys.speedUnit}?`;
+
+  const wrongsList=[];
+  wrongsList.push(d*t);
+  wrongsList.push(d+t);
+  wrongsList.push(t);
+  wrongsList.push(Math.max(1,v+(Math.random()<0.5?1:-1)));
+
+  return{
+    name:'Speed',topicKind:'speed',
+    display,
+    prompt:'Speed = distance \u00f7 time.',
+    correct:[v],
+    formula:'Speed = Distance \u00f7 Time',
+    working:`${d} \u00f7 ${t} = ${v} ${sys.speedUnit}`,
+    choices:makeRatioChoices([v],wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+function gSpeed2(tier){ // find distance, given speed & time
+  const sys=pick(SPEED_SYS);
+  const vR=scaledRange(sys.vRange,tier),tR=scaledRange(sys.tRange,tier);
+  const v=rnd(vR[0],vR[1]),t=rnd(tR[0],tR[1]);
+  const d=v*t;
+  const subj=pick(sys.subj);
+  const display=`${subj} travels at ${v} ${sys.speedUnit} for ${t} ${sys.timeUnit}. How far does it travel (in ${sys.distUnit})?`;
+
+  const wrongsList=[];
+  wrongsList.push(v+t);
+  wrongsList.push(Math.max(1,Math.round(v/t)));
+  wrongsList.push(v);
+  wrongsList.push(d+t);
+
+  return{
+    name:'Speed',topicKind:'speed',
+    display,
+    prompt:'Distance = speed \u00d7 time.',
+    correct:[d],
+    formula:'Distance = Speed \u00d7 Time',
+    working:`${v} \u00d7 ${t} = ${d} ${sys.distUnit}`,
+    choices:makeRatioChoices([d],wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+function gSpeed3(tier){ // find time, given distance & speed
+  const sys=pick(SPEED_SYS);
+  const vR=scaledRange(sys.vRange,tier),tR=scaledRange(sys.tRange,tier);
+  const v=rnd(vR[0],vR[1]),t=rnd(tR[0],tR[1]);
+  const d=v*t;
+  const subj=pick(sys.subj);
+  const display=`${subj} travels ${d} ${sys.distUnit} at a speed of ${v} ${sys.speedUnit}. How long does the journey take (in ${sys.timeUnit})?`;
+
+  const wrongsList=[];
+  wrongsList.push(d*v);
+  wrongsList.push(d+v);
+  wrongsList.push(v);
+  wrongsList.push(Math.max(1,t+(Math.random()<0.5?1:-1)));
+
+  return{
+    name:'Speed',topicKind:'speed',
+    display,
+    prompt:'Time = distance \u00f7 speed.',
+    correct:[t],
+    formula:'Time = Distance \u00f7 Speed',
+    working:`${d} \u00f7 ${v} = ${t} ${sys.timeUnit}`,
+    choices:makeRatioChoices([t],wrongsList.map(w=>[Math.max(1,Math.round(w))]))
+  };
+}
+
+function gSpeed(tier){
+  const r=Math.random();
+  if(r<0.34)return gSpeed1(tier);
+  if(r<0.67)return gSpeed2(tier);
+  return gSpeed3(tier);
+}
+
+// ═══════════════════════════════════════════════════════
+//  QUIZ STATE
+// ═══════════════════════════════════════════════════════
+let MODE='mc',TOPIC='simplify',DIFF='easy';
+let score={c:0,t:0},streak=0,currentQ=null,answered=false;
+let timerStart=0,timerInterval=null;
+
+function setTopic(t){
+  TOPIC=t;
+  ['simplify','divide','ratio-word','unitary','rate','speed','mix'].forEach(k=>document.getElementById('btn-'+k).classList.toggle('active',t===k));
+  score={c:0,t:0};streak=0;updateStats();
+  nextQ();
+}
+function setMode(m){
+  MODE=m;
+  document.getElementById('btn-mc').classList.toggle('active',m==='mc');
+  document.getElementById('btn-type').classList.toggle('active',m==='type');
+  if(currentQ&&!answered)renderAnswerArea();
+}
+function setDiff(d){
+  DIFF=d;
+  document.querySelectorAll('.diff-pill').forEach((b,i)=>b.classList.toggle('active',['easy','medium','all'][i]===d));
+  nextQ();
+}
+
+// ── Timer ──────────────────────────────────────────────
+function startTimer(){
+  timerStart=Date.now();
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    document.getElementById('stat-timer').textContent=Math.floor((Date.now()-timerStart)/1000)+'s';
+  },500);
+}
+function stopTimer(){clearInterval(timerInterval);}
+
+// ── Stats ──────────────────────────────────────────────
+function updateStats(){
+  document.getElementById('stat-score').textContent=`${score.c} / ${score.t}`;
+  document.getElementById('stat-streak').textContent=streak;
+}
+
+// ── Next question ────────────────────────────────────
+function nextQ(){
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('next-btn').style.display='none';
+
+  const pools=TOPIC==='mix'?['simplify','divide','ratio-word','unitary','rate','speed']:[TOPIC];
+  const effTopic=pick(pools);
+
+  if(effTopic==='simplify'||effTopic==='divide'){
+    let nParts=2;
+    if(DIFF==='all'&&Math.random()<0.35)nParts=3;
+    currentQ=effTopic==='simplify'?gSimplify(nParts,DIFF):gDivide(nParts,DIFF);
+  } else if(effTopic==='ratio-word'){
+    currentQ=gRatioWord(DIFF);
+  } else if(effTopic==='unitary'){
+    currentQ=gUnitary(DIFF);
+  } else if(effTopic==='rate'){
+    currentQ=gRate(DIFF);
+  } else {
+    currentQ=gSpeed(DIFF);
+  }
+  answered=false;
+
+  const svgWrap=document.getElementById('svg-wrap');
+  if(effTopic==='divide'){
+    svgWrap.innerHTML=drawRatioBar(currentQ.ratioParts);
+  } else if(effTopic==='simplify'){
+    svgWrap.innerHTML=`<div class="formula-display">${currentQ.display}</div>`;
+  } else {
+    svgWrap.innerHTML=`<div class="word-display">${currentQ.display}</div>`;
+  }
+  document.getElementById('shape-label').textContent=currentQ.name;
+  document.getElementById('prompt').textContent=currentQ.prompt;
+  renderAnswerArea();
+  startTimer();
+}
+
+function renderAnswerArea(){
+  const el=document.getElementById('answer-area');
+  if(MODE==='mc'){
+    const btns=currentQ.choices.map((c,i)=>`<button class="mc-btn" id="mc${i}" onclick="checkMC(${i})">${c.label}</button>`).join('');
+    el.innerHTML=`<div class="mc-grid">${btns}</div>`;
+  }else{
+    const n=currentQ.correct.length;
+    let inputs='';
+    for(let i=0;i<n;i++){
+      inputs+=`<input class="ratio-input" id="ri${i}" type="number" inputmode="numeric" placeholder="?">`;
+      if(i<n-1)inputs+=`<span class="ratio-colon">:</span>`;
+    }
+    el.innerHTML=`
+      <div class="type-row">
+        <div class="ratio-input-group">${inputs}</div>
+        <button class="submit-btn" onclick="checkType()">Check</button>
+      </div>`;
+    for(let i=0;i<n;i++){
+      document.getElementById('ri'+i).addEventListener('keydown',e=>{if(e.key==='Enter')checkType();});
+    }
+    setTimeout(()=>document.getElementById('ri0')?.focus(),50);
+  }
+}
+
+// ── Check answer ─────────────────────────────────────
+function checkMC(idx){
+  if(answered)return;
+  answered=true;stopTimer();score.t++;
+  const chosen=currentQ.choices[idx];
+  const correct=arraysEqual(chosen.parts,currentQ.correct);
+  if(correct)score.c++;streak=correct?streak+1:0;updateStats();
+  currentQ.choices.forEach((c,i)=>{
+    const b=document.getElementById('mc'+i);
+    if(!b)return;
+    const isC=arraysEqual(c.parts,currentQ.correct);
+    if(i===idx)b.classList.add(isC?'correct':'wrong');
+    else if(isC)b.classList.add('correct');
+    b.disabled=true;
+  });
+  showFeedback(correct);
+}
+
+function checkType(){
+  if(answered)return;
+  const n=currentQ.correct.length;
+  const vals=[];
+  for(let i=0;i<n;i++){
+    const inp=document.getElementById('ri'+i);
+    const v=parseFloat(inp.value);
+    if(isNaN(v)){inp.focus();return;}
+    vals.push(v);
+  }
+  answered=true;stopTimer();score.t++;
+  const correct=arraysEqual(vals,currentQ.correct);
+  if(correct)score.c++;streak=correct?streak+1:0;updateStats();
+  for(let i=0;i<n;i++){
+    const inp=document.getElementById('ri'+i);
+    inp.classList.add(vals[i]===currentQ.correct[i]?'correct':'wrong');
+    inp.disabled=true;
+  }
+  document.querySelector('.submit-btn').disabled=true;
+  showFeedback(correct);
+}
+
+function showFeedback(correct){
+  const label=currentQ.correct.join(' : ');
+  document.getElementById('fb-banner').className='fb-banner '+(correct?'ok':'err');
+  document.getElementById('fb-banner').textContent=correct?'✓ Correct!':`✗ Answer: ${label}`;
+  document.getElementById('fb-formula').textContent=currentQ.formula;
+  document.getElementById('fb-working').textContent=currentQ.working;
+  document.getElementById('feedback').style.display='block';
+  document.getElementById('next-btn').style.display='block';
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+nextQ();
+</script>
+</body>
+</html>

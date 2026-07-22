@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maths Applets</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f8f8f6;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e4e4e0;
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+    }
+
+    header a {
+      text-decoration: none;
+      color: #1a1a1a;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    header a span { color: #4a7fe8; }
+
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    .hero { margin-bottom: 3.5rem; }
+
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.6rem;
+    }
+
+    .hero p {
+      font-size: 1rem;
+      color: #777;
+      line-height: 1.65;
+      max-width: 460px;
+    }
+
+    .label {
+      font-size: 0.68rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: #aaa;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .topics {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+
+    .topic-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: #fff;
+      border: 1px solid #e4e4e0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+
+    .topic-card:hover {
+      border-color: #4a7fe8;
+      box-shadow: 0 4px 18px rgba(74,127,232,0.09);
+      transform: translateY(-2px);
+    }
+
+    .topic-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+
+    .topic-card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .topic-card p {
+      font-size: 0.82rem;
+      color: #999;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 0.85rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      background: #eef3fd;
+      color: #4a7fe8;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2.5rem 2rem;
+      font-size: 0.8rem;
+      color: #ccc;
+      border-top: 1px solid #eee;
+      margin-top: 4rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html">Maths <span>Applets</span></a>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Interactive Maths<br>for High School</h1>
+    <p>Explore topics through interactive applets. Practice and build understanding at your own pace.</p>
+  </div>
+
+  <p class="label">Topics</p>
+
+  <div class="topics">
+
+    <a class="topic-card" href="number.html">
+      <div class="topic-icon">🔢</div>
+      <h2>Number</h2>
+      <p>Times tables, arithmetic, fractions, rounding and ratio &amp; rates.</p>
+      <span class="badge">5 applets</span>
+    </a>
+
+    <a class="topic-card" href="algebra.html">
+      <div class="topic-icon">𝑥</div>
+      <h2>Algebra</h2>
+      <p>Expressions, equations and algebraic thinking.</p>
+      <span class="badge">3 applets</span>
+    </a>
+
+    <a class="topic-card" href="geometry.html">
+      <div class="topic-icon">📐</div>
+      <h2>Geometry</h2>
+      <p>Area, perimeter and volume of 2D and 3D shapes.</p>
+      <span class="badge">1 applet</span>
+    </a>
+
+    <!-- TO ADD A NEW TOPIC: copy a card above, update the href, icon, title, description and badge count -->
+    <!--
+    <a class="topic-card" href="probability.html">
+      <div class="topic-icon">🎲</div>
+      <h2>Probability</h2>
+      <p>Chance, outcomes and probability theory.</p>
+      <span class="badge">1 applet</span>
+    </a>
+
+    <a class="topic-card" href="statistics.html">
+      <div class="topic-icon">📊</div>
+      <h2>Statistics</h2>
+      <p>Data, averages and statistical analysis.</p>
+      <span class="badge">1 applet</span>
+    </a>
+    -->
+
+  </div>
+</main>
+
+<footer>
+  More topics coming soon &mdash; Probability &middot; Statistics
+</footer>
+
+</body>
+</html>
