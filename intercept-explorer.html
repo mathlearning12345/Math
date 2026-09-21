@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Intercept Explorer</title>
+<style>
+  :root{
+    --bg-top:#faf9f6; --bg-bot:#f2efe9; --grid:#2a3163; --axis:#6b6a63;
+    --ink:#28261f; --accent:#2f7dc9; --good:#2f9e44; --bad:#d64545; --panel:#ffffff;
+    --line:#c9502f; --target:#b8842e;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100%; font-family:'Trebuchet MS',system-ui,sans-serif;
+    background:radial-gradient(circle at 50% 0%, var(--bg-bot), var(--bg-top));
+    color:var(--ink); display:flex; flex-direction:column; align-items:center;
+    padding:16px 10px calc(16px + env(safe-area-inset-bottom,0px));
+    padding-top:env(safe-area-inset-top,16px);
+  }
+  h1{
+    margin:2px 0 2px; font-size:1.45em; text-align:center;
+    color:var(--ink); letter-spacing:.5px;
+  }
+  .sub{color:#6b6a63; font-size:.85em; margin:0 0 12px; text-align:center;}
+  .wrap{width:100%; max-width:560px;}
+  .hud{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--panel); border-radius:12px; padding:8px 14px; margin-bottom:10px;
+    font-weight:700; font-size:.95em; box-shadow:0 2px 8px rgba(20,15,5,.05); border:1px solid #ece8e0;
+    flex-wrap:wrap; gap:6px;
+  }
+  .hud span.lbl{color:#6b6a63; font-weight:500; margin-right:4px;}
+  .lives{color:var(--bad); letter-spacing:2px;}
+
+  .eq-panel{
+    background:var(--panel); border-radius:12px; padding:16px 18px; margin-bottom:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(20,15,5,.05); border:1px solid #ece8e0;
+  }
+  .eq-panel .eq{
+    font-size:1.6em; font-weight:800; color:var(--accent); letter-spacing:1px;
+    font-family:'Courier New',monospace;
+  }
+  .eq-panel .step{ margin-top:6px; font-size:1.05em; font-weight:800; color:var(--ink); }
+  .eq-panel .step .tag{
+    display:inline-block; background:var(--line); color:#fff; border-radius:6px;
+    padding:4px 10px; margin-right:8px; font-size:.85em;
+  }
+  .mode-badge{
+    display:inline-block; margin-top:6px; background:#f1efe9; color:var(--accent);
+    border:1px solid #d8d3c8; border-radius:20px; padding:3px 10px; font-size:.72em; font-weight:700;
+  }
+  .attempts{ font-size:.78em; color:#6b6a63; margin-top:4px; }
+
+  .answer-form{
+    display:flex; gap:8px; align-items:center; justify-content:center;
+    margin-bottom:10px; flex-wrap:wrap; min-height:44px;
+  }
+  .answer-form label{ font-size:.9em; font-weight:700; color:#28261f; }
+  .answer-form input[type=number]{
+    width:80px; padding:9px 8px; font-size:1.05em; text-align:center;
+    border:2px solid #d8d3c8; border-radius:8px; outline:none;
+    background:#ffffff; color:var(--ink);
+  }
+  .answer-form input[type=number]:focus{ border-color:var(--accent); }
+  .answer-form button{
+    background:var(--line); color:#fff; border:none; border-radius:8px;
+    padding:10px 16px; font-weight:700; font-size:.95em; cursor:pointer;
+  }
+  .answer-form .paren{ font-size:1.2em; font-weight:700; color:#28261f; }
+  .click-instruction{
+    text-align:center; color:#6b6a63; font-size:.85em; font-weight:600;
+    margin-bottom:10px;
+  }
+  .hint-btn{
+    background:#d8d3c8; color:var(--ink); border:none; border-radius:8px;
+    padding:8px 14px; font-weight:700; font-size:.85em; cursor:pointer;
+  }
+  .hint-btn.active{ background:var(--accent); color:#ffffff; }
+
+  .canvas-shell{
+    position:relative; width:100%; aspect-ratio:1/1; border-radius:14px; overflow:hidden;
+    background:#ffffff; box-shadow:0 10px 34px rgba(20,15,5,.08), inset 0 0 0 2px #e5e1da;
+  }
+  canvas{width:100%; height:100%; display:block; touch-action:none;}
+  canvas.clickable{ cursor:crosshair; }
+  .overlay{
+    position:absolute; inset:0; display:none; flex-direction:column;
+    align-items:center; justify-content:center; background:rgba(255,255,255,.96);
+    text-align:center; padding:22px;
+  }
+  .overlay.show{display:flex;}
+  .overlay h2{margin:0 0 8px; font-size:1.5em; color:var(--accent);}
+  .overlay p, .overlay div.body{margin:2px 0 14px; color:#28261f; line-height:1.55; font-size:.95em;}
+  .overlay .diagram{margin:6px 0 12px;}
+  .overlay.fullscreen{
+    position:fixed; inset:0; z-index:1000; border-radius:0;
+    background:radial-gradient(circle at 50% 30%, var(--bg-bot), var(--bg-top));
+  }
+  .overlay.fullscreen h2{ font-size:2em; }
+  .overlay.fullscreen .body{ font-size:1.15em; max-width:420px; }
+  .overlay.fullscreen .big-icon{ font-size:3.2em; margin-bottom:6px; }
+  .btn{
+    background:var(--accent); color:#ffffff; border:none; border-radius:10px;
+    padding:12px 22px; font-size:1em; font-weight:700; cursor:pointer;
+  }
+  .btn.secondary{background:#f1efe9; color:var(--ink); border:1px solid #d8d3c8;}
+  .controls{display:flex; justify-content:center; gap:10px; margin-top:12px; flex-wrap:wrap;}
+  .slide-controls{display:flex; gap:10px; margin-top:4px;}
+  .slide-dots{display:flex; gap:6px; margin-bottom:10px;}
+  .slide-dots span{ width:8px; height:8px; border-radius:50%; background:#d8d3c8; display:inline-block; }
+  .slide-dots span.on{ background:var(--accent); }
+  .miss-flash{ animation:flash .25s ease; }
+  @keyframes flash{ from{ background:#fdecec;} to{ background:transparent;} }
+
+  .click-bar{
+    margin-top:10px; border-radius:12px; padding:12px 16px;
+    background:var(--panel); box-shadow:0 2px 8px rgba(20,15,5,.05); border:1px solid #ece8e0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    font-weight:700; font-size:1em; min-height:1.3em;
+    border:2px solid #d8d3c8; transition:background .15s, border-color .15s, color .15s;
+  }
+  .click-bar-label{color:#6b6a63; font-weight:500; font-size:.9em;}
+  .click-bar-main{display:flex; align-items:center; gap:8px;}
+  .click-bar-hint{ font-weight:600; font-size:.85em; opacity:.95; text-align:center; }
+  .click-bar.hit{ background:#eaf7ee; border-color:var(--good); color:var(--good); }
+  .click-bar.miss{ background:#fdecec; border-color:var(--bad); color:var(--bad); }
+  .click-bar .dot-icon{ display:inline-block; width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+  footer{color:#8a8578; font-size:.78em; margin-top:12px; text-align:center; max-width:560px;}
+</style>
+</head>
+<body>
+  <div class="overlay fullscreen show" id="slideOverlay">
+    <div class="slide-dots" id="slideDots"></div>
+    <div id="slideContent"></div>
+    <div class="slide-controls">
+      <button class="btn secondary" id="slideBackBtn">Back</button>
+      <button class="btn" id="slideNextBtn">Next</button>
+    </div>
+  </div>
+
+  <h1>📐 INTERCEPT EXPLORER</h1>
+  <p class="sub">Find the x-intercept and y-intercept of the equation to draw the line through the target.</p>
+
+  <div class="wrap">
+    <div class="hud">
+      <div><span class="lbl">Score</span><span id="score">0</span></div>
+      <div class="lives" id="lives">❤❤❤</div>
+      <div><span class="lbl">Level</span><span id="level">1</span></div>
+    </div>
+
+    <div class="eq-panel">
+      <div class="eq" id="eqText">y = 2x - 4</div>
+      <div class="step"><span class="tag" id="stepTag">STEP 1</span><span id="stepText">Find the x-intercept</span></div>
+      <div class="mode-badge" id="modeBadge">Mode: Type the values</div>
+      <div class="attempts" id="attemptsText">4 tries left this round</div>
+    </div>
+
+    <div class="click-instruction" id="clickInstruction" style="display:none;"></div>
+    <div class="answer-form" id="answerForm"></div>
+
+    <div class="canvas-shell" id="shell">
+      <canvas id="game"></canvas>
+
+      <div class="overlay" id="overOverlay">
+        <h2>Game Over</h2>
+        <p id="finalScore">Score: 0</p>
+        <button class="btn" id="retryBtn">Play Again</button>
+      </div>
+    </div>
+
+    <div class="click-bar" id="clickBar">
+      <span class="click-bar-label">Answer above to begin</span>
+    </div>
+
+    <div class="controls">
+      <button class="btn secondary" id="pauseBtn">Pause</button>
+    </div>
+  </div>
+
+  <footer>Tip: the x-intercept is where the line crosses the horizontal axis (y = 0). The y-intercept is where it crosses the vertical axis (x = 0) — it's the "+ b" in y = mx + b.</footer>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const shell = document.getElementById('shell');
+const scoreEl = document.getElementById('score');
+const livesEl = document.getElementById('lives');
+const levelEl = document.getElementById('level');
+const eqText = document.getElementById('eqText');
+const stepTag = document.getElementById('stepTag');
+const stepText = document.getElementById('stepText');
+const modeBadge = document.getElementById('modeBadge');
+const attemptsText = document.getElementById('attemptsText');
+const answerForm = document.getElementById('answerForm');
+const clickInstruction = document.getElementById('clickInstruction');
+const overOverlay = document.getElementById('overOverlay');
+const finalScoreEl = document.getElementById('finalScore');
+const pauseBtn = document.getElementById('pauseBtn');
+const clickBar = document.getElementById('clickBar');
+
+/* ---------------- intro slides ---------------- */
+const slideOverlay = document.getElementById('slideOverlay');
+const slideContent = document.getElementById('slideContent');
+const slideDots = document.getElementById('slideDots');
+const slideBackBtn = document.getElementById('slideBackBtn');
+const slideNextBtn = document.getElementById('slideNextBtn');
+
+const slides = [
+  {
+    icon: "📉",
+    title: "X-Intercept",
+    body: `<div class="body">The point where the line crosses the <b>x-axis</b>.<br>(y = 0 here)</div>`
+  },
+  {
+    icon: "📈",
+    title: "Y-Intercept",
+    body: `<div class="body">The point where the line crosses the <b>y-axis</b>.<br>(x = 0 here)</div>`
+  },
+  {
+    icon: "🎯",
+    title: "How to Play",
+    body: `<div class="body">Find both intercepts to draw the line through the target!</div>`
+  }
+];
+let slideIdx = 0;
+function renderSlide(){
+  const s = slides[slideIdx];
+  slideContent.innerHTML = `<div class="big-icon">${s.icon}</div><h2>${s.title}</h2>${s.body}`;
+  slideDots.innerHTML = slides.map((_,i)=>`<span class="${i===slideIdx?'on':''}"></span>`).join('');
+  slideBackBtn.style.visibility = slideIdx === 0 ? 'hidden' : 'visible';
+  slideNextBtn.textContent = slideIdx === slides.length-1 ? 'Start Game' : 'Next';
+}
+slideBackBtn.addEventListener('click', ()=>{ if(slideIdx>0){ slideIdx--; renderSlide(); } });
+slideNextBtn.addEventListener('click', ()=>{
+  if(slideIdx < slides.length-1){ slideIdx++; renderSlide(); }
+  else {
+    slideOverlay.classList.remove('show');
+    resetGame();
+    running = true; paused=false; lastTime = performance.now();
+    requestAnimationFrame(loop);
+  }
+});
+renderSlide();
+
+/* ---------------- canvas / grid ---------------- */
+let W,H,dpr;
+function resize(){
+  dpr = window.devicePixelRatio || 1;
+  const rect = shell.getBoundingClientRect();
+  W = rect.width; H = rect.height;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener('resize', resize);
+
+const minV = -10, maxV = 10;
+const PAD = 34;
+
+function gridToPixel(gx,gy){
+  const usable = Math.min(W,H) - PAD*2;
+  const span = maxV-minV;
+  return { x: PAD + ((gx-minV)/span)*usable, y: PAD + ((maxV-gy)/span)*usable };
+}
+function nearestGridPoint(px,py){
+  const usable = Math.min(W,H) - PAD*2;
+  const span = maxV-minV;
+  let gx = minV + ((px-PAD)/usable)*span;
+  let gy = maxV - ((py-PAD)/usable)*span;
+  return { x: Math.round(gx), y: Math.round(gy) };
+}
+
+let score=0, lives=3, level=1;
+let running=false, paused=false, lastTime=0;
+let round = null;
+let clickMarkers = [];
+let particles = [];
+let lineAnim = null;
+const MAX_ATTEMPTS = 4;
+const MODES = ['click','coords','values'];
+
+function randInt(mn,mx){ return Math.floor(Math.random()*(mx-mn+1))+mn; }
+
+function fmtEq(m,b){
+  let s = 'y = ';
+  if(m===1) s+='x'; else if(m===-1) s+='-x'; else s+= m+'x';
+  if(b>0) s+= ' + '+b; else if(b<0) s+= ' - '+Math.abs(b);
+  return s;
+}
+
+function modeLabel(mode){
+  if(mode==='click') return 'Mode: Click the grid';
+  if(mode==='coords') return 'Mode: Type the coordinates';
+  return 'Mode: Type the values';
+}
+
+function newRound(){
+  let m,a,b, tries=0;
+  do{
+    m = randInt(-4,4); if(m===0) m = (Math.random()<0.5?-1:1)*randInt(1,4);
+    a = randInt(-8,8); if(a===0) a = (Math.random()<0.5?-1:1)*randInt(1,8);
+    b = -m*a;
+    tries++;
+  } while((Math.abs(b) > 10 || b===0) && tries < 60);
+
+  let targetX, targetY, t2=0;
+  do{
+    targetX = randInt(minV+1, maxV-1);
+    targetY = m*targetX + b;
+    t2++;
+  } while((targetY < minV || targetY > maxV || targetX===a || targetX===0) && t2 < 60);
+
+  const mode = MODES[randInt(0, MODES.length-1)];
+
+  round = { m, b, xInt:a, yInt:b, targetX, targetY, step:1, attemptsLeft: MAX_ATTEMPTS, mode };
+  lineAnim = null;
+
+  eqText.textContent = fmtEq(m,b);
+  modeBadge.textContent = modeLabel(mode);
+  attemptsText.textContent = `${round.attemptsLeft} tries left this round`;
+  clickBar.classList.remove('hit','miss');
+  clickBar.innerHTML = '<span class="click-bar-label">Answer above to begin</span>';
+  clickMarkers = [];
+
+  canvas.classList.toggle('clickable', mode==='click');
+  renderStepUI();
+}
+
+function renderStepUI(){
+  const step = round.step;
+  stepTag.textContent = step===1 ? 'STEP 1' : 'STEP 2';
+  stepText.textContent = step===1 ? 'Find the x-intercept' : 'Find the y-intercept';
+
+  if(round.mode === 'click'){
+    answerForm.style.display = 'none';
+    clickInstruction.style.display = 'block';
+    clickInstruction.textContent = step===1
+      ? '🖱️ Click the point where the line crosses the x-axis'
+      : '🖱️ Click the point where the line crosses the y-axis';
+  } else if(round.mode === 'coords'){
+    clickInstruction.style.display = 'none';
+    answerForm.style.display = 'flex';
+    answerForm.innerHTML = `
+      <span class="paren">(</span>
+      <input type="number" id="inX" inputmode="numeric" placeholder="x">
+      <span class="paren">,</span>
+      <input type="number" id="inY" inputmode="numeric" placeholder="y">
+      <span class="paren">)</span>
+      <button id="submitBtn">Check</button>`;
+    attachCoordHandlers();
+  } else { // values
+    clickInstruction.style.display = 'none';
+    answerForm.style.display = 'flex';
+    const label = step===1 ? 'x =' : 'y =';
+    answerForm.innerHTML = `
+      <label>${label}</label>
+      <input type="number" id="inVal" inputmode="numeric" placeholder="?">
+      <button id="submitBtn">Check</button>`;
+    attachValueHandlers();
+  }
+}
+
+function attachCoordHandlers(){
+  const inX = document.getElementById('inX');
+  const inY = document.getElementById('inY');
+  const btn = document.getElementById('submitBtn');
+  const submit = () => submitCoords(inX.value, inY.value);
+  btn.addEventListener('click', submit);
+  [inX,inY].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); }));
+  setTimeout(()=>inX.focus(), 50);
+}
+function attachValueHandlers(){
+  const inVal = document.getElementById('inVal');
+  const btn = document.getElementById('submitBtn');
+  const submit = () => submitValue(inVal.value);
+  btn.addEventListener('click', submit);
+  inVal.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  setTimeout(()=>inVal.focus(), 50);
+}
+
+function updateHUD(){
+  scoreEl.textContent = score;
+  levelEl.textContent = level;
+  livesEl.textContent = '❤'.repeat(Math.max(lives,0)) + '🖤'.repeat(Math.max(3-lives,0));
+}
+
+function drawGrid(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,W,H);
+
+  ctx.strokeStyle = '#ece8e0';
+  ctx.lineWidth = 1;
+  for(let i=minV;i<=maxV;i++){
+    const p1 = gridToPixel(i,minV), p2 = gridToPixel(i,maxV);
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+    const q1 = gridToPixel(minV,i), q2 = gridToPixel(maxV,i);
+    ctx.beginPath(); ctx.moveTo(q1.x,q1.y); ctx.lineTo(q2.x,q2.y); ctx.stroke();
+  }
+
+  ctx.strokeStyle = '#8a8578';
+  ctx.lineWidth = 2;
+  const xax1 = gridToPixel(minV,0), xax2 = gridToPixel(maxV,0);
+  ctx.beginPath(); ctx.moveTo(xax1.x,xax1.y); ctx.lineTo(xax2.x,xax2.y); ctx.stroke();
+  const yax1 = gridToPixel(0,minV), yax2 = gridToPixel(0,maxV);
+  ctx.beginPath(); ctx.moveTo(yax1.x,yax1.y); ctx.lineTo(yax2.x,yax2.y); ctx.stroke();
+
+  ctx.fillStyle = '#6b6a63';
+  ctx.font = '10px sans-serif';
+  ctx.textAlign = 'center';
+  for(let i=minV;i<=maxV;i++){
+    if(i===0) continue;
+    const p = gridToPixel(i,0);
+    ctx.fillText(i, p.x, Math.min(H-4,p.y+14));
+  }
+  ctx.textAlign = 'right';
+  for(let i=minV;i<=maxV;i++){
+    if(i===0) continue;
+    const p = gridToPixel(0,i);
+    ctx.fillText(i, Math.max(PAD-6,p.x-6), p.y+3);
+  }
+
+  ctx.fillStyle = '#28261f';
+  ctx.font = 'bold 14px sans-serif';
+  const xLabelPos = gridToPixel(maxV,0);
+  ctx.textAlign = 'left';
+  ctx.fillText('x', Math.min(xLabelPos.x+8, W-12), xLabelPos.y+4);
+  const yLabelPos = gridToPixel(0,maxV);
+  ctx.textAlign = 'center';
+  ctx.fillText('y', yLabelPos.x, Math.max(yLabelPos.y-10,12));
+}
+
+function drawGuideLine(){
+  if(!round || lineAnim) return;
+  const a = round.xInt, b = round.yInt;
+  const dx = 0-a, dy = b-0;
+  const p1 = gridToPixel(a - dx*20, 0 - dy*20);
+  const p2 = gridToPixel(a + dx*20, 0 + dy*20);
+  ctx.save();
+  ctx.strokeStyle = '#2f7dc9';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8,7]);
+  ctx.globalAlpha = 0.55;
+  ctx.beginPath();
+  ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawTarget(t){
+  if(!round) return;
+  const p = gridToPixel(round.targetX, round.targetY);
+  const pulse = 1 + Math.sin(t/220)*0.08;
+  ctx.save();
+  ctx.translate(p.x,p.y);
+  ctx.scale(pulse,pulse);
+  ctx.strokeStyle = '#b8842e'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.arc(0,0,14,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle = '#ff8c42'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(0,0,8,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle = '#c9502f';
+  ctx.beginPath(); ctx.arc(0,0,3,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawConfirmedPoints(){
+  if(!round) return;
+  if(round.step >= 2){
+    const p = gridToPixel(round.xInt, 0);
+    ctx.fillStyle = '#2f9e44';
+    ctx.beginPath(); ctx.arc(p.x,p.y,7,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+  }
+  if(round.step >= 3){
+    const p = gridToPixel(0, round.yInt);
+    ctx.fillStyle = '#2f9e44';
+    ctx.beginPath(); ctx.arc(p.x,p.y,7,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+  }
+}
+
+function drawClickMarkers(dt){
+  clickMarkers.forEach(m=>{ m.life -= dt/1100; });
+  clickMarkers = clickMarkers.filter(m=>m.life>0);
+  clickMarkers.forEach(m=>{
+    ctx.globalAlpha = Math.max(m.life,0);
+    ctx.fillStyle = m.color;
+    ctx.beginPath(); ctx.arc(m.x,m.y,7,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(m.x,m.y,7,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha = 1;
+  });
+}
+
+function explode(x,y,color){
+  for(let i=0;i<18;i++){
+    const ang = Math.random()*Math.PI*2, spd=1+Math.random()*4;
+    particles.push({x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,life:1,color});
+  }
+}
+function drawParticles(dt){
+  particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.life -= dt/600; });
+  particles = particles.filter(p=>p.life>0);
+  particles.forEach(p=>{
+    ctx.globalAlpha = Math.max(p.life,0);
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+}
+
+function drawLine(dt){
+  if(!lineAnim) return;
+  lineAnim.t += dt;
+  const prog = Math.min(lineAnim.t / lineAnim.duration, 1);
+  const x = lineAnim.x1 + (lineAnim.x2-lineAnim.x1)*prog;
+  const y = lineAnim.y1 + (lineAnim.y2-lineAnim.y1)*prog;
+  ctx.save();
+  ctx.strokeStyle = '#c9502f';
+  ctx.lineWidth = 4;
+  ctx.shadowColor = '#c9502f';
+  ctx.shadowBlur = 4;
+  ctx.beginPath();
+  ctx.moveTo(lineAnim.x1, lineAnim.y1);
+  ctx.lineTo(x,y);
+  ctx.stroke();
+  ctx.restore();
+
+  if(prog>=1 && !lineAnim.done){
+    lineAnim.done = true;
+    explode(lineAnim.hitX, lineAnim.hitY, '#b8842e');
+    score += 15 + level*2;
+    updateHUD();
+    setTimeout(()=>{
+      const newLevel = Math.floor(score/100)+1;
+      if(newLevel !== level){ level = newLevel; updateHUD(); }
+      newRound();
+    }, 600);
+  }
+}
+
+function drawTheLine(){
+  const a = round.xInt, b = round.yInt;
+  const dx = 0-a, dy = b-0;
+  const p1 = gridToPixel(a - dx*20, 0 - dy*20);
+  const p2 = gridToPixel(a + dx*20, 0 + dy*20);
+  const hit = gridToPixel(round.targetX, round.targetY);
+  lineAnim = { t:0, duration: 500, x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y, hitX:hit.x, hitY:hit.y, done:false };
+  answerForm.style.display = 'none';
+  clickInstruction.style.display = 'none';
+  stepTag.textContent = 'DRAWING';
+  stepText.textContent = 'Line locked in — drawing!';
+}
+
+/* ---------- hints ---------- */
+function buildPairHint(step, gx, gy){
+  const wantX = step===1 ? round.xInt : 0;
+  const wantY = step===1 ? 0 : round.yInt;
+  const xOk = gx === wantX;
+  const yOk = gy === wantY;
+  if(xOk && !yOk){
+    return step===1
+      ? `x is correct! But the x-intercept sits ON the x-axis, so y must be 0 (you had y = ${gy}).`
+      : `x is correct! But the y-intercept sits ON the y-axis, so x should be 0 — check your y value again (you need y = ${round.yInt}).`;
+  }
+  if(yOk && !xOk){
+    return step===1
+      ? `y is correct (0)! Now solve 0 = ${fmtEq(round.m, round.b)} for x — you need x = ${wantX}, try ${gx < wantX ? 'more to the right' : 'more to the left'}.`
+      : `y is correct! But the y-intercept sits ON the y-axis, so x must be 0 (you had x = ${gx}).`;
+  }
+  if(step===1){
+    return `Not quite. The x-intercept is where y = 0. Set 0 = ${fmtEq(round.m, round.b)} and solve for x (you need x = ${wantX}).`;
+  }
+  return `Not quite. The y-intercept is where x = 0. Plug x = 0 into ${fmtEq(round.m, round.b)} to get y (you need y = ${wantY}).`;
+}
+
+function buildValueHint(step, guess){
+  if(step===1){
+    return `Not quite. Set y = 0 in ${fmtEq(round.m, round.b)} and solve for x. You need x = ${round.xInt} — try a bit ${guess < round.xInt ? 'higher' : 'lower'}.`;
+  }
+  return `Not quite. Plug x = 0 into ${fmtEq(round.m, round.b)} to get y. You need y = ${round.yInt} — try a bit ${guess < round.yInt ? 'higher' : 'lower'}.`;
+}
+
+function showResult(labelText, hit, hint){
+  clickBar.classList.remove('hit','miss');
+  clickBar.classList.add(hit ? 'hit':'miss');
+  const dotColor = hit ? '#2f9e44' : '#d64545';
+  const mainLine = `${labelText} — ${hit ? 'Correct! ✅' : 'Not yet ✗'}`;
+  const hintLine = hit ? '' : `<div class="click-bar-hint">${hint}</div>`;
+  clickBar.innerHTML = `<div class="click-bar-main"><span class="dot-icon" style="background:${dotColor}"></span>${mainLine}</div>${hintLine}`;
+}
+
+function revealRoundFail(){
+  showResult('Out of tries', false,
+    `The line was ${fmtEq(round.m, round.b)} — x-intercept (${round.xInt}, 0), y-intercept (0, ${round.yInt}).`);
+  answerForm.style.display = 'none';
+  clickInstruction.style.display = 'none';
+  loseLife();
+}
+
+function registerAttempt(hit, gx, gy, labelText, hint, marker){
+  if(marker) clickMarkers.push(marker);
+  if(hit){
+    if(round.step === 1){
+      round.step = 2;
+      round.attemptsLeft = MAX_ATTEMPTS;
+      attemptsText.textContent = `${round.attemptsLeft} tries left this round`;
+      showResult(labelText, true, null);
+      renderStepUI();
+    } else {
+      showResult(labelText, true, null);
+      drawTheLine();
+    }
+  } else {
+    round.attemptsLeft--;
+    if(round.attemptsLeft <= 0){
+      revealRoundFail();
+      return;
+    }
+    attemptsText.textContent = `${round.attemptsLeft} tries left this round`;
+    showResult(labelText, false, hint);
+  }
+}
+
+/* ---------- submit handlers per mode ---------- */
+function submitCoords(xStr, yStr){
+  if(!running || paused || !round || lineAnim) return;
+  if(xStr.trim()==='' || yStr.trim()==='') return;
+  const gx = parseFloat(xStr), gy = parseFloat(yStr);
+  if(Number.isNaN(gx) || Number.isNaN(gy)) return;
+  const wantX = round.step===1 ? round.xInt : 0;
+  const wantY = round.step===1 ? 0 : round.yInt;
+  const hit = gx===wantX && gy===wantY;
+  const p = gridToPixel(gx,gy);
+  registerAttempt(hit, gx, gy, `You entered (${gx}, ${gy})`, buildPairHint(round.step, gx, gy),
+    {x:p.x, y:p.y, life:1, color: hit ? '#2f9e44':'#d64545'});
+}
+
+function submitValue(valStr){
+  if(!running || paused || !round || lineAnim) return;
+  if(valStr.trim()==='') return;
+  const guess = parseFloat(valStr);
+  if(Number.isNaN(guess)) return;
+  const want = round.step===1 ? round.xInt : round.yInt;
+  const hit = guess === want;
+  const p = round.step===1 ? gridToPixel(guess,0) : gridToPixel(0,guess);
+  const label = round.step===1 ? 'x' : 'y';
+  registerAttempt(hit, round.step===1?guess:0, round.step===1?0:guess,
+    `You answered ${label} = ${guess}`, buildValueHint(round.step, guess),
+    {x:p.x, y:p.y, life:1, color: hit ? '#2f9e44':'#d64545'});
+}
+
+function handleGridClick(px,py){
+  if(!running || paused || !round || lineAnim || round.mode!=='click') return;
+  const g = nearestGridPoint(px,py);
+  const wantX = round.step===1 ? round.xInt : 0;
+  const wantY = round.step===1 ? 0 : round.yInt;
+  const hit = g.x===wantX && g.y===wantY;
+  const snapped = gridToPixel(g.x, g.y);
+  registerAttempt(hit, g.x, g.y, `You clicked (${g.x}, ${g.y})`, buildPairHint(round.step, g.x, g.y),
+    {x:snapped.x, y:snapped.y, life:1, color: hit ? '#2f9e44':'#d64545'});
+}
+
+canvas.addEventListener('pointerdown', (e)=>{
+  const rect = canvas.getBoundingClientRect();
+  handleGridClick(e.clientX-rect.left, e.clientY-rect.top);
+});
+
+function loseLife(){
+  lives--;
+  updateHUD();
+  shell.classList.add('miss-flash');
+  setTimeout(()=>shell.classList.remove('miss-flash'),250);
+  if(lives<=0){ gameOver(); }
+  else { setTimeout(newRound, 900); }
+}
+
+function gameOver(){
+  running = false;
+  finalScoreEl.textContent = `Score: ${score} · Level reached: ${level}`;
+  overOverlay.classList.add('show');
+}
+
+function loop(t){
+  if(!running) return;
+  if(!paused){
+    const dt = Math.min(t-lastTime, 50);
+    lastTime = t;
+
+    drawGrid();
+    drawGuideLine();
+    drawTarget(t);
+    drawConfirmedPoints();
+    drawClickMarkers(dt);
+    drawParticles(dt);
+    drawLine(dt);
+  } else {
+    lastTime = t;
+  }
+  requestAnimationFrame(loop);
+}
+
+function resetGame(){
+  score=0; lives=3; level=1;
+  particles=[]; clickMarkers=[]; lineAnim=null;
+  updateHUD();
+  resize();
+  newRound();
+  drawGrid();
+}
+
+document.getElementById('retryBtn').addEventListener('click', ()=>{
+  overOverlay.classList.remove('show');
+  resetGame();
+  running=true; paused=false; lastTime=performance.now();
+  requestAnimationFrame(loop);
+});
+pauseBtn.addEventListener('click', ()=>{
+  paused = !paused;
+  pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+});
+
+resize();
+drawGrid();
+</script>
+</body>
+</html>
