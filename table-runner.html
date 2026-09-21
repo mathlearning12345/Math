@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Table Runner: Table of Values</title>
+<style>
+  :root{
+    --bg-top:#faf9f6; --bg-bot:#f2efe9; --ink:#28261f; --accent:#2f7dc9;
+    --good:#2f9e44; --bad:#d64545; --panel:#ffffff; --hi:#c9502f;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100%; font-family:'Trebuchet MS',system-ui,sans-serif;
+    background:radial-gradient(circle at 50% 0%, var(--bg-bot), var(--bg-top));
+    color:var(--ink); display:flex; flex-direction:column; align-items:center;
+    padding:16px 10px calc(16px + env(safe-area-inset-bottom,0px));
+    padding-top:env(safe-area-inset-top,16px);
+  }
+  h1{
+    margin:2px 0 2px; font-size:1.4em; text-align:center;
+    color:var(--ink); letter-spacing:.5px;
+  }
+  .sub{color:#6b6a63; font-size:.85em; margin:0 0 12px; text-align:center;}
+  .wrap{width:100%; max-width:620px;}
+  .hud{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--panel); border-radius:12px; padding:8px 14px; margin-bottom:10px;
+    font-weight:700; font-size:.95em; box-shadow:0 2px 8px rgba(20,15,5,.05); border:1px solid #ece8e0;
+    flex-wrap:wrap; gap:6px;
+  }
+  .hud span.lbl{color:#6b6a63; font-weight:500; margin-right:4px;}
+  .lives{color:var(--bad); letter-spacing:2px;}
+  .mode-tag{
+    background:#f1efe9; color:var(--accent); border:1px solid #d8d3c8;
+    border-radius:20px; padding:4px 12px; font-size:.82em; font-weight:700;
+  }
+
+  .rule-panel{
+    background:var(--panel); border-radius:12px; padding:10px 16px; margin-bottom:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(20,15,5,.05); border:1px solid #ece8e0;
+  }
+  .rule-panel .rule{
+    font-size:1.25em; font-weight:800; color:var(--accent); letter-spacing:1px;
+    font-family:'Courier New',monospace;
+  }
+  .mode-choice{ display:flex; gap:14px; margin-top:6px; flex-wrap:wrap; justify-content:center; }
+  .mode-choice button{
+    background:var(--panel); border:2px solid #d8d3c8; color:var(--ink);
+    border-radius:14px; padding:16px 20px; font-size:1em; font-weight:700; cursor:pointer;
+    max-width:220px; text-align:left;
+  }
+  .mode-choice button:hover{ border-color:var(--accent); }
+  .mode-choice .mtitle{ font-size:1.15em; color:var(--accent); display:block; margin-bottom:4px; }
+  .mode-choice .mdesc{ font-size:.82em; font-weight:500; color:#28261f; }
+
+  .table-shell{
+    background:#ffffff; border-radius:14px; padding:16px 8px; margin-bottom:10px;
+    box-shadow:0 10px 34px rgba(20,15,5,.07), inset 0 0 0 2px #e5e1da;
+    overflow-x:auto;
+  }
+
+  .canvas-shell{
+    position:relative; width:100%; aspect-ratio:4/3; border-radius:14px; overflow:hidden;
+    background:#ffffff; box-shadow:0 10px 34px rgba(20,15,5,.08), inset 0 0 0 2px #e5e1da;
+    margin-bottom:10px;
+  }
+  canvas{ width:100%; height:100%; display:block; }
+  table{ border-collapse:collapse; margin:0 auto; }
+  td{
+    padding:8px 4px; text-align:center; min-width:56px;
+  }
+  td.rowlabel{
+    font-weight:800; color:var(--accent); font-size:1.05em; padding-right:10px; min-width:30px;
+  }
+  tr.xrow td.val{
+    font-weight:800; font-size:1.15em; color:var(--ink);
+    border-bottom:2px solid #d8d3c8;
+  }
+  tr.yrow td.val{ padding-top:12px; }
+  input.yin{
+    width:52px; padding:9px 4px; font-size:1.05em; text-align:center;
+    border:2px solid #d8d3c8; border-radius:8px; outline:none;
+    background:#ffffff; color:var(--ink); transition:border-color .15s, background .15s;
+  }
+  input.yin:focus{ border-color:var(--accent); }
+  input.yin.correct{ border-color:var(--good); background:#eaf7ee; color:var(--good); }
+  input.yin.wrong{ border-color:var(--bad); background:#fdecec; color:var(--bad); }
+  input.yin:disabled{ opacity:.9; }
+  .given-val{
+    display:inline-block; width:52px; padding:9px 4px; font-size:1.05em; font-weight:800;
+    color:var(--good); border:2px solid var(--good); border-radius:8px; background:#eaf7ee;
+  }
+
+  .controls-row{ display:flex; gap:10px; justify-content:center; margin-bottom:10px; flex-wrap:wrap; }
+  .btn{
+    background:var(--accent); color:#ffffff; border:none; border-radius:10px;
+    padding:12px 22px; font-size:1em; font-weight:700; cursor:pointer;
+  }
+  .btn.secondary{background:#f1efe9; color:var(--ink); border:1px solid #d8d3c8;}
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .click-bar{
+    border-radius:12px; padding:12px 16px; margin-bottom:6px;
+    background:var(--panel); box-shadow:0 2px 8px rgba(20,15,5,.05); border:1px solid #ece8e0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    font-weight:700; font-size:1em; min-height:1.3em;
+    border:2px solid #d8d3c8; transition:background .15s, border-color .15s, color .15s;
+  }
+  .click-bar-label{color:#6b6a63; font-weight:500; font-size:.9em;}
+  .click-bar-main{display:flex; align-items:center; gap:8px;}
+  .click-bar-hint{ font-weight:600; font-size:.85em; opacity:.95; text-align:center; }
+  .click-bar.hit{ background:#eaf7ee; border-color:var(--good); color:var(--good); }
+  .click-bar.miss{ background:#fdecec; border-color:var(--bad); color:var(--bad); }
+  .click-bar .dot-icon{ display:inline-block; width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+  .attempts{ text-align:center; font-size:.78em; color:#6b6a63; margin-bottom:10px; }
+
+  .miss-flash{ animation:flash .25s ease; }
+  @keyframes flash{ from{ background:#fdecec;} to{ background:transparent;} }
+
+  .overlay{
+    position:fixed; inset:0; z-index:1000; display:none; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; padding:22px;
+    background:radial-gradient(circle at 50% 30%, var(--bg-bot), var(--bg-top));
+  }
+  .overlay.show{ display:flex; }
+  .overlay h2{ font-size:2em; margin:0 0 8px; color:var(--accent); }
+  .overlay .body{ font-size:1.15em; max-width:420px; color:#28261f; line-height:1.55; }
+  .overlay .big-icon{ font-size:3.2em; margin-bottom:6px; }
+  .slide-controls{ display:flex; gap:10px; margin-top:14px; }
+  .slide-dots{ display:flex; gap:6px; margin-bottom:10px; }
+  .slide-dots span{ width:8px; height:8px; border-radius:50%; background:#d8d3c8; display:inline-block; }
+  .slide-dots span.on{ background:var(--accent); }
+
+  .over-panel{
+    position:relative; display:none; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:30px 20px; background:var(--panel); border-radius:14px;
+    box-shadow:0 10px 34px rgba(20,15,5,.07); margin-bottom:10px;
+  }
+  .over-panel.show{ display:flex; }
+  .over-panel h2{ color:var(--accent); margin:0 0 8px; }
+
+  footer{color:#8a8578; font-size:.78em; margin-top:6px; text-align:center; max-width:560px;}
+</style>
+</head>
+<body>
+  <div class="overlay show" id="slideOverlay">
+    <div class="slide-dots" id="slideDots"></div>
+    <div id="slideContent"></div>
+    <div class="slide-controls">
+      <button class="btn secondary" id="slideBackBtn">Back</button>
+      <button class="btn" id="slideNextBtn">Next</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="modeOverlay">
+    <div class="big-icon">🎚️</div>
+    <h2>Choose Your Mode</h2>
+    <div class="mode-choice">
+      <button id="pickEasy">
+        <span class="mtitle">Easy</span>
+        <span class="mdesc">The line is shown from the start — just read the y-values straight off the graph.</span>
+      </button>
+      <button id="pickMedium">
+        <span class="mtitle">Medium</span>
+        <span class="mdesc">No line shown until you solve it — use the rule y = mx + b to work it out.</span>
+      </button>
+    </div>
+  </div>
+
+  <h1>📊 TABLE RUNNER</h1>
+  <p class="sub">Find the pattern, fill in the missing y-values</p>
+
+  <div class="wrap">
+    <div class="hud">
+      <div><span class="lbl">Score</span><span id="score">0</span></div>
+      <div class="lives" id="lives">❤❤❤</div>
+      <div class="mode-tag" id="modeTag">Easy</div>
+    </div>
+
+    <div class="rule-panel">
+      <div class="rule" id="ruleBox">Rule: <span id="ruleText">y = mx + b</span></div>
+    </div>
+
+    <div class="table-shell">
+      <table id="valuesTable"></table>
+    </div>
+
+    <div class="canvas-shell" id="shell">
+      <canvas id="graph"></canvas>
+    </div>
+
+    <div class="attempts" id="attemptsText">4 tries left this table</div>
+
+    <div class="controls-row">
+      <button class="btn" id="checkBtn">Check</button>
+      <button class="btn secondary" id="nextBtn" disabled>Next Table →</button>
+    </div>
+
+    <div class="click-bar" id="clickBar">
+      <span class="click-bar-label">Fill in the table, then hit Check</span>
+    </div>
+
+    <div class="over-panel" id="overPanel">
+      <h2>Game Over</h2>
+      <p class="body" id="finalScore" style="color:#28261f;">Score: 0</p>
+      <button class="btn" id="retryBtn">Play Again</button>
+    </div>
+  </div>
+
+  <footer>Tip: look at how y changes each time x goes up by 1 — that's the slope (m). The rule is always y = mx + b.</footer>
+
+<script>
+/* ---------------- intro slides ---------------- */
+const slideOverlay = document.getElementById('slideOverlay');
+const slideContent = document.getElementById('slideContent');
+const slideDots = document.getElementById('slideDots');
+const slideBackBtn = document.getElementById('slideBackBtn');
+const slideNextBtn = document.getElementById('slideNextBtn');
+
+const slides = [
+  {
+    icon: "📊",
+    title: "Table of Values",
+    body: `<div class="body">A table pairs up x and y values that all follow the same rule: <b>y = mx + b</b>.</div>`
+  },
+  {
+    icon: "🔍",
+    title: "Find the Pattern",
+    body: `<div class="body">Watch how y changes each time x goes up by 1 — that step is the pattern.</div>`
+  },
+  {
+    icon: "🎮",
+    title: "How to Play",
+    body: `<div class="body">Fill in the missing y-values using that pattern. Wrong guess? You'll get a hint!</div>`
+  }
+];
+let slideIdx = 0;
+function renderSlide(){
+  const s = slides[slideIdx];
+  slideContent.innerHTML = `<div class="big-icon">${s.icon}</div><h2>${s.title}</h2>${s.body}`;
+  slideDots.innerHTML = slides.map((_,i)=>`<span class="${i===slideIdx?'on':''}"></span>`).join('');
+  slideBackBtn.style.visibility = slideIdx === 0 ? 'hidden' : 'visible';
+  slideNextBtn.textContent = slideIdx === slides.length-1 ? 'Start Game' : 'Next';
+}
+slideBackBtn.addEventListener('click', ()=>{ if(slideIdx>0){ slideIdx--; renderSlide(); } });
+slideNextBtn.addEventListener('click', ()=>{
+  if(slideIdx < slides.length-1){ slideIdx++; renderSlide(); }
+  else {
+    slideOverlay.classList.remove('show');
+    document.getElementById('modeOverlay').classList.add('show');
+  }
+});
+renderSlide();
+
+document.getElementById('pickEasy').addEventListener('click', ()=>{
+  difficulty = 'easy';
+  modeTag.textContent = 'Easy';
+  document.getElementById('modeOverlay').classList.remove('show');
+  startGame();
+});
+document.getElementById('pickMedium').addEventListener('click', ()=>{
+  difficulty = 'medium';
+  modeTag.textContent = 'Medium';
+  document.getElementById('modeOverlay').classList.remove('show');
+  startGame();
+});
+
+/* ---------------- game ---------------- */
+const scoreEl = document.getElementById('score');
+const livesEl = document.getElementById('lives');
+const modeTag = document.getElementById('modeTag');
+const ruleText = document.getElementById('ruleText');
+const table = document.getElementById('valuesTable');
+const attemptsText = document.getElementById('attemptsText');
+const checkBtn = document.getElementById('checkBtn');
+const nextBtn = document.getElementById('nextBtn');
+const clickBar = document.getElementById('clickBar');
+const overPanel = document.getElementById('overPanel');
+const finalScoreEl = document.getElementById('finalScore');
+
+let score = 0, lives = 3;
+let difficulty = 'easy';
+let current = null; // {m,b,xs,attemptsLeft}
+const MAX_ATTEMPTS = 4;
+
+/* ---------------- cartesian plane ---------------- */
+const graphCanvas = document.getElementById('graph');
+const gctx = graphCanvas.getContext('2d');
+const graphShell = document.getElementById('shell');
+let GW, GH, gdpr;
+let bounds = { min:-10, max:10 };
+
+function resizeGraph(){
+  gdpr = window.devicePixelRatio || 1;
+  const rect = graphShell.getBoundingClientRect();
+  GW = rect.width; GH = rect.height;
+  graphCanvas.width = GW*gdpr; graphCanvas.height = GH*gdpr;
+  gctx.setTransform(gdpr,0,0,gdpr,0,0);
+}
+window.addEventListener('resize', ()=>{ resizeGraph(); renderGraph(); });
+
+function pickStep(range){
+  if(range<=12) return 1;
+  if(range<=24) return 2;
+  if(range<=50) return 5;
+  return 10;
+}
+
+function computeBounds(){
+  const {m,b,xs} = current;
+  const ys = xs.map(x=>m*x+b);
+  let lo = Math.min(...xs, ...ys);
+  let hi = Math.max(...xs, ...ys);
+  const pad = Math.max(2, Math.round((hi-lo)*0.15));
+  lo -= pad; hi += pad;
+  bounds = { min: lo, max: hi };
+}
+
+function gPix(gx,gy){
+  const PAD = 30;
+  const usable = Math.min(GW,GH) - PAD*2;
+  const span = bounds.max - bounds.min;
+  return {
+    x: PAD + ((gx-bounds.min)/span)*usable,
+    y: PAD + ((bounds.max-gy)/span)*usable
+  };
+}
+
+function renderGraph(){
+  if(!current) return;
+  gctx.clearRect(0,0,GW,GH);
+  gctx.fillStyle = '#ffffff';
+  gctx.fillRect(0,0,GW,GH);
+
+  const step = 1;
+  const first = Math.ceil(bounds.min/step)*step;
+
+  gctx.strokeStyle = '#ece8e0';
+  gctx.lineWidth = 1;
+  for(let i=first;i<=bounds.max;i+=step){
+    const p1 = gPix(i,bounds.min), p2 = gPix(i,bounds.max);
+    gctx.beginPath(); gctx.moveTo(p1.x,p1.y); gctx.lineTo(p2.x,p2.y); gctx.stroke();
+    const q1 = gPix(bounds.min,i), q2 = gPix(bounds.max,i);
+    gctx.beginPath(); gctx.moveTo(q1.x,q1.y); gctx.lineTo(q2.x,q2.y); gctx.stroke();
+  }
+
+  // axes
+  gctx.strokeStyle = '#8a8578';
+  gctx.lineWidth = 2;
+  const xax1 = gPix(bounds.min,0), xax2 = gPix(bounds.max,0);
+  gctx.beginPath(); gctx.moveTo(xax1.x,xax1.y); gctx.lineTo(xax2.x,xax2.y); gctx.stroke();
+  const yax1 = gPix(0,bounds.min), yax2 = gPix(0,bounds.max);
+  gctx.beginPath(); gctx.moveTo(yax1.x,yax1.y); gctx.lineTo(yax2.x,yax2.y); gctx.stroke();
+
+  // axis labels
+  gctx.fillStyle = '#6b6a63';
+  gctx.font = '10px sans-serif';
+  gctx.textAlign = 'center';
+  for(let i=first;i<=bounds.max;i+=step){
+    if(i===0) continue;
+    const p = gPix(i,0);
+    gctx.fillText(i, p.x, Math.min(GH-4,p.y+13));
+  }
+  gctx.textAlign = 'right';
+  for(let i=first;i<=bounds.max;i+=step){
+    if(i===0) continue;
+    const p = gPix(0,i);
+    gctx.fillText(i, Math.max(6,p.x-6), p.y+3);
+  }
+  gctx.fillStyle = '#28261f';
+  gctx.font = 'bold 13px sans-serif';
+  gctx.textAlign = 'left';
+  gctx.fillText('x', gPix(bounds.max,0).x-10, gPix(bounds.max,0).y-6);
+  gctx.textAlign = 'center';
+  gctx.fillText('y', gPix(0,bounds.max).x, gPix(0,bounds.max).y+12);
+
+  // gather point statuses from the table
+  const inputs = table.querySelectorAll('.yin');
+  const points = current.xs.map((x,idx)=>{
+    const trueY = current.m*x + current.b;
+    if(idx===0) return { x, y: trueY, status:'given' };
+    const inp = inputs[idx-1];
+    if(!inp) return { x, y:null, status:'unknown' };
+    if(inp.classList.contains('correct')) return { x, y: trueY, status:'correct' };
+    if(inp.classList.contains('wrong') && inp.value.trim()!=='') return { x, y: parseFloat(inp.value), status:'wrong' };
+    return { x, y:null, status:'unknown' };
+  });
+
+  const solved = table.querySelectorAll('.yin:not(.wrong)').length === current.xs.length-1 &&
+                 table.querySelectorAll('.yin.correct').length === current.xs.length-1;
+
+  // line: shown immediately on easy mode, or once solved on medium
+  if(solved || difficulty === 'easy'){
+    const p1 = gPix(bounds.min, current.m*bounds.min + current.b);
+    const p2 = gPix(bounds.max, current.m*bounds.max + current.b);
+    gctx.save();
+    if(solved){
+      gctx.strokeStyle = '#2f9e44';
+      gctx.lineWidth = 3;
+      gctx.shadowColor = '#2f9e44';
+      gctx.shadowBlur = 3;
+    } else {
+      gctx.strokeStyle = '#2f7dc9';
+      gctx.lineWidth = 2;
+      gctx.setLineDash([8,7]);
+      gctx.globalAlpha = 0.75;
+    }
+    gctx.beginPath(); gctx.moveTo(p1.x,p1.y); gctx.lineTo(p2.x,p2.y); gctx.stroke();
+    gctx.restore();
+  }
+
+  // points
+  points.forEach(pt=>{
+    if(pt.y===null) return;
+    const p = gPix(pt.x, pt.y);
+    const color = pt.status==='wrong' ? '#d64545' : '#2f9e44';
+    gctx.fillStyle = color;
+    gctx.beginPath(); gctx.arc(p.x,p.y,6,0,Math.PI*2); gctx.fill();
+    gctx.strokeStyle = '#fff'; gctx.lineWidth = 2;
+    gctx.beginPath(); gctx.arc(p.x,p.y,6,0,Math.PI*2); gctx.stroke();
+  });
+}
+
+function randInt(mn,mx){ return Math.floor(Math.random()*(mx-mn+1))+mn; }
+
+function fmtRule(m,b){
+  let s = 'y = ';
+  if(m===1) s+='x'; else if(m===-1) s+='-x'; else s+= m+'x';
+  if(b>0) s+= ' + '+b; else if(b<0) s+= ' - '+Math.abs(b);
+  return s;
+}
+
+function makeRelation(diff){
+  let m,b;
+  if(diff==='easy'){
+    m = randInt(1,4);
+    b = Math.random() < 0.4 ? 0 : randInt(1,6); // favor simple rules like y=x, y=2x
+  } else {
+    m=randInt(-5,5); if(m===0)m=2; b=randInt(-8,8);
+  }
+  const start = randInt(-4,3);
+  const xs = [0,1,2,3,4].map(i=>start+i);
+  return {m,b,xs};
+}
+
+function buildTable(){
+  const {m,b,xs} = current;
+  table.innerHTML = '';
+  const xRow = document.createElement('tr'); xRow.className='xrow';
+  const labelX = document.createElement('td'); labelX.className='rowlabel'; labelX.textContent='x';
+  xRow.appendChild(labelX);
+  xs.forEach(x=>{
+    const td = document.createElement('td'); td.className='val'; td.textContent = x;
+    xRow.appendChild(td);
+  });
+  const yRow = document.createElement('tr'); yRow.className='yrow';
+  const labelY = document.createElement('td'); labelY.className='rowlabel'; labelY.textContent='y';
+  yRow.appendChild(labelY);
+  xs.forEach((x,idx)=>{
+    const td = document.createElement('td'); td.className='val';
+    const y = m*x+b;
+    if(idx===0){
+      const span = document.createElement('span'); span.className='given-val'; span.textContent = y;
+      td.appendChild(span);
+    } else {
+      const inp = document.createElement('input');
+      inp.type='number'; inp.className='yin'; inp.dataset.answer = y; inp.dataset.x = x;
+      inp.inputMode = 'numeric';
+      inp.addEventListener('keydown', e=>{ if(e.key==='Enter') checkAnswers(); });
+      td.appendChild(inp);
+    }
+    yRow.appendChild(td);
+  });
+  table.appendChild(xRow);
+  table.appendChild(yRow);
+}
+
+function newRound(){
+  current = { ...makeRelation(difficulty), attemptsLeft: MAX_ATTEMPTS };
+  ruleText.textContent = fmtRule(current.m, current.b);
+  attemptsText.textContent = `${current.attemptsLeft} tries left this table`;
+  clickBar.classList.remove('hit','miss');
+  clickBar.innerHTML = '<span class="click-bar-label">Fill in the table, then hit Check</span>';
+  checkBtn.disabled = false;
+  nextBtn.disabled = true;
+  buildTable();
+  computeBounds();
+  resizeGraph();
+  renderGraph();
+}
+
+function updateHUD(){
+  scoreEl.textContent = score;
+  livesEl.textContent = '❤'.repeat(Math.max(lives,0)) + '🖤'.repeat(Math.max(3-lives,0));
+}
+
+function showResult(hit, hint){
+  clickBar.classList.remove('hit','miss');
+  clickBar.classList.add(hit ? 'hit':'miss');
+  const dotColor = hit ? '#2f9e44' : '#d64545';
+  const mainLine = hit ? 'All correct! 🎉' : 'Not quite — check the red boxes';
+  const hintLine = hit ? '' : `<div class="click-bar-hint">${hint}</div>`;
+  clickBar.innerHTML = `<div class="click-bar-main"><span class="dot-icon" style="background:${dotColor}"></span>${mainLine}</div>${hintLine}`;
+}
+
+function buildHintForInput(inp, guess){
+  const x = parseInt(inp.dataset.x,10);
+  const answer = parseFloat(inp.dataset.answer);
+  const dir = guess < answer ? 'higher' : 'lower';
+  return `For x = ${x}: try a bit ${dir}. Remember, each time x goes up by 1, y changes by m = ${current.m}.`;
+}
+
+function checkAnswers(){
+  if(!current || checkBtn.disabled) return;
+  const inputs = table.querySelectorAll('.yin:not(:disabled)');
+  let allFilled = true, allCorrect = true, firstWrongHint = null;
+
+  inputs.forEach(inp=>{
+    if(inp.value.trim()===''){ allFilled=false; return; }
+    const guess = parseFloat(inp.value);
+    const correct = guess === parseFloat(inp.dataset.answer);
+    inp.classList.remove('correct','wrong');
+    inp.classList.add(correct ? 'correct':'wrong');
+    if(!correct){
+      allCorrect = false;
+      if(!firstWrongHint) firstWrongHint = buildHintForInput(inp, guess);
+    }
+  });
+
+  if(!allFilled){
+    showResult(false, 'Fill in every box before checking.');
+    return;
+  }
+
+  if(allCorrect){
+    inputs.forEach(inp=>inp.disabled=true);
+    checkBtn.disabled = true;
+    nextBtn.disabled = false;
+    score += 10;
+    updateHUD();
+    showResult(true, null);
+    renderGraph();
+  } else {
+    current.attemptsLeft--;
+    if(current.attemptsLeft <= 0){
+      inputs.forEach(inp=>{
+        if(!inp.classList.contains('correct')){
+          inp.value = inp.dataset.answer;
+          inp.classList.remove('wrong');
+          inp.classList.add('correct');
+        }
+        inp.disabled = true;
+      });
+      checkBtn.disabled = true;
+      nextBtn.disabled = false;
+      showResult(false, `Out of tries! Rule was ${fmtRule(current.m, current.b)} — the table's been filled in.`);
+      renderGraph();
+      loseLife();
+      return;
+    }
+    attemptsText.textContent = `${current.attemptsLeft} tries left this table`;
+    showResult(false, firstWrongHint);
+    renderGraph();
+  }
+}
+
+checkBtn.addEventListener('click', checkAnswers);
+nextBtn.addEventListener('click', newRound);
+
+function loseLife(){
+  lives--;
+  updateHUD();
+  document.body.classList.add('miss-flash');
+  setTimeout(()=>document.body.classList.remove('miss-flash'),250);
+  if(lives<=0){ gameOver(); }
+}
+
+function gameOver(){
+  finalScoreEl.textContent = `Score: ${score}`;
+  overPanel.classList.add('show');
+  checkBtn.disabled = true;
+  nextBtn.disabled = true;
+}
+
+document.getElementById('retryBtn').addEventListener('click', ()=>{
+  overPanel.classList.remove('show');
+  startGame();
+});
+
+function startGame(){
+  score = 0; lives = 3;
+  updateHUD();
+  overPanel.classList.remove('show');
+  newRound();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Table of Values</title>
+<style>
+  :root{
+    --bg-top:#faf9f6; --bg-bot:#f2efe9; --ink:#28261f; --accent:#2f7dc9;
+    --good:#2f9e44; --bad:#d64545; --panel:#ffffff; --hi:#c9502f;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100%; font-family:'Trebuchet MS',system-ui,sans-serif;
+    background:radial-gradient(circle at 50% 0%, var(--bg-bot), var(--bg-top));
+    color:var(--ink); display:flex; flex-direction:column; align-items:center;
+    padding:16px 10px calc(16px + env(safe-area-inset-bottom,0px));
+    padding-top:env(safe-area-inset-top,16px);
+  }
+  h1{
+    margin:2px 0 2px; font-size:1.4em; text-align:center;
+    color:var(--ink); letter-spacing:.5px;
+  }
+  .sub{color:#6b6a63; font-size:.85em; margin:0 0 12px; text-align:center;}
+  .wrap{width:100%; max-width:460px;}
+  .hud{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--panel); border-radius:12px; padding:8px 14px; margin-bottom:10px;
+    font-weight:700; font-size:.95em; box-shadow:0 2px 8px rgba(20,15,5,.05); border:1px solid #ece8e0;
+    flex-wrap:wrap; gap:6px;
+  }
+  .hud span.lbl{color:#6b6a63; font-weight:500; margin-right:4px;}
+  select{
+    background:#f1efe9; color:var(--ink); border:1px solid #d8d3c8;
+    border-radius:8px; padding:6px 8px; font-size:.82em; font-weight:600;
+  }
+
+  .rule-panel{
+    background:var(--panel); border-radius:12px; padding:10px 16px; margin-bottom:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(20,15,5,.05); border:1px solid #ece8e0;
+  }
+  .rule-panel .rule{
+    font-size:1.25em; font-weight:800; color:var(--accent); letter-spacing:1px;
+    font-family:'Courier New',monospace;
+  }
+  .rule-panel .rule.hidden span{ filter:blur(7px); user-select:none; }
+  .reveal-btn{
+    margin-top:6px; background:none; border:1px solid #d8d3c8; color:#6b6a63;
+    border-radius:20px; padding:4px 12px; font-size:.75em; font-weight:700; cursor:pointer;
+  }
+
+  .table-shell{
+    background:#ffffff; border-radius:14px; padding:10px 12px; margin-bottom:14px;
+    box-shadow:0 10px 34px rgba(20,15,5,.07), inset 0 0 0 2px #e5e1da;
+  }
+  table{ width:100%; border-collapse:collapse; }
+  th,td{ padding:10px 6px; text-align:center; border-bottom:1px solid #ece8e0; }
+  th{ color:#6b6a63; font-size:.8em; text-transform:uppercase; letter-spacing:.06em; font-weight:700; }
+  td.xval{ font-weight:800; font-size:1.1em; color:var(--ink); }
+  input.yin{
+    width:70px; padding:9px 6px; font-size:1.05em; text-align:center;
+    border:2px solid #d8d3c8; border-radius:8px; outline:none;
+    background:#ffffff; color:var(--ink); transition:border-color .15s, background .15s;
+  }
+  input.yin:focus{ border-color:var(--accent); }
+  input.yin.correct{ border-color:var(--good); background:#eaf7ee; color:var(--good); }
+  input.yin.wrong{ border-color:var(--bad); background:#fdecec; color:var(--bad); }
+  input.yin:disabled{ opacity:.9; }
+  .given-val{
+    display:inline-block; width:70px; padding:9px 6px; font-size:1.05em; font-weight:800;
+    color:var(--good); border:2px solid var(--good); border-radius:8px; background:#eaf7ee;
+  }
+
+  .btnrow{ display:flex; gap:10px; margin-top:6px; flex-wrap:wrap; }
+  .btn{
+    flex:1; min-width:120px; background:var(--accent); color:#ffffff; border:none;
+    border-radius:10px; padding:12px 22px; font-size:1em; font-weight:700; cursor:pointer;
+  }
+  .btn.secondary{ background:#f1efe9; color:var(--ink); border:1px solid #d8d3c8; }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .click-bar{
+    border-radius:12px; padding:12px 16px; margin-top:12px;
+    background:var(--panel); box-shadow:0 2px 8px rgba(20,15,5,.05); border:1px solid #ece8e0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    font-weight:700; font-size:1em; min-height:1.3em;
+    border:2px solid #d8d3c8; transition:background .15s, border-color .15s, color .15s;
+  }
+  .click-bar-label{ color:#6b6a63; font-weight:500; font-size:.9em; }
+  .click-bar-main{ display:flex; align-items:center; gap:8px; }
+  .click-bar.hit{ background:#eaf7ee; border-color:var(--good); color:var(--good); }
+  .click-bar.miss{ background:#fdecec; border-color:var(--bad); color:var(--bad); }
+  .click-bar .dot-icon{ display:inline-block; width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+
+  footer{color:#8a8578; font-size:.78em; margin-top:14px; text-align:center; max-width:460px;}
+</style>
+</head>
+<body>
+  <h1>📈 TABLE OF VALUES</h1>
+  <p class="sub">Find the pattern, fill in the missing y-values</p>
+
+  <div class="wrap">
+    <div class="hud">
+      <div><span class="lbl">Score</span><span id="score">0</span></div>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+      <div><span class="lbl">Round</span><span id="round">1</span></div>
+    </div>
+
+    <div class="rule-panel">
+      <div class="rule hidden" id="ruleBox">Rule: <span id="ruleText">y = mx + b</span></div>
+      <button class="reveal-btn" id="revealBtn">👁 Show rule (for practice)</button>
+    </div>
+
+    <div class="table-shell">
+      <table>
+        <thead><tr><th>x</th><th>y</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="btnrow">
+      <button class="btn" id="checkBtn">Check Answers</button>
+      <button class="btn secondary" id="nextBtn" disabled>Next Table →</button>
+    </div>
+
+    <div class="click-bar" id="statusBar">
+      <span class="click-bar-label">Fill in the table, then hit Check</span>
+    </div>
+  </div>
+
+  <footer>Every table follows y = mx + b. Use the pattern between rows to find missing y-values!</footer>
+
+<script>
+let score = 0;
+let round = 1;
+let current = null;
+
+function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+function makeRelation(diff){
+  let m, b, xs;
+  if(diff === 'easy'){
+    m = randInt(1,4);
+    b = Math.random() < 0.4 ? 0 : randInt(1,6);
+  } else if(diff === 'medium'){
+    m = randInt(-5,5); if(m===0) m=2;
+    b = randInt(-8,8);
+  } else {
+    m = randInt(-9,9); if(m===0) m=3;
+    b = randInt(-15,15);
+  }
+  const start = randInt(-4, 3);
+  xs = [0,1,2,3,4].map(i => start+i);
+  return {m, b, xs};
+}
+
+function fmtRule(m,b){
+  let rule = 'y = ';
+  if(m === 1) rule += 'x';
+  else if(m === -1) rule += '-x';
+  else rule += m + 'x';
+  if(b > 0) rule += ' + ' + b;
+  else if(b < 0) rule += ' - ' + Math.abs(b);
+  return rule;
+}
+
+function newRound(){
+  const diff = document.getElementById('difficulty').value;
+  current = makeRelation(diff);
+  document.getElementById('ruleText').textContent = fmtRule(current.m, current.b);
+  document.getElementById('ruleBox').classList.add('hidden');
+  document.getElementById('revealBtn').textContent = '👁 Show rule (for practice)';
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  current.xs.forEach((x, idx) => {
+    const y = current.m * x + current.b;
+    const tr = document.createElement('tr');
+    const tdX = document.createElement('td');
+    tdX.className = 'xval';
+    tdX.textContent = x;
+    const tdY = document.createElement('td');
+    if(idx === 0){
+      const span = document.createElement('span');
+      span.className = 'given-val';
+      span.textContent = y;
+      tdY.appendChild(span);
+    } else {
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.className = 'yin';
+      inp.dataset.answer = y;
+      inp.addEventListener('keydown', e => {
+        if(e.key === 'Enter') document.getElementById('checkBtn').click();
+      });
+      tdY.appendChild(inp);
+    }
+    tr.appendChild(tdX);
+    tr.appendChild(tdY);
+    tbody.appendChild(tr);
+  });
+
+  showStatus(null, 'Fill in the table, then hit Check');
+  document.getElementById('checkBtn').disabled = false;
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('round').textContent = round;
+}
+
+function showStatus(hit, text){
+  const bar = document.getElementById('statusBar');
+  bar.classList.remove('hit','miss');
+  if(hit === null){
+    bar.innerHTML = `<span class="click-bar-label">${text}</span>`;
+    return;
+  }
+  bar.classList.add(hit ? 'hit' : 'miss');
+  const dotColor = hit ? '#2f9e44' : '#d64545';
+  bar.innerHTML = `<div class="click-bar-main"><span class="dot-icon" style="background:${dotColor}"></span>${text}</div>`;
+}
+
+function checkAnswers(){
+  const inputs = document.querySelectorAll('.yin');
+  let allCorrect = true;
+  let anyBlank = false;
+  inputs.forEach(inp => {
+    if(inp.value === ''){ anyBlank = true; return; }
+    const correct = parseFloat(inp.value) === parseFloat(inp.dataset.answer);
+    inp.classList.remove('correct','wrong');
+    inp.classList.add(correct ? 'correct' : 'wrong');
+    if(!correct) allCorrect = false;
+  });
+
+  if(anyBlank){
+    showStatus(false, 'Fill in every box first!');
+    return;
+  }
+  if(allCorrect){
+    score += 10;
+    document.getElementById('score').textContent = score;
+    showStatus(true, `Correct! Rule was ${fmtRule(current.m, current.b)}`);
+    document.getElementById('ruleBox').classList.remove('hidden');
+    inputs.forEach(inp => inp.disabled = true);
+    document.getElementById('checkBtn').disabled = true;
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    showStatus(false, 'Not quite — check the boxes in red and try again.');
+  }
+}
+
+document.getElementById('checkBtn').addEventListener('click', checkAnswers);
+document.getElementById('nextBtn').addEventListener('click', () => {
+  round++;
+  newRound();
+});
+document.getElementById('revealBtn').addEventListener('click', () => {
+  const box = document.getElementById('ruleBox');
+  box.classList.toggle('hidden');
+  document.getElementById('revealBtn').textContent = box.classList.contains('hidden')
+    ? '👁 Show rule (for practice)' : '🙈 Hide rule';
+});
+document.getElementById('difficulty').addEventListener('change', () => {
+  round = 1;
+  newRound();
+});
+
+newRound();
+</script>
+</body>
+</html>
