@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Algebra Essentials Quiz (Verdana 36)</title>
+<style>
+:root{
+  --bg:#f7f6fa;--card:#ffffff;--card2:#f7f5fb;--border:#e4e1ec;
+  --accent:#6d5ef5;--accent-hover:#5a4bdc;--accent-soft:#efecfd;
+  --green:#2e9e5e;--green-bg:#edfaf3;--green-border:#a8e4c0;
+  --red:#d94f4f;--red-bg:#fdf0f0;--red-border:#f0b0b0;
+  --text:#1c1a22;--muted:#8a8594;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Verdana,Geneva,sans-serif;
+  min-height:100vh;display:flex;justify-content:center;padding:16px 12px 60px;}
+.app{width:100%;max-width:1100px;}
+.hidden{display:none !important;}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:14px 0 12px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.hdr h1{font-size:1rem;font-weight:700;letter-spacing:-0.01em;}
+.stats{display:flex;gap:10px;font-size:1rem;color:var(--muted);}
+.stat strong{color:var(--text);font-weight:700;}
+
+/* ── SETUP WIZARD ─────────────────────────── */
+.wiz-dots{display:flex;justify-content:center;gap:6px;margin-bottom:14px;}
+.wiz-dot{width:7px;height:7px;border-radius:50%;background:#e4e1ec;transition:background .15s;}
+.wiz-dot.done{background:var(--accent);}
+.wiz-dot.current{background:var(--accent);width:18px;border-radius:4px;}
+.wiz-crumb{font-size:1rem;color:var(--muted);text-align:center;margin-bottom:18px;line-height:1.5;min-height:1.1em;}
+.setup-sec{margin-bottom:20px;}
+.setup-label{font-size:1rem;font-weight:700;color:#999;letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.step-num{display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;background:#ece9f3;color:#7a7488;
+  font-size:1rem;font-weight:700;letter-spacing:0;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.opt-grid.single{grid-template-columns:1fr;}
+.opt-card{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:11px 12px;cursor:pointer;transition:border-color .12s,background .12s;user-select:none;
+  position:relative;}
+.opt-card:hover{border-color:#cfc9df;}
+.opt-card.sel{border-color:var(--accent);background:var(--accent-soft);}
+.opt-badge{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:1rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.opt-title{font-size:1rem;font-weight:700;margin-bottom:2px;}
+.opt-card.sel .opt-title{color:var(--accent-hover);}
+
+.tog-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;user-select:none;}
+.tog-row.on{border-color:var(--accent);background:var(--accent-soft);}
+.tog-num{width:1.4em;font-weight:800;color:var(--accent);font-size:1rem;text-align:right;flex:none;}
+.tog-text{flex:1;min-width:0;}
+.tog-switch{flex:none;width:40px;height:24px;border-radius:12px;background:#cfc9df;position:relative;transition:background .15s;}
+.tog-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s;}
+.tog-row.on .tog-switch{background:var(--accent);}
+.tog-row.on .tog-knob{transform:translateX(16px);}
+.opt-num{color:var(--accent);font-weight:800;}
+.opt-desc{font-size:1rem;color:var(--muted);line-height:1.35;}
+.setup-note{font-size:1rem;color:var(--muted);font-style:italic;margin-top:6px;min-height:1px;}
+.wiz-foot{display:flex;flex-direction:column;gap:10px;}
+.wiz-nav-row{display:flex;gap:8px;align-items:center;}
+.back-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);
+  font-size:1rem;font-weight:700;padding:12px 16px;cursor:pointer;}
+.back-btn:hover{border-color:#cfc9df;color:var(--text);}
+.continue-btn{flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px;font-size:1rem;font-weight:700;cursor:pointer;}
+.continue-btn:hover{background:var(--accent-hover);}
+.continue-btn:disabled{background:#cfc9df;cursor:default;}
+.wiz-review{margin-bottom:4px;}
+.review-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border);font-size:1rem;}
+.review-row:last-child{border-bottom:none;}
+.review-row .rlabel{color:var(--muted);font-size:1rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.review-row .rvalue{font-weight:700;text-align:right;}
+.start-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:1rem;font-weight:700;cursor:pointer;}
+.start-btn:hover{background:var(--accent-hover);}
+
+/* ── QUIZ SCREEN ──────────────────────────── */
+.quiz-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;}
+.quiz-bar-btns{display:flex;gap:6px;}
+.setup-summary{font-size:1rem;color:var(--muted);line-height:1.4;}
+.change-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);
+  font-size:1rem;font-weight:700;padding:6px 10px;cursor:pointer;white-space:nowrap;}
+.change-btn:hover{border-color:#cfc9df;color:var(--text);}
+
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:18px 16px;margin-bottom:14px;}
+.topic-label{font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:.05em;
+  text-transform:uppercase;margin-bottom:10px;}
+.context-wrap{background:var(--card2);border-left:3px solid var(--accent);border-radius:6px;
+  padding:10px 12px;margin-bottom:10px;font-size:1rem;line-height:1.5;color:var(--text);}
+.formula-wrap{font-size:1rem;font-weight:700;margin-bottom:10px;text-align:center;}
+.prompt{font-size:1rem;font-weight:600;text-align:center;line-height:1.4;margin-bottom:12px;}
+.expr-display{font-size:1rem;font-weight:700;text-align:center;line-height:1.6;
+  font-family:Verdana,Geneva,sans-serif;letter-spacing:.01em;padding:6px 4px;word-break:break-word;}
+.expr-display i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.words-display{font-size:1rem;font-weight:600;text-align:center;line-height:1.5;font-style:italic;}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  margin:0 .18em;font-size:.82em;line-height:1.15;position:relative;top:.08em;}
+.frac .fnum{border-bottom:1.6px solid currentColor;padding:0 .3em .1em;}
+.frac .fden{padding:.1em .3em 0;}
+.sqin{border-top:1.6px solid currentColor;padding:1px .15em 0;display:inline-block;}
+
+#answer-area{margin-bottom:14px;}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.choice-btn{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:13px 8px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;
+  font-family:Verdana,Geneva,sans-serif;}
+.choice-btn i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.choice-btn:hover{border-color:#cfc9df;}
+.choice-btn:disabled{cursor:default;}
+.choice-btn.ok{border-color:var(--green-border);background:var(--green-bg);color:var(--green);}
+.choice-btn.bad{border-color:var(--red-border);background:var(--red-bg);color:var(--red);}
+
+.type-row{display:flex;gap:8px;}
+.type-row input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:12px;
+  font-size:1rem;font-family:Verdana,Geneva,sans-serif;}
+.type-row input:focus{outline:none;border-color:var(--accent);}
+.type-hint{font-size:1rem;color:var(--muted);margin-top:6px;}
+.submit-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px 18px;font-size:1rem;font-weight:700;cursor:pointer;}
+.submit-btn:disabled{background:#cfc9df;cursor:default;}
+
+.feedback{display:none;background:var(--card2);border:1px solid var(--border);
+  border-radius:12px;padding:14px;margin-bottom:14px;}
+.fb-banner{font-size:1rem;font-weight:700;margin-bottom:6px;}
+.fb-banner.ok{color:var(--green);}
+.fb-banner.err{color:var(--red);}
+.fb-answer{font-size:1rem;font-weight:600;font-family:Verdana,Geneva,sans-serif;}
+.fb-answer i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.fb-steps-title{font-size:1rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:6px;}
+.fb-steps-list{padding-left:1.2em;}
+.fb-steps-list li{font-size:1rem;line-height:1.55;margin-bottom:4px;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps-list li i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps-list li b{font-weight:700;}
+.next-btn{display:none;width:100%;background:var(--text);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:1rem;font-weight:700;cursor:pointer;}
+.next-btn:hover{opacity:.9;}
+
+/* ── RESULTS SCREEN ───────────────────────── */
+.results-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:22px 18px;text-align:center;}
+.results-title{font-size:1rem;font-weight:800;margin-bottom:4px;}
+.results-sub{font-size:1rem;color:var(--muted);margin-bottom:18px;}
+.results-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:11px 0;border-bottom:1px solid var(--border);font-size:1rem;text-align:left;}
+.results-row:last-child{border-bottom:none;}
+.results-btns{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+.results-btns .start-btn{margin:0;}
+.results-secondary{background:none;border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:1rem;font-weight:700;padding:13px;cursor:pointer;}
+.results-secondary:hover{border-color:#cfc9df;}
+
+/* ---- Verdana 36 version ---- */
+html{font-size:36px;}
+body,button,input,textarea{font-family:Verdana,Geneva,sans-serif;font-size:36px;}
+.expr-display,.choice-btn,.fb-answer,.fb-steps-list li{font-family:Verdana,Geneva,sans-serif;}
+.expr-display i,.choice-btn i,.fb-answer i,.fb-steps-list li i{font-family:Verdana,Geneva,sans-serif;}
+.step-num{width:1.5em;height:1.5em;font-size:.6em;}
+.opt-badge{width:1.4em;height:1.4em;top:-.35em;right:-.35em;font-size:.6em;}
+.wiz-dot{width:14px;height:14px;}.wiz-dot.current{width:36px;}
+.tog-switch{width:80px;height:48px;border-radius:24px;}
+.tog-knob{width:40px;height:40px;top:4px;left:4px;}
+.tog-row.on .tog-knob{transform:translateX(32px);}
+.tog-row{gap:18px;padding:16px 20px;}
+.tog-num{width:1.6em;}
+.opt-card{padding:16px 18px;}
+.opt-grid{gap:14px;}
+.fb-steps-list li{line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <h1>Algebra Essentials</h1>
+    <div class="stats">
+      <span class="stat hidden" id="stat-timer-wrap">&#9201;&nbsp;<strong id="stat-timer">0:00</strong></span>
+      <span class="stat hidden" id="stat-streak-wrap">&#9733;&nbsp;<strong id="stat-streak">0</strong></span>
+    </div>
+  </div>
+
+  <!-- ===================== SETUP SCREEN ===================== -->
+  <div id="setup-screen">
+    <div class="wiz-dots" id="wiz-dots"></div>
+    <div class="wiz-crumb" id="wiz-crumb"></div>
+
+    <div id="wiz-body"></div>
+
+    <div class="wiz-foot">
+      <div class="wiz-nav-row">
+        <button class="back-btn hidden" id="wiz-back" onclick="stepBack()">&larr; Back</button>
+        <button class="continue-btn hidden" id="wiz-continue" onclick="stepContinue()">Continue &rarr;</button>
+      </div>
+      <div id="review-block" class="hidden">
+        <div class="wiz-review" id="wiz-review"></div>
+        <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== QUIZ SCREEN ===================== -->
+  <div id="quiz-screen" class="hidden">
+    <div class="quiz-bar">
+      <div class="setup-summary" id="setup-summary"></div>
+      <div class="quiz-bar-btns">
+        <button class="change-btn" onclick="goToSetupFromQuiz()">Change</button>
+        <button class="change-btn" onclick="endQuiz(false)">Finish</button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="topic-label" id="q-topic-label"></div>
+      <div class="context-wrap hidden" id="q-context"></div>
+      <div class="formula-wrap hidden" id="q-formula"></div>
+      <div class="prompt" id="q-prompt"></div>
+      <div class="expr-display hidden" id="q-expr"></div>
+      <div class="words-display hidden" id="q-words"></div>
+    </div>
+
+    <div id="answer-area">
+      <div class="choice-grid hidden" id="choice-grid"></div>
+      <div class="type-row hidden" id="type-row">
+        <input type="text" id="type-input" placeholder="Type your answer" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="submit-btn" id="type-submit" onclick="submitTyped()">Check</button>
+      </div>
+      <div class="type-hint hidden" id="type-hint">e.g. 2x+10, 3/(4y), or a number</div>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <div class="fb-banner" id="fb-banner"></div>
+      <div class="fb-answer" id="fb-answer"></div>
+      <div class="fb-steps hidden" id="fb-steps"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question &rarr;</button>
+  </div>
+
+  <!-- ===================== RESULTS SCREEN ===================== -->
+  <div id="results-screen" class="hidden">
+    <div class="results-card">
+      <div class="results-title" id="results-title">Quiz Complete!</div>
+      <div class="results-sub" id="results-sub"></div>
+      <div class="results-row"><span class="rlabel">Score</span><span class="rvalue" id="res-score"></span></div>
+      <div class="results-row"><span class="rlabel">Best Streak</span><span class="rvalue" id="res-beststreak"></span></div>
+      <div class="results-btns">
+        <button class="start-btn" onclick="restartSameSetup()">Play Again</button>
+        <button class="results-secondary" onclick="goToSetupFromResults()">Change Setup</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =========================================================================
+// PURE LOGIC (expression engine, term builders, topic generators,
+// distractor generation) — tested independently via node before being
+// embedded here. See merged_logic.js / test_*.js in the build workspace.
+// =========================================================================
+</script>
+<script>
+// ===== engine.js =====
+
+// ===================== Expression Engine =====================
+// Tokenizer + recursive descent parser + evaluator for simple algebraic
+// expressions: + - * / ^ ( ) , single-letter variables, integers/decimals,
+// implicit multiplication (2x, 3(x+1), xy, (x+1)(x-1)), unary minus,
+// and a few named functions: sqrt(...).
+
+function tokenize(str) {
+  const toks = [];
+  let i = 0;
+  const s = str.replace(/\s+/g, '');
+  while (i < s.length) {
+    const c = s[i];
+    if (/[0-9.]/.test(c)) {
+      let j = i;
+      while (j < s.length && /[0-9.]/.test(s[j])) j++;
+      toks.push({ type: 'NUM', value: parseFloat(s.slice(i, j)) });
+      i = j;
+    } else if (/[a-zA-Z]/.test(c)) {
+      // check for function name "sqrt"
+      if (s.slice(i, i + 4) === 'sqrt' && s[i + 4] === '(') {
+        toks.push({ type: 'FUNC', value: 'sqrt' });
+        i += 4;
+      } else {
+        toks.push({ type: 'VAR', value: c });
+        i++;
+      }
+    } else if (c === '+' || c === '-' || c === '*' || c === '/' || c === '^') {
+      toks.push({ type: 'OP', value: c });
+      i++;
+    } else if (c === '(') {
+      toks.push({ type: 'LP' });
+      i++;
+    } else if (c === ')') {
+      toks.push({ type: 'RP' });
+      i++;
+    } else {
+      throw new Error('Unexpected character: ' + c);
+    }
+  }
+  return toks;
+}
+
+// Insert explicit '*' tokens for implicit multiplication.
+function insertImplicitMul(toks) {
+  const out = [];
+  for (let i = 0; i < toks.length; i++) {
+    const t = toks[i];
+    if (out.length > 0) {
+      const prev = out[out.length - 1];
+      const prevEndsValue = prev.type === 'NUM' || prev.type === 'VAR' || prev.type === 'RP';
+      const curStartsValue = t.type === 'NUM' || t.type === 'VAR' || t.type === 'LP' || t.type === 'FUNC';
+      if (prevEndsValue && curStartsValue) {
+        out.push({ type: 'OP', value: '*' });
+      }
+    }
+    out.push(t);
+  }
+  return out;
+}
+
+function parseExpr(str) {
+  const toks = insertImplicitMul(tokenize(str));
+  let pos = 0;
+  function peek() { return toks[pos]; }
+  function next() { return toks[pos++]; }
+
+  function parseAddSub() {
+    let node = parseMulDiv();
+    while (peek() && peek().type === 'OP' && (peek().value === '+' || peek().value === '-')) {
+      const op = next().value;
+      const rhs = parseMulDiv();
+      node = { type: 'bin', op, left: node, right: rhs };
+    }
+    return node;
+  }
+  function parseMulDiv() {
+    let node = parseUnary();
+    while (peek() && peek().type === 'OP' && (peek().value === '*' || peek().value === '/')) {
+      const op = next().value;
+      const rhs = parseUnary();
+      node = { type: 'bin', op, left: node, right: rhs };
+    }
+    return node;
+  }
+  function parseUnary() {
+    if (peek() && peek().type === 'OP' && peek().value === '-') {
+      next();
+      return { type: 'neg', node: parseUnary() };
+    }
+    return parsePow();
+  }
+  function parsePow() {
+    let node = parseAtom();
+    if (peek() && peek().type === 'OP' && peek().value === '^') {
+      next();
+      const rhs = parseUnary();
+      node = { type: 'bin', op: '^', left: node, right: rhs };
+    }
+    return node;
+  }
+  function parseAtom() {
+    const t = peek();
+    if (!t) throw new Error('Unexpected end of input');
+    if (t.type === 'NUM') { next(); return { type: 'num', value: t.value }; }
+    if (t.type === 'VAR') { next(); return { type: 'var', name: t.value }; }
+    if (t.type === 'FUNC') {
+      next();
+      if (!peek() || peek().type !== 'LP') throw new Error('Expected ( after function');
+      next();
+      const arg = parseAddSub();
+      if (!peek() || peek().type !== 'RP') throw new Error('Expected )');
+      next();
+      return { type: 'func', name: t.value, arg };
+    }
+    if (t.type === 'LP') {
+      next();
+      const node = parseAddSub();
+      if (!peek() || peek().type !== 'RP') throw new Error('Expected )');
+      next();
+      return node;
+    }
+    throw new Error('Unexpected token ' + JSON.stringify(t));
+  }
+
+  const ast = parseAddSub();
+  if (pos !== toks.length) throw new Error('Unexpected trailing tokens');
+  return ast;
+}
+
+function safeParseExpr(str) {
+  try { return parseExpr(str); } catch (e) { return null; }
+}
+
+function evalAst(ast, vars) {
+  switch (ast.type) {
+    case 'num': return ast.value;
+    case 'var':
+      if (!(ast.name in vars)) throw new Error('Unbound variable ' + ast.name);
+      return vars[ast.name];
+    case 'neg': return -evalAst(ast.node, vars);
+    case 'func':
+      if (ast.name === 'sqrt') {
+        const v = evalAst(ast.arg, vars);
+        if (v < 0) return NaN;
+        return Math.sqrt(v);
+      }
+      throw new Error('Unknown function ' + ast.name);
+    case 'bin': {
+      const l = evalAst(ast.left, vars);
+      const r = evalAst(ast.right, vars);
+      switch (ast.op) {
+        case '+': return l + r;
+        case '-': return l - r;
+        case '*': return l * r;
+        case '/': return l / r;
+        case '^': return Math.pow(l, r);
+      }
+      throw new Error('Unknown op ' + ast.op);
+    }
+  }
+  throw new Error('Unknown node type ' + ast.type);
+}
+
+function collectVars(ast, set) {
+  set = set || new Set();
+  switch (ast.type) {
+    case 'num': break;
+    case 'var': set.add(ast.name); break;
+    case 'neg': collectVars(ast.node, set); break;
+    case 'func': collectVars(ast.arg, set); break;
+    case 'bin': collectVars(ast.left, set); collectVars(ast.right, set); break;
+  }
+  return set;
+}
+
+// Evaluate a string expression at given variable values. Returns NaN on error.
+function evalExprStr(str, vars) {
+  const ast = safeParseExpr(str);
+  if (!ast) return NaN;
+  try { return evalAst(ast, vars); } catch (e) { return NaN; }
+}
+
+// Check whether two expression strings are numerically equivalent by
+// sampling random values for every variable that appears in EITHER one.
+// Returns false if variable sets differ, or parsing fails, or any sample
+// mismatches (within epsilon), after enough valid (non-NaN/Infinity) trials.
+function expressionsEquivalent(userStr, correctStr) {
+  const userAst = safeParseExpr(userStr);
+  const correctAst = safeParseExpr(correctStr);
+  if (!userAst || !correctAst) return false;
+  const userVars = collectVars(userAst);
+  const correctVars = collectVars(correctAst);
+  if (userVars.size !== correctVars.size) return false;
+  for (const v of userVars) if (!correctVars.has(v)) return false;
+  const varNames = Array.from(correctVars);
+  if (varNames.length === 0) {
+    // Both constant - compare directly.
+    const a = evalAst(userAst, {});
+    const b = evalAst(correctAst, {});
+    return Math.abs(a - b) < 1e-9;
+  }
+  const SAMPLE_SETS = [
+    [2, 3, 5, 7, 11, 13],
+    [3, 5, 2, 7, 4, 6],
+    [4, 2, 6, 3, 9, 5],
+    [5, 7, 3, 2, 8, 4],
+    [7, 4, 9, 5, 2, 3],
+  ];
+  let validTrials = 0;
+  for (const sampleVals of SAMPLE_SETS) {
+    const vars = {};
+    varNames.forEach((name, idx) => { vars[name] = sampleVals[idx % sampleVals.length] + idx * 0.37; });
+    let a, b;
+    try { a = evalAst(userAst, vars); } catch (e) { continue; }
+    try { b = evalAst(correctAst, vars); } catch (e) { continue; }
+    if (!isFinite(a) || !isFinite(b)) continue;
+    validTrials++;
+    if (Math.abs(a - b) > 1e-6 * Math.max(1, Math.abs(b))) return false;
+  }
+  return validTrials >= 3;
+}
+
+
+
+// ===== terms.js =====
+
+// ===================== Term Builders =====================
+// Build {str, html} pairs together so display and evaluation can never
+// disagree. `str` is parseable by engine.js; `html` is pretty markup.
+
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randChoice(arr) { return arr[randInt(0, arr.length - 1)]; }
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = randInt(0, i);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function numTerm(n) { return { str: String(n), html: String(n) }; }
+function varTerm(name) { return { str: name, html: `<i>${name}</i>` }; }
+
+function powTerm(base, exp) {
+  if (exp === 1) return base;
+  // Both str and html must consult base.needsParen the same way: a base like
+  // "3*a" (needsParen from mulTerms) must render as "(3a)^2"/"(3*a)^2" in both
+  // forms, not "3a^2" (which means 3*(a^2), a different value).
+  return { str: `${wrapIfNeeded(base)}^${exp}`, html: `${wrapIfNeededHtml(base)}<sup>${exp}</sup>` };
+}
+
+function wrapIfNeeded(t) {
+  // Wrap in parens for str if it's a sum (to be safe before applying ^ or coefficients)
+  return t.needsParen ? `(${t.str})` : t.str;
+}
+
+function paren(t) {
+  return { str: `(${t.str})`, html: `(${t.html})`, needsParen: false };
+}
+
+// Multiply a list of terms together (implicit multiplication in display,
+// explicit * in str for safety).
+function mulTerms(terms) {
+  const strParts = terms.map(t => wrapIfNeeded(t));
+  const htmlParts = terms.map(t => t.needsParen ? `(${t.html})` : t.html);
+  return { str: strParts.join('*'), html: htmlParts.join(''), needsParen: true };
+}
+
+// HTML counterpart of wrapIfNeeded: wraps t.html in parens when t.needsParen
+// is set (e.g. varPart is a sum), so "coefficient times a sum" renders as
+// "2(l + 8)" in html exactly as it does in the parseable str form, instead
+// of silently dropping the parens and rendering the wrong expression
+// ("2l + 8").
+function wrapIfNeededHtml(t) {
+  return t.needsParen ? `(${t.html})` : t.html;
+}
+
+// For coefficient-times-term display: only a SUM needs brackets ("2(l + 8)");
+// a product or fraction reads fine without ("36a^2b^2").
+function wrapSumHtml(t) {
+  return t.isSum ? `(${t.html})` : t.html;
+}
+
+// coefficient * variable-part, formatted nicely (omit coefficient of 1,
+// show -1 as a bare minus, etc.) `varPart` may be null for a pure number.
+function coeffTerm(coeff, varPart) {
+  if (varPart === null || varPart === undefined) return numTerm(coeff);
+  if (coeff === 1) return varPart;
+  // needsParen is false here (on coeffTerm's OWN output): "7u" or "-x" as a
+  // coefficient-times-variable term reads unambiguously as a multiplication
+  // operand without extra parens (matches the source document's own style,
+  // e.g. "6a(2a+2a^2)"). This is separate from whether varPart ITSELF needs
+  // wrapping (e.g. a sum like "l + 8"), which wrapIfNeeded(Html) handles.
+  if (coeff === -1) return { str: `-${wrapIfNeeded(varPart)}`, html: `-${wrapSumHtml(varPart)}`, needsParen: false };
+  return { str: `${coeff}*${wrapIfNeeded(varPart)}`, html: `${coeff}${wrapSumHtml(varPart)}`, needsParen: false };
+}
+
+// Add a list of {coeff-including} terms with correct +/- signs.
+// terms: array of {str, html} where a negative term already starts with '-'.
+function addTerms(terms) {
+  let str = '', html = '';
+  terms.forEach((t, idx) => {
+    const isNeg = t.str.startsWith('-');
+    const corePlain = isNeg ? t.str.slice(1) : t.str;
+    const coreHtml = isNeg ? t.html.slice(stripMinusLen(t.html)) : t.html;
+    if (idx === 0) {
+      str += t.str;
+      html += t.html;
+    } else {
+      str += isNeg ? ` - ${corePlain}` : ` + ${t.str}`;
+      html += isNeg ? ` - ${coreHtml}` : ` + ${t.html}`;
+    }
+  });
+  return { str, html, needsParen: true, isSum: true };
+}
+function stripMinusLen(html) {
+  // html starts with '-' char
+  return 1;
+}
+
+function fracTerm(num, den) {
+  return {
+    str: `(${num.str})/(${den.str})`,
+    html: `<span class="frac"><span class="fnum">${num.html}</span><span class="fden">${den.html}</span></span>`,
+    needsParen: true,
+  };
+}
+
+function sqrtTerm(inner) {
+  return { str: `sqrt(${inner.str})`, html: `&radic;<span class="sqin">${inner.html}</span>`, needsParen: true };
+}
+
+
+
+// ===== E/T namespace aliases (for topics.js/distractors.js internal qualified calls) =====
+
+const E = { tokenize, insertImplicitMul, parseExpr, safeParseExpr, evalAst, collectVars, evalExprStr, expressionsEquivalent };
+
+const T = { randInt, randChoice, shuffle, numTerm, varTerm, powTerm, paren, mulTerms, coeffTerm, addTerms, fracTerm, sqrtTerm, wrapIfNeeded, wrapIfNeededHtml };
+
+// ===== topics.js =====
+
+const VARS_POOL = ['a','b','c','d','e','f','g','h','j','k','m','n','p','q','r','s','t','u','v','w','x','y','z'];
+function pickVars(n) { return shuffle(VARS_POOL).slice(0, n); }
+
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a; }
+
+function fracToStr(num, den) {
+  const g = gcd(num, den) || 1;
+  num /= g; den /= g;
+  if (den < 0) { den = -den; num = -num; }
+  if (den === 1) return String(num);
+  return `${num}/${den}`;
+}
+
+// ---------- Topic 1: Substitution ----------
+// Built from the worksheet's own three sets of expressions and values:
+//   basic    : "If t = 3, evaluate" (t+2, t×2, t÷3, 10t, t-1, 12-2t, 4t+1, 2(3+t)+t, 30-(2t-1))
+//   fraction : "Substitute a = 5"  (30/a+3, (5+a)/a, 6a+3(a-2), 20/a+2a(a+4), 3(3a-5)/(a+10), 100-4(3+4a))
+//   twoVar   : "x = 2 and y = 3"   (3xy, 3x^2, y^2-x^2, 2x^2+y/3-xy, sqrt(3y)+sqrt(6xy), sqrt(x^2+y^2+3), (3x)^2-y^2, 24+2xy^2/2)
+// Only the letters are randomised; the expressions and values are the worksheet's.
+// Stages follow the worksheet's own order, simplest first:
+//   0: t+2, t×2, t÷3, 10t, t-1, 12-2t                    (t = 3)
+//   1: 4t+1, 2(3+t)+t, 30-(2t-1)                          (t = 3)  and  3xy, 3x², y²-x²  (x = 2, y = 3)
+//   2: the a = 5 set with fractions                        (30/a+3 ... 100-4(3+4a))
+//   3: the remaining two-variable items (roots, (3x)²-y², ...)
+// `tier` is a stage number 0-3 (the old names 'basic'/'fraction'/'twoVar' map to 0/2/3).
+function genSubstitutionRaw(tier) {
+  const stage = typeof tier === 'number' ? tier : ({ basic: 0, fraction: 2, twoVar: 3 })[tier];
+  const [vx, vy] = pickVars(2);
+  const X = varTerm(vx), Y = varTerm(vy);
+  const xy = { str: `${vx}*${vy}`, html: `<i>${vx}</i><i>${vy}</i>`, needsParen: false };
+  const one = (V, val, expr) => { const v = V.str; const vars = { [v]: val };
+    return { prompt: `If ${v} = ${val}, evaluate:`, exprHtml: expr.html, exprStr: expr.str, vars, answer: E.evalExprStr(expr.str, vars) }; };
+  const two = (expr) => { const vars = { [vx]: 2, [vy]: 3 };
+    return { prompt: `If ${vx} = 2 and ${vy} = 3, evaluate:`, exprHtml: expr.html, exprStr: expr.str, vars, answer: Math.round(E.evalExprStr(expr.str, vars)) }; };
+  const T3 = X; // single-letter set uses vx as its letter (t = 3 / a = 5)
+  const pools = {
+    0: [
+      () => one(T3, 3, addTerms([T3, numTerm(2)])),
+      () => one(T3, 3, { str: `${vx}*2`, html: `<i>${vx}</i> &times; 2`, needsParen: true }),
+      () => one(T3, 3, { str: `${vx}/3`, html: `<i>${vx}</i> &divide; 3`, needsParen: true }),
+      () => one(T3, 3, coeffTerm(10, T3)),
+      () => one(T3, 3, addTerms([T3, numTerm(-1)])),
+      () => one(T3, 3, addTerms([numTerm(12), coeffTerm(-2, T3)])),
+    ],
+    1: [
+      () => one(T3, 3, addTerms([coeffTerm(4, T3), numTerm(1)])),
+      () => one(T3, 3, addTerms([coeffTerm(2, addTerms([numTerm(3), T3])), T3])),
+      () => one(T3, 3, addTerms([numTerm(30), coeffTerm(-1, addTerms([coeffTerm(2, T3), numTerm(-1)]))])),
+      () => two(coeffTerm(3, xy)),
+      () => two(coeffTerm(3, powTerm(X, 2))),
+      () => two(addTerms([powTerm(Y, 2), coeffTerm(-1, powTerm(X, 2))])),
+    ],
+    2: [
+      () => one(T3, 5, addTerms([fracTerm(numTerm(30), T3), numTerm(3)])),
+      () => one(T3, 5, fracTerm(addTerms([numTerm(5), T3]), T3)),
+      () => one(T3, 5, addTerms([coeffTerm(6, T3), coeffTerm(3, addTerms([T3, numTerm(-2)]))])),
+      () => one(T3, 5, addTerms([fracTerm(numTerm(20), T3), mulTerms([numTerm(2), T3, addTerms([T3, numTerm(4)])])])),
+      () => one(T3, 5, fracTerm(mulTerms([numTerm(3), addTerms([coeffTerm(3, T3), numTerm(-5)])]), addTerms([T3, numTerm(10)]))),
+      () => one(T3, 5, addTerms([numTerm(100), coeffTerm(-4, addTerms([numTerm(3), coeffTerm(4, T3)]))])),
+    ],
+    3: [
+      () => two(addTerms([coeffTerm(2, powTerm(X, 2)), fracTerm(Y, numTerm(3)), coeffTerm(-1, xy)])),
+      () => two(addTerms([sqrtTerm(coeffTerm(3, Y)), sqrtTerm(mulTerms([numTerm(6), X, Y]))])),
+      () => two(sqrtTerm(addTerms([powTerm(X, 2), powTerm(Y, 2), numTerm(3)]))),
+      () => two(addTerms([powTerm(mulTerms([numTerm(3), X]), 2), coeffTerm(-1, powTerm(Y, 2))])),
+      () => two(addTerms([numTerm(24), fracTerm(mulTerms([numTerm(2), X, powTerm(Y, 2)]), numTerm(2))])),
+    ],
+  };
+  return randChoice(pools[Math.max(0, Math.min(3, stage))])();
+}
+
+// Only whole-number answers (all worksheet items already are).
+function genSubstitution(tier) {
+  let q;
+  for (let i = 0; i < 200; i++) {
+    q = genSubstitutionRaw(tier);
+    if (Number.isInteger(q.answer)) return q;
+  }
+  return q;
+}
+
+// ---------- Topic 2: Index Notation Basics (numeric only) ----------
+function genIndexNotation(mode, twoGroups) {
+  // mode: 'sumToProduct' | 'productToIndex'
+  // Worksheet ranges: numbers 2-10; single group repeats 2-5 (sums) / 3-6 (products);
+  // two-group questions repeat each number 2-3 times (e.g. 2+2+3+3, 5x5x4x4x2x2 is the max).
+  const groups = [];
+  const kLo = twoGroups ? 2 : (mode === 'sumToProduct' ? 2 : 3);
+  const kHi = twoGroups ? 3 : (mode === 'sumToProduct' ? 5 : 6);
+  const n1 = randInt(2, 10);
+  const k1 = randInt(kLo, kHi);
+  groups.push({ n: n1, k: k1 });
+  if (twoGroups) {
+    let n2;
+    do { n2 = randInt(2, 10); } while (n2 === n1);
+    const k2 = randInt(kLo, mode === 'sumToProduct' ? Math.min(kHi, 5 - k1) : kHi);
+    groups.push({ n: n2, k: k2 });
+  }
+  // Build the shuffled list of displayed numbers
+  let items = [];
+  groups.forEach(g => { for (let i = 0; i < g.k; i++) items.push(g.n); });
+  items = shuffle(items);
+  if (mode === 'sumToProduct') {
+    const promptExpr = items.join(' + ');
+    const answerParts = groups.map(g => `${g.k} &times; ${g.n}`);
+    const answerStr = answerParts.join(' + ');
+    const checkStr = groups.map(g => `${g.k}*${g.n}`).join('+');
+    const numericAnswer = groups.reduce((s, g) => s + g.n * g.k, 0);
+    const steps = groups.map(g => `There ${g.k === 1 ? 'is' : 'are'} ${g.k} ${g.k === 1 ? 'copy' : 'copies'} of ${g.n}, so that part is ${g.k} &times; ${g.n} = ${g.k * g.n}.`);
+    steps.push(`Add the parts together: ${groups.map(g => g.k * g.n).join(' + ')} = ${numericAnswer}.`);
+    steps.push(`Answer: ${answerStr}`);
+    return { prompt: 'Write the following sum as a product (or sum of products):', exprHtml: promptExpr, answerDisplay: answerStr, answerStrForCheck: checkStr, numericAnswer, steps };
+  } else {
+    const promptExpr = items.join(' &times; ');
+    const answerParts = groups.map(g => `${g.n}<sup>${g.k}</sup>`);
+    const answerStr = answerParts.join(' &times; ');
+    const checkStr = groups.map(g => `${g.n}^${g.k}`).join('*');
+    const numericAnswer = groups.reduce((p, g) => p * Math.pow(g.n, g.k), 1);
+    const steps = groups.map(g => `${g.n} is multiplied by itself ${g.k} times, so write it as ${g.n}<sup>${g.k}</sup>.`);
+    steps.push(`Answer: ${answerStr}`);
+    return { prompt: 'Write the following product in index form:', exprHtml: promptExpr, answerDisplay: answerStr, answerStrForCheck: checkStr, numericAnswer, steps };
+  }
+}
+
+// ---------- Topic 3: Collecting Like Terms ----------
+function genLikeTerms(mode) {
+  // modes: 'addSame','addMixed','mulSame','mulDistinct','mulRepeatedDistinct','coeffCombine'
+  if (mode === 'addSame') {
+    const v = randChoice(VARS_POOL);
+    const k = randInt(2, 5);
+    const items = shuffle(Array(k).fill(v));
+    const promptHtml = items.map(x => `<i>${x}</i>`).join(' + ');
+    const answer = coeffTerm(k, varTerm(v));
+    const steps = [
+      `All ${k} terms are <i>${v}</i>, so they are like terms.`,
+      `Count how many there are: ${k} lots of <i>${v}</i>.`,
+      `Answer: ${answer.html}`,
+    ];
+    return { prompt: 'Simplify by collecting like terms:', exprHtml: promptHtml, answer, steps };
+  }
+  if (mode === 'addMixed') {
+    const [v1, v2] = pickVars(2);
+    const k1 = randInt(1, 3), k2 = randInt(1, 3);
+    let items = shuffle([...Array(k1).fill(v1), ...Array(k2).fill(v2)]);
+    const promptHtml = items.map(x => `<i>${x}</i>`).join(' + ');
+    const t1 = coeffTerm(k1, varTerm(v1)), t2 = coeffTerm(k2, varTerm(v2));
+    const answer = addTerms([t1, t2]);
+    const steps = [
+      `Group the like terms together: the <i>${v1}</i> terms and the <i>${v2}</i> terms.`,
+      `There ${k1 === 1 ? 'is' : 'are'} ${k1} ${k1 === 1 ? 'copy' : 'copies'} of <i>${v1}</i>, giving ${t1.html}.`,
+      `There ${k2 === 1 ? 'is' : 'are'} ${k2} ${k2 === 1 ? 'copy' : 'copies'} of <i>${v2}</i>, giving ${t2.html}.`,
+      `Answer: ${answer.html}`,
+    ];
+    return { prompt: 'Simplify by collecting like terms:', exprHtml: promptHtml, answer, steps };
+  }
+  if (mode === 'mulSame') {
+    const v = randChoice(VARS_POOL);
+    const k = randInt(3, 5);
+    const items = Array(k).fill(v);
+    const promptHtml = items.map(x => `<i>${x}</i>`).join(' &times; ');
+    const answer = powTerm(varTerm(v), k);
+    const steps = [
+      `<i>${v}</i> is multiplied by itself ${k} times.`,
+      `Write repeated multiplication of the same base as a power: ${answer.html}.`,
+    ];
+    return { prompt: 'Simplify:', exprHtml: promptHtml, answer, steps };
+  }
+  if (mode === 'mulDistinct') {
+    const n = randInt(2, 4);
+    const vs = pickVars(n);
+    const promptHtml = vs.map(x => `<i>${x}</i>`).join(' &times; ');
+    const answer = { html: vs.map(x => `<i>${x}</i>`).join(''), str: vs.join('*') };
+    const steps = [
+      `${vs.map(x => `<i>${x}</i>`).join(', ')} are all different letters, so nothing can combine further.`,
+      `Write them next to each other (implied multiplication): ${answer.html}`,
+    ];
+    return { prompt: 'Simplify:', exprHtml: promptHtml, answer, steps };
+  }
+  if (mode === 'mulRepeatedDistinct') {
+    const [v1, v2] = pickVars(2);
+    const k1 = randInt(2, 3), k2 = randInt(2, 3);
+    let items = shuffle([...Array(k1).fill(v1), ...Array(k2).fill(v2)]);
+    const promptHtml = items.map(x => `<i>${x}</i>`).join(' &times; ');
+    const p1 = powTerm(varTerm(v1), k1), p2 = powTerm(varTerm(v2), k2);
+    const answer = mulTerms([p1, p2]);
+    const steps = [
+      `Group the repeated factors: <i>${v1}</i> appears ${k1} times and <i>${v2}</i> appears ${k2} times.`,
+      `<i>${v1}</i> multiplied by itself ${k1} times is ${p1.html}.`,
+      `<i>${v2}</i> multiplied by itself ${k2} times is ${p2.html}.`,
+      `Answer: ${answer.html}`,
+    ];
+    return { prompt: 'Simplify:', exprHtml: promptHtml, answer, steps };
+  }
+  // coeffCombine: e.g. 3a+4a+a+4b+5b = 8a+9b
+  const [v1, v2] = pickVars(2);
+  const n1 = randInt(2, 3), n2 = randInt(2, 5 - n1);   // worksheet's longest sum has 5 terms
+  const coeffs1 = Array(n1).fill(0).map(() => randInt(1, 5));
+  const coeffs2 = Array(n2).fill(0).map(() => randInt(1, 5));
+  let termList = [];
+  coeffs1.forEach(c => termList.push(coeffTerm(c, varTerm(v1))));
+  coeffs2.forEach(c => termList.push(coeffTerm(c, varTerm(v2))));
+  termList = shuffle(termList);
+  const promptExpr = addTerms(termList);
+  const sum1 = coeffs1.reduce((a, b) => a + b, 0);
+  const sum2 = coeffs2.reduce((a, b) => a + b, 0);
+  const r1 = coeffTerm(sum1, varTerm(v1)), r2 = coeffTerm(sum2, varTerm(v2));
+  const answer = addTerms([r1, r2]);
+  const steps = [
+    `Group the <i>${v1}</i> terms and the <i>${v2}</i> terms separately.`,
+    `Add the <i>${v1}</i> coefficients: ${coeffs1.join(' + ')} = ${sum1}, giving ${r1.html}.`,
+    `Add the <i>${v2}</i> coefficients: ${coeffs2.join(' + ')} = ${sum2}, giving ${r2.html}.`,
+    `Answer: ${answer.html}`,
+  ];
+  return { prompt: 'Simplify by collecting like terms:', exprHtml: promptExpr.html, answer, steps };
+}
+
+// ---------- Topic 4: Index Laws ----------
+function genIndexLaws(mode) {
+  if (mode === 'multiplyPowers') {
+    const v = randChoice(VARS_POOL);
+    const n = randInt(2, 3);
+    const exps = Array(n).fill(0).map(() => randInt(1, 4));
+    const promptHtml = exps.map(e => e === 1 ? `<i>${v}</i>` : `<i>${v}</i><sup>${e}</sup>`).join(' &times; ');
+    const totalExp = exps.reduce((a, b) => a + b, 0);
+    const answer = powTerm(varTerm(v), totalExp);
+    const steps = [
+      `All the terms have the same base, <i>${v}</i>.`,
+      `When multiplying powers with the same base, add the exponents: ${exps.join(' + ')} = ${totalExp}.`,
+      `Answer: ${answer.html}`,
+    ];
+    return { prompt: 'Simplify using index laws:', exprHtml: promptHtml, answer, steps };
+  }
+  if (mode === 'coeffTimesPower') {
+    const v = randChoice(VARS_POOL);
+    const coeff = randInt(2, 10);
+    const exp = randInt(1, 4);
+    const order = randChoice([0, 1]);
+    const base = exp === 1 ? `<i>${v}</i>` : `<i>${v}</i><sup>${exp}</sup>`;
+    const promptHtml = order === 0 ? `${coeff} &times; ${base}` : `${base} &times; ${coeff}`;
+    const answer = coeffTerm(coeff, powTerm(varTerm(v), exp));
+    const steps = [
+      `There is only one term with a power (${base}); the ${coeff} is just a coefficient multiplying it.`,
+      `Write the coefficient directly in front of the power: ${answer.html}`,
+    ];
+    return { prompt: 'Simplify:', exprHtml: promptHtml, answer, steps };
+  }
+  if (mode === 'chainedCoeffPower') {
+    // Worksheet forms: 3x6xg, 2x2x2xg^3, 10x10xf xf, 10xgx10xg, gx5x10xg^4 ...
+    // Two numbers (product at most 100), or 2x2x2.
+    const v = randChoice(VARS_POOL);
+    const nums = Math.random() < 0.85 ? [randInt(2, 10), randInt(2, 10)] : [2, 2, 2];
+    const varExp = randInt(1, 3);
+    let varParts = [];
+    for (let i = 0; i < varExp; i++) varParts.push(`<i>${v}</i>`);
+    let items = shuffle([...nums.map(String), ...varParts]);
+    const promptHtml = items.join(' &times; ');
+    const coeff = nums.reduce((a, b) => a * b, 1);
+    const answer = coeffTerm(coeff, powTerm(varTerm(v), varExp));
+    const steps = [
+      `Multiply the number parts together: ${nums.join(' &times; ')} = ${coeff}.`,
+      `Combine the <i>${v}</i> factors: ${varExp} ${varExp === 1 ? 'copy' : 'copies'} of <i>${v}</i> ${varExp === 1 ? 'stays as' : 'becomes'} ${varExp === 1 ? `<i>${v}</i>` : `<i>${v}</i><sup>${varExp}</sup>`}.`,
+      `Answer: ${answer.html}`,
+    ];
+    return { prompt: 'Simplify:', exprHtml: promptHtml, answer, steps };
+  }
+  // twoVarCompound: 2g x 4g x b x 2b = 16 g^2 b^2
+  const [v1, v2] = pickVars(2);
+  // Worksheet: 2g x 4g x b x 2b, 4b x b x 5g x 10g, 3c x 3c x 4a x 5a  (two factors of each letter)
+  const n1 = 2, n2 = 2;
+  let coeffs1, coeffs2;
+  do {
+    coeffs1 = Array(n1).fill(0).map(() => randInt(1, 5));
+    coeffs2 = Array(n2).fill(0).map(() => randInt(1, 5));
+  } while ([...coeffs1, ...coeffs2].reduce((a, b) => a * b, 1) > 200);
+  let group1 = coeffs1.map(c => c === 1 ? `<i>${v1}</i>` : `${c}<i>${v1}</i>`);
+  let group2 = coeffs2.map(c => c === 1 ? `<i>${v2}</i>` : `${c}<i>${v2}</i>`);
+  let items = shuffle([...group1, ...group2]);
+  const promptHtml = items.join(' &times; ');
+  const totalCoeff = [...coeffs1, ...coeffs2].reduce((a, b) => a * b, 1);
+  const p1 = powTerm(varTerm(v1), n1), p2 = powTerm(varTerm(v2), n2);
+  const answer = coeffTerm(totalCoeff, mulTerms([p1, p2]));
+  const steps = [
+    `Multiply all the number parts together: ${[...coeffs1, ...coeffs2].join(' &times; ')} = ${totalCoeff}.`,
+    `Combine the <i>${v1}</i> factors (${n1} of them): ${p1.html}.`,
+    `Combine the <i>${v2}</i> factors (${n2} of them): ${p2.html}.`,
+    `Answer: ${answer.html}`,
+  ];
+  return { prompt: 'Simplify:', exprHtml: promptHtml, answer, steps };
+}
+
+// ---------- Topic 5: Simplifying Algebraic Fractions ----------
+function genFractions(mode) {
+  if (mode === 'cancelInteger') {
+    const v = randChoice(VARS_POOL);
+    let resultCoeff, denCoeff, numCoeff;
+    do {
+      denCoeff = randChoice([2, 3, 5]);
+      resultCoeff = randInt(2, 7);
+      numCoeff = resultCoeff * denCoeff;
+    } while (numCoeff > 15);
+    const promptHtml = `<span class="frac"><span class="fnum">${numCoeff}<i>${v}</i></span><span class="fden">${denCoeff}<i>${v}</i></span></span>`;
+    const steps = [
+      `The same variable (<i>${v}</i>) appears on top and bottom, so it cancels completely.`,
+      `That leaves the numbers: ${numCoeff} &divide; ${denCoeff} = ${resultCoeff}.`,
+      `Answer: ${resultCoeff}`,
+    ];
+    return { prompt: 'Simplify fully:', exprHtml: promptHtml, answerDisplay: String(resultCoeff), answerStrForCheck: String(resultCoeff), numericAnswer: resultCoeff, steps };
+  }
+  if (mode === 'cancelFraction') {
+    const v = randChoice(VARS_POOL);
+    let numCoeff, denCoeff;
+    do { numCoeff = randChoice([2, 4, 5]); denCoeff = numCoeff * randInt(2, 4); } while (denCoeff > 16);
+    const promptHtml = `<span class="frac"><span class="fnum">${numCoeff}<i>${v}</i></span><span class="fden">${denCoeff}<i>${v}</i></span></span>`;
+    const resultStr = fracToStr(numCoeff, denCoeff);
+    const g = gcd(numCoeff, denCoeff);
+    const steps = [
+      `The <i>${v}</i> on top and bottom cancels, leaving the number fraction ${numCoeff}/${denCoeff}.`,
+      `Their highest common factor is ${g}, so divide top and bottom by ${g}: ${numCoeff}&divide;${g} = ${numCoeff / g}, ${denCoeff}&divide;${g} = ${denCoeff / g}.`,
+      `Answer: ${resultStr}`,
+    ];
+    return { prompt: 'Simplify fully:', exprHtml: promptHtml, answerDisplay: resultStr, numericAnswer: numCoeff / denCoeff, answerStrForCheck: resultStr, steps };
+  }
+  if (mode === 'cancelWithExtraVars') {
+    // e.g. 4ab/2a = 2b ; 15hgi/3gi = 5h ; 16tyu/3t = 16yu/3
+    const [common1, common2] = pickVars(2);
+    const extra = randChoice(VARS_POOL.filter(x => x !== common1 && x !== common2));
+    const useCommon2 = Math.random() < 0.6;
+    const numCoeff = randInt(2, 16);
+    const denCoeff = randChoice([2, 3]);
+    const commons = useCommon2 ? [common1, common2] : [common1];
+    const numVars = shuffle([...commons, extra]);
+    const denVars = shuffle([...commons]);
+    const numHtml = `${numCoeff}` + numVars.map(x => `<i>${x}</i>`).join('');
+    const denHtml = (denCoeff === 1 ? '' : `${denCoeff}`) + denVars.map(x => `<i>${x}</i>`).join('');
+    const promptHtml = `<span class="frac"><span class="fnum">${numHtml}</span><span class="fden">${denHtml}</span></span>`;
+    const g = gcd(numCoeff, denCoeff);
+    const resCoeff = numCoeff / g, resDen = denCoeff / g;
+    let answerDisplay;
+    if (resDen === 1) {
+      answerDisplay = `${resCoeff === 1 ? '' : resCoeff}<i>${extra}</i>`;
+    } else {
+      answerDisplay = `<span class="frac"><span class="fnum">${resCoeff === 1 ? '' : resCoeff}<i>${extra}</i></span><span class="fden">${resDen}</span></span>`;
+    }
+    const answerStr = resDen === 1 ? `${resCoeff}*${extra}` : `(${resCoeff}*${extra})/(${resDen})`;
+    const steps = [
+      `The factor${commons.length > 1 ? 's' : ''} ${commons.map(c => `<i>${c}</i>`).join(', ')} appear${commons.length > 1 ? '' : 's'} on both top and bottom, so cancel ${commons.length > 1 ? 'them' : 'it'}.`,
+      `That leaves <i>${extra}</i> on top and the numbers ${numCoeff}/${denCoeff} to simplify (divide by ${g}): ${resCoeff}/${resDen}.`,
+      `Answer: ${answerDisplay}`,
+    ];
+    return { prompt: 'Simplify fully:', exprHtml: promptHtml, answerDisplay, answerStrForCheck: answerStr, steps };
+  }
+  if (mode === 'cancelToOne') {
+    const n = randInt(3, 3);
+    const vs = pickVars(n);
+    const numOrder = shuffle(vs);
+    const denOrder = shuffle(vs);
+    const numHtml = numOrder.map(x => `<i>${x}</i>`).join('');
+    const denHtml = denOrder.map(x => `<i>${x}</i>`).join('');
+    const promptHtml = `<span class="frac"><span class="fnum">${numHtml}</span><span class="fden">${denHtml}</span></span>`;
+    const steps = [
+      `The exact same letters (${vs.map(x => `<i>${x}</i>`).join(', ')}) appear on both top and bottom, just in a different order.`,
+      `Every factor cancels, leaving 1.`,
+      `Answer: 1`,
+    ];
+    return { prompt: 'Simplify fully:', exprHtml: promptHtml, answerDisplay: '1', answerStrForCheck: '1', numericAnswer: 1, steps };
+  }
+  if (mode === 'indexDivision') {
+    const v = randChoice(VARS_POOL);
+    const numExp = randInt(2, 10);
+    let denExp = randInt(1, 9);
+    while (denExp === numExp) denExp = randInt(1, 9);
+    const numHtml = `<i>${v}</i><sup>${numExp}</sup>`;
+    const denHtml = denExp === 1 ? `<i>${v}</i>` : `<i>${v}</i><sup>${denExp}</sup>`;
+    const promptHtml = `<span class="frac"><span class="fnum">${numHtml}</span><span class="fden">${denHtml}</span></span>`;
+    let answerDisplay, answerStr, steps;
+    if (numExp > denExp) {
+      const e = numExp - denExp;
+      answerDisplay = e === 1 ? `<i>${v}</i>` : `<i>${v}</i><sup>${e}</sup>`;
+      answerStr = e === 1 ? v : `${v}^${e}`;
+      steps = [
+        `When dividing powers with the same base, subtract the exponents: ${numExp} &minus; ${denExp} = ${e}.`,
+        `Answer: ${answerDisplay}`,
+      ];
+    } else {
+      const e = denExp - numExp;
+      const baseDisp = e === 1 ? `<i>${v}</i>` : `<i>${v}</i><sup>${e}</sup>`;
+      answerDisplay = `<span class="frac"><span class="fnum">1</span><span class="fden">${baseDisp}</span></span>`;
+      answerStr = e === 1 ? `1/${v}` : `1/(${v}^${e})`;
+      steps = [
+        `The bottom has more factors of <i>${v}</i>, so after cancelling ${numExp} of them, ${e} ${e === 1 ? 'is' : 'are'} left on the bottom: ${denExp} &minus; ${numExp} = ${e}.`,
+        `Answer: ${answerDisplay}`,
+      ];
+    }
+    return { prompt: 'Simplify using index laws:', exprHtml: promptHtml, answerDisplay, answerStrForCheck: answerStr, steps };
+  }
+  if (mode === 'extraInDenominator') {
+    // Worksheet: 3y/9yt = 1/3t, 5df/15dfg = 1/3g, 3eb/12ebh = 1/4h
+    const vs = pickVars(3);
+    const nCommon = randChoice([1, 2]);
+    const commons = vs.slice(0, nCommon), extra = vs[2];
+    const k = randChoice([3, 5]);
+    const r = randChoice([3, 4]);
+    const numHtml = `${k}` + shuffle(commons).map(x => `<i>${x}</i>`).join('');
+    const denHtml = `${k * r}` + shuffle([...commons, extra]).map(x => `<i>${x}</i>`).join('');
+    const promptHtml = `<span class="frac"><span class="fnum">${numHtml}</span><span class="fden">${denHtml}</span></span>`;
+    const answerDisplay = `<span class="frac"><span class="fnum">1</span><span class="fden">${r}<i>${extra}</i></span></span>`;
+    const answerStr = `1/(${r}*${extra})`;
+    const steps = [
+      `Cancel the letters that appear on both top and bottom: ${commons.map(c => `<i>${c}</i>`).join(', ')}.`,
+      `Divide the numbers by their common factor ${k}: ${k}&divide;${k} = 1 and ${k * r}&divide;${k} = ${r}.`,
+      `The <i>${extra}</i> is only on the bottom, so it stays there. Answer: ${answerDisplay}`,
+    ];
+    return { prompt: 'Simplify fully:', exprHtml: promptHtml, answerDisplay, answerStrForCheck: answerStr, steps };
+  }
+  if (mode === 'intOverVar') {
+    // Worksheet: 10/2y = 5/y, 15/3y = 5/y, 14/7u = 2/u
+    const v = randChoice(VARS_POOL);
+    const den = randChoice([2, 3, 7]);
+    const res = den === 7 ? 2 : randInt(2, 5);
+    const num = den * res;
+    const promptHtml = `<span class="frac"><span class="fnum">${num}</span><span class="fden">${den}<i>${v}</i></span></span>`;
+    const answerDisplay = `<span class="frac"><span class="fnum">${res}</span><span class="fden"><i>${v}</i></span></span>`;
+    const steps = [
+      `There is no <i>${v}</i> on top, so only the numbers ${num}/${den} can simplify.`,
+      `Divide ${num} by ${den}: ${num} &divide; ${den} = ${res}. The <i>${v}</i> stays on the bottom.`,
+      `Answer: ${answerDisplay}`,
+    ];
+    return { prompt: 'Simplify fully:', exprHtml: promptHtml, answerDisplay, answerStrForCheck: `${res}/${v}`, steps };
+  }
+  // numericOverVariable: 2/12x = 1/6x style (coefficient fraction over single variable denominator)
+  const v = randChoice(VARS_POOL);
+  const resultDen = randInt(3, 6);
+  const k = randChoice([2, 3, 6]);
+  const numCoeff = k;
+  const denCoeff = k * resultDen;
+  const numHtml = `${numCoeff}`;
+  const denHtml = `${denCoeff}<i>${v}</i>`;
+  const promptHtml = `<span class="frac"><span class="fnum">${numHtml}</span><span class="fden">${denHtml}</span></span>`;
+  const answerDisplay = `<span class="frac"><span class="fnum">1</span><span class="fden">${resultDen}<i>${v}</i></span></span>`;
+  const answerStr = `1/(${resultDen}*${v})`;
+  const steps = [
+    `There is no <i>${v}</i> on top, so only the numbers ${numCoeff}/${denCoeff} can simplify.`,
+    `Divide top and bottom by their common factor ${k}: ${numCoeff}&divide;${k} = 1, ${denCoeff}&divide;${k} = ${resultDen}.`,
+    `Answer: ${answerDisplay}`,
+  ];
+  return { prompt: 'Simplify fully:', exprHtml: promptHtml, answerDisplay, answerStrForCheck: answerStr, steps };
+}
+
+// ---------- Topic 6: Writing Expressions from Words ----------
+// Worksheet phrases only: "1 more than x", "the sum of k and 5", "double the value of u",
+// "4 lots of y", "half of p", "the product of n and 9" and the three two-step sentences.
+function genWordsToExpr(tier) {
+  // tier: 'oneStep' | 'twoStep' | undefined (any)
+  const v = randChoice(VARS_POOL);
+  const oneStepTemplates = [
+    () => { const k = randInt(1, 9); const expr = addTerms([varTerm(v), numTerm(k)]);
+      return { words: `${k} more than ${v}`, expr, steps: [`"More than" means add: start with <i>${v}</i> and add ${k}.`, `Answer: ${expr.html}`] }; },
+    () => { const k = randInt(2, 9); const expr = addTerms([varTerm(v), numTerm(k)]);
+      return { words: `the sum of ${v} and ${k}`, expr, steps: [`"Sum" means add the two quantities: <i>${v}</i> and ${k}.`, `Answer: ${expr.html}`] }; },
+    () => { const expr = coeffTerm(2, varTerm(v));
+      return { words: `double the value of ${v}`, expr, steps: [`"Double" means multiply by 2.`, `Answer: ${expr.html}`] }; },
+    () => { const k = randInt(2, 9); const expr = coeffTerm(k, varTerm(v));
+      return { words: `${k} lots of ${v}`, expr, steps: [`"${k} lots of" means multiply <i>${v}</i> by ${k}.`, `Answer: ${expr.html}`] }; },
+    () => { const expr = fracTerm(varTerm(v), numTerm(2));
+      return { words: `half of ${v}`, expr, steps: [`"Half" means divide by 2.`, `Answer: ${expr.html}`] }; },
+    () => { const k = randInt(2, 9); const expr = coeffTerm(k, varTerm(v));
+      return { words: `the product of ${v} and ${k}`, expr, steps: [`"Product" means multiply the two quantities: <i>${v}</i> and ${k}.`, `Answer: ${expr.html}`] }; },
+  ];
+  const twoStepTemplates = [
+    () => { const k = randInt(2, 9); const inner = addTerms([varTerm(v), numTerm(k)]); const expr = coeffTerm(2, inner);
+      return { words: `${k} is added to ${v}, then the result is doubled`, expr, steps: [`First add: <i>${v}</i> + ${k} = ${inner.html}.`, `Then double the whole result, so put it in brackets and multiply by 2: ${expr.html}`] }; },
+    () => { const k = randInt(2, 9); const t1 = coeffTerm(3, varTerm(v)); const expr = addTerms([t1, numTerm(k)]);
+      return { words: `${v} is tripled, then ${k} is added`, expr, steps: [`First triple <i>${v}</i>: ${t1.html}.`, `Then add ${k}: ${expr.html}`] }; },
+    () => { const k1 = randInt(2, 9); const k2 = randInt(2, 9); const t1 = coeffTerm(k1, varTerm(v)); const expr = addTerms([t1, numTerm(-k2)]);
+      return { words: `${v} is multiplied by ${k1}, then ${k2} is subtracted`, expr, steps: [`First multiply: <i>${v}</i> &times; ${k1} = ${t1.html}.`, `Then subtract ${k2}: ${expr.html}`] }; },
+  ];
+  // Stages (worksheet order): 0 more than / sum of, 1 double / lots of, 2 half / product of, 3 two-step sentences.
+  // 'oneStep' / 'twoStep' (old names) are still accepted.
+  const stagePools = {
+    0: [oneStepTemplates[0], oneStepTemplates[1]],
+    1: [oneStepTemplates[2], oneStepTemplates[3]],
+    2: [oneStepTemplates[4], oneStepTemplates[5]],
+    3: twoStepTemplates,
+  };
+  let pool;
+  if (typeof tier === 'number') pool = stagePools[Math.max(0, Math.min(3, tier))];
+  else if (tier === 'oneStep') pool = oneStepTemplates;
+  else if (tier === 'twoStep') pool = twoStepTemplates;
+  else pool = oneStepTemplates.concat(twoStepTemplates);
+  const { words, expr, steps } = randChoice(pool)();
+  return { prompt: 'Write an algebraic expression for:', words, answer: expr, steps };
+}
+
+// ---------- Topic 7: Expanding Brackets ----------
+// Worksheet forms: 5(x+8), 3(2m+9), 6(-7+s); 6(a+b-c), 8(2a+5b-5); g(2a-b), f(-e+6j); 6a(2a+2a^2).
+function genExpandBrackets(mode) {
+  const v = randChoice(VARS_POOL);
+  const pv = (x, y) => ({ str: `${x}*${y}`, html: `<i>${x}</i><i>${y}</i>`, needsParen: false });
+  if (mode === 'numCoeffTwoTerm' || mode === 'numCoeffTwoSimple') {
+    // Simple (5(x+8), 3(x-3)): plain letter first. Full (3(2m+9), 9(4+s), 6(-7+s)): coefficient on the letter, either order.
+    const simple = mode === 'numCoeffTwoSimple';
+    const coeff = randInt(2, 10);
+    const n = randInt(2, 9);
+    const c = simple || Math.random() < 0.5 ? 1 : randInt(2, 9);
+    const sign = randChoice([1, -1]);
+    const constFirst = !simple && Math.random() < 0.3;
+    const vt = coeffTerm(c, varTerm(v)), nt = numTerm(sign * n);
+    const inner = addTerms(constFirst ? [nt, vt] : [vt, nt]);
+    const promptExpr = mulTerms([numTerm(coeff), inner]);
+    const rv = coeffTerm(coeff * c, varTerm(v)), rn = numTerm(coeff * sign * n);
+    const answer = addTerms(constFirst ? [rn, rv] : [rv, rn]);
+    const steps = [
+      `Multiply ${coeff} by each term inside the brackets (the distributive law).`,
+      `${coeff} &times; ${vt.html} = ${rv.html}`,
+      `${coeff} &times; ${sign === 1 ? n : `(&minus;${n})`} = ${coeff * sign * n}`,
+      `Answer: ${answer.html}`,
+    ];
+    return { prompt: 'Expand:', exprHtml: promptExpr.html, exprStr: promptExpr.str, answer, steps };
+  }
+  if (mode === 'numCoeffThreeTerm') {
+    const coeff = randInt(2, 8);
+    if (Math.random() < 0.5) {
+      // 6(a+b-c) style
+      const [v1, v2, v3] = pickVars(3);
+      const s1 = randChoice([1, -1]), s2 = randChoice([1, -1]);
+      const bracket = addTerms([varTerm(v1), coeffTerm(s1, varTerm(v2)), coeffTerm(s2, varTerm(v3))]);
+      const promptExpr = mulTerms([numTerm(coeff), bracket]);
+      const rt1 = coeffTerm(coeff, varTerm(v1)), rt2 = coeffTerm(coeff * s1, varTerm(v2)), rt3 = coeffTerm(coeff * s2, varTerm(v3));
+      const answer = addTerms([rt1, rt2, rt3]);
+      const steps = [
+        `Multiply ${coeff} by each term inside the brackets (the distributive law).`,
+        `${coeff} &times; <i>${v1}</i> = ${rt1.html}, ${coeff} &times; ${s1 === 1 ? '' : '(&minus;)'}<i>${v2}</i> = ${rt2.html}, ${coeff} &times; ${s2 === 1 ? '' : '(&minus;)'}<i>${v3}</i> = ${rt3.html}`,
+        `Answer: ${answer.html}`,
+      ];
+      return { prompt: 'Expand:', exprHtml: promptExpr.html, exprStr: promptExpr.str, answer, steps };
+    }
+    // 8(2a+5b-5) style
+    const [v1, v2] = pickVars(2);
+    const c1 = randInt(2, 6), c2 = randInt(2, 6), n = randInt(2, 6);
+    const s1 = randChoice([1, -1]), s2 = randChoice([1, -1]);
+    const b1 = coeffTerm(s1 * c1, varTerm(v1)), b2 = coeffTerm(c2, varTerm(v2)), b3 = numTerm(s2 * n);
+    const bracket = addTerms([b1, b2, b3]);
+    const promptExpr = mulTerms([numTerm(coeff), bracket]);
+    const r1 = coeffTerm(coeff * s1 * c1, varTerm(v1)), r2 = coeffTerm(coeff * c2, varTerm(v2)), r3 = numTerm(coeff * s2 * n);
+    const answer = addTerms([r1, r2, r3]);
+    const steps = [
+      `Multiply ${coeff} by each term inside the brackets (the distributive law).`,
+      `${coeff} &times; ${b1.html} = ${r1.html}, ${coeff} &times; ${b2.html} = ${r2.html}, ${coeff} &times; ${s2 === 1 ? n : `(&minus;${n})`} = ${r3.html}`,
+      `Answer: ${answer.html}`,
+    ];
+    return { prompt: 'Expand:', exprHtml: promptExpr.html, exprStr: promptExpr.str, answer, steps };
+  }
+  if (mode === 'varOutside') {
+    // g(2a-b), f(-e+6j), a(3b+c): a letter outside, two different letters inside
+    const [o, w, u] = pickVars(3);
+    const c1 = randChoice([1, 2, 3, 6]), c2 = randChoice([1, 2, 3, 6]);
+    const s1 = randChoice([1, -1]), s2 = randChoice([1, -1]);
+    const b1 = coeffTerm(s1 * c1, varTerm(w)), b2 = coeffTerm(s2 * c2, varTerm(u));
+    const bracket = addTerms([b1, b2]);
+    const promptExpr = mulTerms([varTerm(o), bracket]);
+    const r1 = coeffTerm(s1 * c1, pv(o, w)), r2 = coeffTerm(s2 * c2, pv(o, u));
+    const answer = addTerms([r1, r2]);
+    const steps = [
+      `Multiply <i>${o}</i> by each term inside the brackets (the distributive law).`,
+      `<i>${o}</i> &times; ${b1.html} = ${r1.html}, <i>${o}</i> &times; ${s2 === 1 ? '' : '(&minus;)'}${coeffTerm(c2, varTerm(u)).html} = ${r2.html}`,
+      `Answer: ${answer.html}`,
+    ];
+    return { prompt: 'Expand:', exprHtml: promptExpr.html, exprStr: promptExpr.str, answer, steps };
+  }
+  // varCoeffWithIndices: 6a(2a+2a^2) style
+  const coeff = randInt(2, 6);
+  const t1coeff = randInt(1, 4), t1exp = 1;
+  const t2coeff = randInt(1, 4), t2exp = 2;
+  const bracket = addTerms([coeffTerm(t1coeff, powTerm(varTerm(v), t1exp)), coeffTerm(t2coeff, powTerm(varTerm(v), t2exp))]);
+  const outerCoeffTerm = coeffTerm(coeff, varTerm(v));
+  const promptExpr = mulTerms([outerCoeffTerm, bracket]);
+  const rt1 = coeffTerm(coeff * t1coeff, powTerm(varTerm(v), 1 + t1exp));
+  const rt2 = coeffTerm(coeff * t2coeff, powTerm(varTerm(v), 1 + t2exp));
+  const answer = addTerms([rt1, rt2]);
+  const steps = [
+    `Multiply ${outerCoeffTerm.html} by each term inside the brackets. When multiplying powers of the same base, add the exponents.`,
+    `${outerCoeffTerm.html} &times; ${coeffTerm(t1coeff, powTerm(varTerm(v), t1exp)).html} = ${rt1.html}`,
+    `${outerCoeffTerm.html} &times; ${coeffTerm(t2coeff, powTerm(varTerm(v), t2exp)).html} = ${rt2.html}`,
+    `Answer: ${answer.html}`,
+  ];
+  return { prompt: 'Expand and simplify:', exprHtml: promptExpr.html, exprStr: promptExpr.str, answer, steps };
+}
+
+// ---------- Topic 8: Real-Life Applications ----------
+// The worksheet's own scenarios and numbers: rectangle perimeter 2l + 2b, pens $2 each, car at 60 km/h,
+// carpenter $40 + $80/hour, tennis court $5 + $10/hour, tissue boxes costing $c.
+// Returns kind 'numeric' (substitute a value) or kind 'expr' (write an expression).
+function genRealLife(stage) {
+  const L = varTerm('l'), B = varTerm('b'), N = varTerm('n'), X = varTerm('x'), C = varTerm('c');
+  const carCtx = 'A car travels at 60 km/h, so in n hours it has travelled 60n kilometres.';
+  const carpenterCtx = 'A carpenter charges a $40 call-out fee and then $80 per hour. This means the total cost, in dollars, for x hours of work is 40 + 80x.';
+  const tennisCtx = 'To hire a tennis court, you must pay a $5 booking fee plus $10 per hour.';
+  const numeric = (context, formulaLabel, expr, vars, prompt, steps) => {
+    const answer = E.evalExprStr(expr.str, vars);
+    return { kind: 'numeric', context, formula: `${formulaLabel} = ${expr.html}`, prompt, answer, exprStr: expr.str, vars, steps };
+  };
+  const written = (context, prompt, answer, steps) => ({ kind: 'expr', context, formula: '', prompt, answerExpr: answer, steps: steps.concat([`Answer: ${answer.html}`]) });
+  const items = [
+    () => { const [b, l] = randChoice([[4, 10], [7, 15]]);
+      return numeric('The perimeter of a rectangle is given by the expression 2l + 2b, where l is the length and b is the breadth.', 'Perimeter',
+        addTerms([coeffTerm(2, L), coeffTerm(2, B)]), { l, b }, `Find the perimeter of a rectangle if b = ${b} and l = ${l}:`); },
+    () => numeric(carCtx, 'Distance', coeffTerm(60, N), { n: 3 }, 'How far does the car travel in 3 hours (n = 3)?'),
+    () => { const q = numeric(carCtx, 'Distance', coeffTerm(60, N), { n: 0.5 }, 'How far does the car travel in 30 minutes?');
+      q.steps = ['30 minutes is half an hour, so n = &frac12;.', 'Distance = 60 &times; &frac12;', 'Answer: 30']; return q; },
+    () => { const x = randChoice([2, 8]);
+      return numeric(carpenterCtx, 'Cost', addTerms([numTerm(40), coeffTerm(80, X)]), { x }, `How much would it cost for ${x === 8 ? 'an' : 'a'} ${x}-hour job (x = ${x})?`); },
+    () => { const x = randChoice([2, 7]);
+      return numeric(tennisCtx + ' The cost for x hours is 5 + 10x.', 'Cost', addTerms([numTerm(5), coeffTerm(10, X)]), { x }, `What is the cost, in dollars, of booking a court for ${x} hours (x = ${x})?`); },
+    () => written('If pens cost $2 each.', 'Write an expression for the cost, in dollars, of n pens:', coeffTerm(2, N), ['Each pen costs $2, so n pens cost 2 &times; n.']),
+    () => written(carCtx, 'Write an expression for the total distance (in km) travelled in n hours by a motorbike with speed 70 km/h:', coeffTerm(70, N), ['Speed &times; time: 70 &times; n.']),
+    () => written(carpenterCtx, 'The call-out fee is increased to $50. Write the new expression for the total cost, in dollars, of x hours:', addTerms([numTerm(50), coeffTerm(80, X)]), ['The fee is now $50, and the hourly charge is still 80x.']),
+    () => written(tennisCtx, 'Write an expression for the cost, in dollars, of booking a court for x hours:', addTerms([numTerm(5), coeffTerm(10, X)]), ['Booking fee $5, plus $10 for each of the x hours (10x).']),
+    () => written('A shop charges $c for a box of tissues.', 'Write an expression for the total cost, in dollars, of buying n boxes:', { str: 'c*n', html: '<i>c</i><i>n</i>' }, ['Each box costs c, so n boxes cost c &times; n.']),
+    () => written('A shop charges $c for a box of tissues.', 'If the original price is tripled, write an expression for the total cost, in dollars, of buying n boxes:', { str: '3*c*n', html: '3<i>c</i><i>n</i>' }, ['The price per box is now 3c, so n boxes cost 3c &times; n.']),
+    () => written('A shop charges $c for a box of tissues.', 'If the original price is tripled and twice as many boxes are bought, write an expression for the total cost, in dollars:', { str: '6*c*n', html: '6<i>c</i><i>n</i>' }, ['The price per box is 3c and the number of boxes is 2n.', '3c &times; 2n = 6cn.']),
+  ];
+  // Stages (worksheet order): 0 first "write an expression" ones, 1 simple substitutions,
+  // 2 the carpenter / tennis costs and tripled price, 3 the follow-up parts.
+  const stageItems = { 0: [5, 9, 6], 1: [1, 0], 2: [3, 4, 10], 3: [7, 8, 2, 11] };
+  if (typeof stage === 'number') return items[randChoice(stageItems[Math.max(0, Math.min(3, stage))])]();
+  return randChoice(items)();
+}
+
+
+
+// ===== distractors.js =====
+
+
+function deepClone(ast) { return JSON.parse(JSON.stringify(ast)); }
+
+function collectNodes(ast, pred, out) {
+  out = out || [];
+  if (pred(ast)) out.push(ast);
+  if (ast.type === 'bin') { collectNodes(ast.left, pred, out); collectNodes(ast.right, pred, out); }
+  else if (ast.type === 'neg') collectNodes(ast.node, pred, out);
+  else if (ast.type === 'func') collectNodes(ast.arg, pred, out);
+  return out;
+}
+
+function astToStr(ast) {
+  switch (ast.type) {
+    case 'num': return String(ast.value);
+    case 'var': return ast.name;
+    case 'neg': return `-(${astToStr(ast.node)})`;
+    case 'func': return `${ast.name}(${astToStr(ast.arg)})`;
+    case 'bin':
+      if (ast.op === '^') return `(${astToStr(ast.left)})^(${astToStr(ast.right)})`;
+      return `(${astToStr(ast.left)})${ast.op}(${astToStr(ast.right)})`;
+  }
+  throw new Error('bad ast');
+}
+
+function wrapAdd(n, html) { return (n.type === 'bin' && (n.op === '+' || n.op === '-')) ? `(${html})` : html; }
+
+function astToHtml(ast) {
+  switch (ast.type) {
+    case 'num': return String(ast.value);
+    case 'var': return `<i>${ast.name}</i>`;
+    case 'neg': { const h = astToHtml(ast.node); return `-${wrapAdd(ast.node, h)}`; }
+    case 'func': return `&radic;<span class="sqin">${astToHtml(ast.arg)}</span>`;
+    case 'bin': {
+      if (ast.op === '^' && ast.right.type === 'num') {
+        const baseH = astToHtml(ast.left);
+        const wrapped = (ast.left.type === 'num' || ast.left.type === 'var') ? baseH : `(${baseH})`;
+        return `${wrapped}<sup>${ast.right.value}</sup>`;
+      }
+      if (ast.op === '*') {
+        const l = astToHtml(ast.left), r = astToHtml(ast.right);
+        // A number on the right of something ("b x 2") needs an explicit times sign:
+        // "b2" would read as b squared.
+        if (ast.right.type === 'num') return `${wrapAdd(ast.left, l)} &times; ${r}`;
+        return `${wrapAdd(ast.left, l)}${wrapAdd(ast.right, r)}`;
+      }
+      if (ast.op === '/') return `<span class="frac"><span class="fnum">${astToHtml(ast.left)}</span><span class="fden">${astToHtml(ast.right)}</span></span>`;
+      if (ast.op === '+') return `${astToHtml(ast.left)} + ${astToHtml(ast.right)}`;
+      // '-'
+      const r = astToHtml(ast.right);
+      return `${astToHtml(ast.left)} - ${wrapAdd(ast.right, r)}`;
+    }
+  }
+  throw new Error('bad ast');
+}
+
+const MUTATIONS = [
+  // Flip a + to - or vice versa
+  (ast) => {
+    const cands = collectNodes(ast, n => n.type === 'bin' && (n.op === '+' || n.op === '-'));
+    if (cands.length === 0) return false;
+    const node = randChoice(cands);
+    node.op = node.op === '+' ? '-' : '+';
+    return true;
+  },
+  // Bump a numeric literal
+  (ast) => {
+    const cands = collectNodes(ast, n => n.type === 'num');
+    if (cands.length === 0) return false;
+    const node = randChoice(cands);
+    const delta = randChoice([1, -1, 2, -2]);
+    node.value = node.value + delta;
+    return true;
+  },
+  // Bump an exponent (right side of ^ which is a num)
+  (ast) => {
+    const cands = collectNodes(ast, n => n.type === 'bin' && n.op === '^' && n.right.type === 'num');
+    if (cands.length === 0) return false;
+    const node = randChoice(cands);
+    node.right.value = Math.max(1, node.right.value + randChoice([1, -1]));
+    return true;
+  },
+  // Drop a top-level term (replace whole tree with one side, if root is +/-)
+  (ast, replaceRoot) => {
+    if (!(ast.type === 'bin' && (ast.op === '+' || ast.op === '-'))) return false;
+    const keep = randChoice([ast.left, ast.right]);
+    replaceRoot(keep);
+    return true;
+  },
+  // Swap * for + at a random multiplicative node (common beginner slip)
+  (ast) => {
+    const cands = collectNodes(ast, n => n.type === 'bin' && n.op === '*');
+    if (cands.length === 0) return false;
+    const node = randChoice(cands);
+    node.op = '+';
+    return true;
+  },
+  // Swap * <-> / at a random node (common beginner slip confusing the two)
+  (ast) => {
+    const cands = collectNodes(ast, n => n.type === 'bin' && (n.op === '*' || n.op === '/'));
+    if (cands.length === 0) return false;
+    const node = randChoice(cands);
+    node.op = node.op === '*' ? '/' : '*';
+    return true;
+  },
+  // Drop a factor from a multiplicative chain (replace the whole node with one side)
+  (ast, replaceRoot) => {
+    const cands = [];
+    (function walk(n, setter) {
+      if (n.type === 'bin' && n.op === '*') { cands.push({ n, setter }); }
+      if (n.type === 'bin') { walk(n.left, (v) => { n.left = v; }); walk(n.right, (v) => { n.right = v; }); }
+      else if (n.type === 'neg') walk(n.node, (v) => { n.node = v; });
+      else if (n.type === 'func') walk(n.arg, (v) => { n.arg = v; });
+    })(ast, replaceRoot);
+    if (cands.length === 0) return false;
+    const { n, setter } = randChoice(cands);
+    const keep = randChoice([n.left, n.right]);
+    setter(keep);
+    return true;
+  },
+  // Multiply the whole expression by a small coefficient (always applicable)
+  (ast, replaceRoot) => {
+    const k = randChoice([2, 3, -1]);
+    replaceRoot({ type: 'bin', op: '*', left: { type: 'num', value: k }, right: ast });
+    return true;
+  },
+  // Wrap the whole expression in an extra exponent (always applicable)
+  (ast, replaceRoot) => {
+    const e = randChoice([2, 3]);
+    replaceRoot({ type: 'bin', op: '^', left: ast, right: { type: 'num', value: e } });
+    return true;
+  },
+  // Negate the whole expression (always applicable)
+  (ast, replaceRoot) => {
+    replaceRoot({ type: 'neg', node: ast });
+    return true;
+  },
+];
+
+// Applies one random mutation to a (mutable) clone. Root replacement is
+// handled by returning a possibly-different root node.
+function applyRandomMutation(astClone) {
+  let root = astClone;
+  const order = shuffle(MUTATIONS.map((_, i) => i));
+  for (const idx of order) {
+    const mut = MUTATIONS[idx];
+    let newRoot = root;
+    const replaceRoot = (n) => { newRoot = n; };
+    const ok = mut(root, replaceRoot);
+    if (ok) return newRoot;
+  }
+  return null;
+}
+
+function genDistractorsForExpr(correctStr, count) {
+  count = count || 3;
+  const ast0 = E.safeParseExpr(correctStr);
+  if (!ast0) return [];
+  const results = [];
+  let attempts = 0;
+  while (results.length < count && attempts < 60) {
+    attempts++;
+    const clone = deepClone(ast0);
+    const mutated = applyRandomMutation(clone);
+    if (!mutated) continue;
+    let str, html;
+    try { str = astToStr(mutated); html = astToHtml(mutated); } catch (e) { continue; }
+    const reparsed = E.safeParseExpr(str);
+    if (reparsed === null) continue;
+    // Reject nonsense options: anything that divides by zero (or is otherwise undefined) at normal values.
+    const names = Array.from(E.collectVars(reparsed));
+    let sane = true;
+    for (const pt of [2, 3, 5, 7]) {
+      const vals = {}; names.forEach((n, i) => { vals[n] = pt + i; });
+      let v; try { v = E.evalAst(reparsed, vals); } catch (e) { v = NaN; }
+      if (!isFinite(v)) { sane = false; break; }
+    }
+    if (!sane) continue;
+    if (E.expressionsEquivalent(str, correctStr)) continue;
+    if (results.some(r => r.html === html || E.expressionsEquivalent(r.str, str))) continue;
+    results.push({ str, html });
+  }
+  return results;
+}
+
+function numericDistractors(correct, count) {
+  count = count || 3;
+  const results = [];
+  const seen = new Set([correct]);
+  const strategies = [
+    () => correct + 1, () => correct - 1, () => -correct,
+    () => correct + randInt(2, 5), () => correct - randInt(2, 5),
+    () => correct * 2, () => Math.round(correct / 2),
+  ];
+  let attempts = 0;
+  while (results.length < count && attempts < 40) {
+    attempts++;
+    const v = randChoice(strategies)();
+    if (!isFinite(v) || seen.has(v)) continue;
+    seen.add(v);
+    results.push(v);
+  }
+  return results;
+}
+
+
+
+// ===== appglue.js =====
+
+// App-level glue: maps the 8 topics + adaptive difficulty level onto the
+// pure generators/checkers above, producing one normalized question shape.
+//
+// Difficulty is now a single adaptive level per topic-pool: 0 = easier,
+// 1 = harder. build(level) clamps level into [0, 1] and picks from the
+// matching pool. (The UI drives `level` up on a correct answer and down
+// on a wrong one — see algebra-quiz.html.)
+
+// Four difficulty levels (0 easiest .. 3 hardest) for every topic, each following the worksheet's own order.
+const MAX_APP_LEVEL = 3;
+function clampLevel(level) { return Math.max(0, Math.min(MAX_APP_LEVEL, Math.floor(level) || 0)); }
+
+// Generic worked-steps builder for "substitute values into an expression"
+// style questions (Substitution, Real-Life Applications). Built from the
+// same exprHtml/vars/answer that already produced the verified answer, so
+// it can never disagree with it.
+function substitutionSteps(exprHtml, vars, answer) {
+  const varEntries = Object.entries(vars);
+  let substituted = exprHtml;
+  for (const [v, val] of varEntries) {
+    substituted = substituted.split(`<i>${v}</i>`).join(`<b>${val}</b>`);
+  }
+  const varList = varEntries.map(([v, val]) => `${v} = ${val}`).join(', ');
+  return [
+    `Substitute ${varList} into the expression.`,
+    substituted,
+    `Answer: ${answer}`,
+  ];
+}
+
+const TOPIC_CONFIG = {
+  substitution: {
+    label: 'Substitution',
+    blurb: 'Evaluate expressions by substituting given values',
+    build(level) {
+      const q = genSubstitution(clampLevel(level));
+      const disp = String(q.answer);
+      return {
+        topicLabel: 'Substitution', promptText: q.prompt, bodyHtml: q.exprHtml,
+        answerKind: 'numeric',
+        correct: { display: disp, checkStr: disp, numeric: q.answer },
+        distractorsHtml: numericDistractors(q.answer, 3).map(String),
+        steps: substitutionSteps(q.exprHtml, q.vars, disp),
+      };
+    },
+  },
+  indexNotation: {
+    label: 'Index Notation',
+    blurb: 'Convert between repeated addition/multiplication and products/index form',
+    build(level) {
+      // 0: sums -> product, 1: product -> index form, 2 and 3: the same with two different numbers
+      const stages = { 0: ['sumToProduct', false], 1: ['productToIndex', false], 2: ['sumToProduct', true], 3: ['productToIndex', true] };
+      const [mode, two] = stages[clampLevel(level)];
+      const q = genIndexNotation(mode, two);
+      return {
+        topicLabel: 'Index Notation', promptText: q.prompt, bodyHtml: q.exprHtml,
+        answerKind: 'expr',
+        correct: { display: q.answerDisplay, checkStr: q.answerStrForCheck, numeric: q.numericAnswer },
+        distractorsHtml: genDistractorsForExpr(q.answerStrForCheck, 3).map(d => d.html),
+        steps: q.steps,
+      };
+    },
+  },
+  likeTerms: {
+    label: 'Collecting Like Terms',
+    blurb: 'Simplify by combining like terms',
+    build(level) {
+      const pools = {
+        0: ['addSame', 'mulSame'],
+        1: ['addMixed', 'mulDistinct'],
+        2: ['mulRepeatedDistinct'],
+        3: ['coeffCombine'],
+      };
+      const mode = randChoice(pools[clampLevel(level)]);
+      const q = genLikeTerms(mode);
+      return {
+        topicLabel: 'Collecting Like Terms', promptText: q.prompt, bodyHtml: q.exprHtml,
+        answerKind: 'expr',
+        correct: { display: q.answer.html, checkStr: q.answer.str, numeric: null },
+        distractorsHtml: genDistractorsForExpr(q.answer.str, 3).map(d => d.html),
+        steps: q.steps,
+      };
+    },
+  },
+  indexLaws: {
+    label: 'Index Laws',
+    blurb: 'Multiply terms that have coefficients and indices',
+    build(level) {
+      const pools = {
+        0: ['multiplyPowers'],
+        1: ['coeffTimesPower'],
+        2: ['chainedCoeffPower'],
+        3: ['twoVarCompound'],
+      };
+      const mode = randChoice(pools[clampLevel(level)]);
+      const q = genIndexLaws(mode);
+      return {
+        topicLabel: 'Index Laws', promptText: q.prompt, bodyHtml: q.exprHtml,
+        answerKind: 'expr',
+        correct: { display: q.answer.html, checkStr: q.answer.str, numeric: null },
+        distractorsHtml: genDistractorsForExpr(q.answer.str, 3).map(d => d.html),
+        steps: q.steps,
+      };
+    },
+  },
+  fractions: {
+    label: 'Simplifying Fractions',
+    blurb: 'Cancel common factors to simplify algebraic fractions',
+    build(level) {
+      const pools = {
+        0: ['cancelInteger', 'cancelToOne'],
+        1: ['cancelFraction', 'cancelWithExtraVars'],
+        2: ['indexDivision', 'extraInDenominator'],
+        3: ['numericOverVariable', 'intOverVar'],
+      };
+      const mode = randChoice(pools[clampLevel(level)]);
+      const q = genFractions(mode);
+      return {
+        topicLabel: 'Simplifying Fractions', promptText: q.prompt, bodyHtml: q.exprHtml,
+        answerKind: 'expr',
+        correct: { display: q.answerDisplay, checkStr: q.answerStrForCheck, numeric: q.numericAnswer !== undefined ? q.numericAnswer : null },
+        distractorsHtml: genDistractorsForExpr(q.answerStrForCheck, 3).map(d => d.html),
+        steps: q.steps,
+      };
+    },
+  },
+  wordsToExpr: {
+    label: 'Words to Expressions',
+    blurb: 'Translate worded statements into algebra',
+    build(level) {
+      const q = genWordsToExpr(clampLevel(level));
+      return {
+        topicLabel: 'Words to Expressions', promptText: q.prompt, bodyHtml: `&ldquo;${q.words}&rdquo;`,
+        answerKind: 'expr',
+        correct: { display: q.answer.html, checkStr: q.answer.str, numeric: null },
+        distractorsHtml: genDistractorsForExpr(q.answer.str, 3).map(d => d.html),
+        steps: q.steps,
+      };
+    },
+  },
+  expandBrackets: {
+    label: 'Expanding Brackets',
+    blurb: 'Apply the distributive law',
+    build(level) {
+      const pools = {
+        0: ['numCoeffTwoSimple'],
+        1: ['numCoeffTwoTerm'],
+        2: ['numCoeffThreeTerm'],
+        3: ['varOutside', 'varCoeffWithIndices'],
+      };
+      const mode = randChoice(pools[clampLevel(level)]);
+      const q = genExpandBrackets(mode);
+      return {
+        topicLabel: 'Expanding Brackets', promptText: q.prompt, bodyHtml: q.exprHtml,
+        answerKind: 'expr',
+        correct: { display: q.answer.html, checkStr: q.answer.str, numeric: null },
+        distractorsHtml: genDistractorsForExpr(q.answer.str, 3).map(d => d.html),
+        steps: q.steps,
+      };
+    },
+  },
+  realLife: {
+    label: 'Real-Life Applications',
+    blurb: 'Apply formulas to real-world scenarios',
+    build(level) {
+      const q = genRealLife(clampLevel(level));
+      if (q.kind === 'expr') {
+        return {
+          topicLabel: 'Real-Life Applications', promptText: q.prompt, bodyHtml: '',
+          context: q.context, formula: '',
+          answerKind: 'expr',
+          correct: { display: q.answerExpr.html, checkStr: q.answerExpr.str, numeric: null },
+          distractorsHtml: genDistractorsForExpr(q.answerExpr.str, 3).map(d => d.html),
+          steps: q.steps,
+        };
+      }
+      const disp = String(q.answer);
+      return {
+        topicLabel: 'Real-Life Applications', promptText: q.prompt, bodyHtml: '',
+        context: q.context, formula: q.formula,
+        answerKind: 'numeric',
+        correct: { display: disp, checkStr: disp, numeric: q.answer },
+        distractorsHtml: numericDistractors(q.answer, 3).map(String),
+        steps: q.steps || substitutionSteps(q.formula, q.vars, disp),
+      };
+    },
+  },
+};
+
+const TOPIC_ORDER = ['substitution', 'indexNotation', 'likeTerms', 'indexLaws', 'fractions', 'wordsToExpr', 'expandBrackets', 'realLife'];
+
+function generateQuestion(topicKey, level) {
+  const cfg = TOPIC_CONFIG[topicKey];
+  const q = cfg.build(level);
+  // Build MC choices: correct + 3 distractors, shuffled, track correct index by value identity.
+  const choiceObjs = [{ html: q.correct.display, correct: true }]
+    .concat(q.distractorsHtml.slice(0, 3).map(h => ({ html: h, correct: false })));
+  // Pad in the rare case a distractor generator returned < 3 (shouldn't happen per tests, but be safe).
+  // Rare fallback: pad with a plain number that isn't already an option (never a look-alike duplicate).
+  let pad = 0;
+  while (choiceObjs.length < 4 && pad < 50) {
+    pad++;
+    const cand = String(randInt(0, 12));
+    if (!choiceObjs.some(c => c.html === cand)) choiceObjs.push({ html: cand, correct: false });
+  }
+  const choices = shuffle(choiceObjs);
+  return Object.assign({}, q, { choices });
+}
+
+function checkTypedAnswer(userInput, q) {
+  const trimmed = (userInput || '').trim();
+  if (!trimmed) return false;
+  if (q.answerKind === 'numeric') {
+    const val = evalExprStr(trimmed, {});
+    return isFinite(val) && !isNaN(val) && Math.abs(val - q.correct.numeric) < 1e-4;
+  }
+  return expressionsEquivalent(trimmed, q.correct.checkStr);
+}
+
+</script>
+<script>
+// =========================================================================
+// UI GLUE
+// =========================================================================
+
+const TOPIC_ORDER_UI = TOPIC_ORDER;
+
+let setup = { topic: ['substitution'], answer: 'mc', timer: 'none' };
+
+const STEP_ORDER = ['topic', 'answer', 'timer'];
+const STEP_META = {
+  topic: {
+    title: 'Choose Topics', multi: true,
+    options: TOPIC_ORDER_UI.map(k => ({ key: k, title: TOPIC_CONFIG[k].label, desc: TOPIC_CONFIG[k].blurb })),
+  },
+  answer: {
+    title: 'Answer Method', multi: false,
+    options: [
+      { key: 'mc', title: 'Multiple Choice', desc: 'Pick from 4 options' },
+      { key: 'type', title: 'Typed Answer', desc: 'Type your own answer' },
+    ],
+  },
+  timer: {
+    title: 'Timer', multi: false,
+    options: [
+      { key: 'none', title: 'No Timer', desc: 'Untimed practice' },
+      { key: 'm2', title: '2 Minutes', desc: 'Quick sprint' },
+      { key: 'm5', title: '5 Minutes', desc: 'Standard round' },
+      { key: 'm10', title: '10 Minutes', desc: 'Longer session' },
+    ],
+  },
+};
+const TIMER_SECONDS = { none: null, m2: 120, m5: 300, m10: 600 };
+
+let stepIndex = 0;
+
+function activeSteps() { return STEP_ORDER; }
+
+function isStepValid(stepName) {
+  const meta = STEP_META[stepName];
+  if (meta.multi) return setup[stepName].length >= 1;
+  return !!setup[stepName];
+}
+
+function selectOption(stepName, key) {
+  const meta = STEP_META[stepName];
+  if (meta.multi) {
+    const arr = setup[stepName];
+    const idx = arr.indexOf(key);
+    if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+  } else {
+    setup[stepName] = key;
+  }
+  renderWizard();
+}
+
+function stepContinue() {
+  const steps = activeSteps();
+  const stepName = steps[stepIndex];
+  if (!isStepValid(stepName)) return;
+  stepIndex++; // may reach steps.length, which renderWizard treats as the review screen
+  renderWizard();
+}
+function stepBack() {
+  if (stepIndex > 0) { stepIndex--; renderWizard(); }
+}
+
+function optLabel(stepName, key) {
+  if (stepName === 'topic') return TOPIC_CONFIG[key].label;
+  const opt = STEP_META[stepName].options.find(o => o.key === key);
+  return opt ? opt.title : key;
+}
+
+function renderWizard() {
+  const steps = activeSteps();
+  const body = document.getElementById('wiz-body');
+  const dotsEl = document.getElementById('wiz-dots');
+  const crumbEl = document.getElementById('wiz-crumb');
+  const backBtn = document.getElementById('wiz-back');
+  const continueBtn = document.getElementById('wiz-continue');
+  const reviewBlock = document.getElementById('review-block');
+
+  const atReview = stepIndex >= steps.length;
+
+  dotsEl.innerHTML = steps.map((s, i) => {
+    let cls = 'wiz-dot';
+    if (i < stepIndex || atReview) cls += ' done';
+    else if (i === stepIndex) cls += ' current';
+    return `<span class="${cls}"></span>`;
+  }).join('') + `<span class="wiz-dot${atReview ? ' current' : ''}"></span>`;
+
+  if (atReview) {
+    crumbEl.textContent = 'Review your setup';
+    body.innerHTML = '';
+    backBtn.classList.remove('hidden');
+    continueBtn.classList.add('hidden');
+    reviewBlock.classList.remove('hidden');
+    const rows = [
+      ['Topics', setup.topic.map((k, i) => `${i + 1}. ${optLabel('topic', k)}`).join('<br>')],
+      ['Answer Method', optLabel('answer', setup.answer)],
+      ['Timer', optLabel('timer', setup.timer)],
+    ];
+    document.getElementById('wiz-review').innerHTML = rows.map(([label, value]) =>
+      `<div class="review-row"><span class="rlabel">${label}</span><span class="rvalue">${value}</span></div>`
+    ).join('');
+    return;
+  }
+
+  reviewBlock.classList.add('hidden');
+  const stepName = steps[stepIndex];
+  const meta = STEP_META[stepName];
+  crumbEl.textContent = `Step ${stepIndex + 1} of ${steps.length}: ${meta.title}`;
+
+  const isSel = (key) => meta.multi ? setup[stepName].includes(key) : setup[stepName] === key;
+  const gridClass = meta.options.length <= 2 || stepName === 'answer' || stepName === 'topic' ? 'opt-grid single' : 'opt-grid';
+  body.innerHTML = `
+    <div class="setup-sec">
+      <div class="setup-label"><span class="step-num">${stepIndex + 1}</span>${meta.title}</div>
+      <div class="${gridClass}">
+        ${stepName === 'topic' ? meta.options.map(o => {
+          const on = isSel(o.key);
+          const n = on ? setup.topic.indexOf(o.key) + 1 : 0;
+          return `
+          <div class="tog-row${on ? ' on' : ''}" role="switch" aria-checked="${on}" tabindex="0" onclick="selectOption('topic','${o.key}')" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();selectOption('topic','${o.key}')}">
+            <span class="tog-num">${on ? n + '.' : ''}</span>
+            <div class="tog-text"><div class="opt-title">${o.title}</div><div class="opt-desc">${o.desc}</div></div>
+            <span class="tog-switch"><span class="tog-knob"></span></span>
+          </div>`;
+        }).join('') : meta.options.map(o => {
+          const selected = isSel(o.key);
+          const orderNum = (stepName === 'topic' && selected) ? setup.topic.indexOf(o.key) + 1 : null;
+          return `
+          <div class="opt-card${selected ? ' sel' : ''}" onclick="selectOption('${stepName}','${o.key}')">
+            ${orderNum ? `<span class="opt-badge">${orderNum}</span>` : ''}
+            <div class="opt-title">${orderNum ? `<span class="opt-num">${orderNum}.</span> ` : ''}${o.title}</div>
+            <div class="opt-desc">${o.desc}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="setup-note">${meta.multi ? 'Select one or more. Numbers show the order topics will start from.' : ''}</div>
+    </div>
+  `;
+
+  backBtn.classList.toggle('hidden', stepIndex === 0);
+  continueBtn.classList.remove('hidden');
+  continueBtn.disabled = !isStepValid(stepName);
+}
+
+// ---------------- Quiz state & flow ----------------
+let sessionStats = { total: 0, correct: 0, bestStreak: 0, streak: 0 };
+let timerHandle = null;
+let timeRemaining = 0;
+let currentQ = null;
+let answered = false;
+let frozenSetup = null;
+
+function clearTimerIfRunning() {
+  if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+}
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
+function tickTimer() {
+  timeRemaining--;
+  document.getElementById('stat-timer').textContent = formatTime(Math.max(0, timeRemaining));
+  if (timeRemaining <= 0) { clearTimerIfRunning(); endQuiz(true); }
+}
+
+function setupSummaryText() {
+  const topicNames = frozenSetup.topic.map((k, i) => `${i + 1}. ${TOPIC_CONFIG[k].label}`).join(', ');
+  return `${topicNames}<br>${optLabel('answer', frozenSetup.answer)}`;
+}
+
+// ---- Adaptive difficulty ----
+// Every topic has its own level, 0 (easiest) to 3 (hardest), following the
+// worksheet's order. Three correct answers in a row on a topic move it up one
+// level; a wrong answer moves it back down one, so a student who keeps
+// missing easier questions stays at the easier level.
+const MAX_LEVEL = 3;
+const LEVEL_UP_STREAK = 3;
+let topicLevels = {};
+let topicStreaks = {};
+let currentTopicKey = null;
+let currentLevel = 0;   // level of the topic just asked
+function levelFor(topicKey) { return topicLevels[topicKey] || 0; }
+function adjustLevelAfterAnswer(ok) {
+  const k = currentTopicKey;
+  if (!k) return;
+  let lvl = levelFor(k), st = topicStreaks[k] || 0;
+  if (ok) {
+    st++;
+    if (st >= LEVEL_UP_STREAK) { lvl = Math.min(lvl + 1, MAX_LEVEL); st = 0; }
+  } else {
+    lvl = Math.max(lvl - 1, 0); st = 0;
+  }
+  topicLevels[k] = lvl; topicStreaks[k] = st; currentLevel = lvl;
+}
+
+// ---- Topic rotation ----
+// Questions cycle through the selected topics in the order they were
+// selected (topic "1" asked first), looping back to the start.
+let topicRotationIndex = 0;
+function nextTopicForQuestion() {
+  const t = frozenSetup.topic;
+  const topic = t[topicRotationIndex % t.length];
+  topicRotationIndex++;
+  return topic;
+}
+
+function startQuiz() {
+  frozenSetup = JSON.parse(JSON.stringify(setup));
+  sessionStats = { total: 0, correct: 0, bestStreak: 0, streak: 0 };
+  currentLevel = 0;
+  topicLevels = {}; topicStreaks = {}; currentTopicKey = null;
+  topicRotationIndex = 0;
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('quiz-screen').classList.remove('hidden');
+  document.getElementById('setup-summary').innerHTML = setupSummaryText();
+
+  const timerStatWrap = document.getElementById('stat-timer-wrap');
+  clearTimerIfRunning();
+  const secs = TIMER_SECONDS[frozenSetup.timer];
+  if (secs) {
+    timeRemaining = secs;
+    timerStatWrap.classList.remove('hidden');
+    document.getElementById('stat-timer').textContent = formatTime(timeRemaining);
+    timerHandle = setInterval(tickTimer, 1000);
+  } else {
+    timerStatWrap.classList.add('hidden');
+  }
+  document.getElementById('stat-streak-wrap').classList.remove('hidden');
+  document.getElementById('stat-streak').textContent = '0';
+
+  nextQuestion();
+}
+
+function nextQuestion() {
+  answered = false;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+
+  const topicKey = nextTopicForQuestion();
+  currentTopicKey = topicKey;
+  currentLevel = levelFor(topicKey);
+  currentQ = generateQuestion(topicKey, currentLevel);
+
+  document.getElementById('q-topic-label').textContent = currentQ.topicLabel;
+
+  const contextEl = document.getElementById('q-context');
+  if (currentQ.context) { contextEl.innerHTML = currentQ.context; contextEl.classList.remove('hidden'); }
+  else contextEl.classList.add('hidden');
+
+  const formulaEl = document.getElementById('q-formula');
+  if (currentQ.formula) { formulaEl.innerHTML = currentQ.formula; formulaEl.classList.remove('hidden'); }
+  else formulaEl.classList.add('hidden');
+
+  document.getElementById('q-prompt').textContent = currentQ.promptText;
+
+  const exprEl = document.getElementById('q-expr');
+  const wordsEl = document.getElementById('q-words');
+  if (currentQ.topicLabel === 'Words to Expressions') {
+    wordsEl.innerHTML = currentQ.bodyHtml;
+    wordsEl.classList.remove('hidden');
+    exprEl.classList.add('hidden');
+  } else if (currentQ.bodyHtml) {
+    exprEl.innerHTML = currentQ.bodyHtml;
+    exprEl.classList.remove('hidden');
+    wordsEl.classList.add('hidden');
+  } else {
+    exprEl.classList.add('hidden');
+    wordsEl.classList.add('hidden');
+  }
+
+  renderAnswerArea();
+}
+
+function renderAnswerArea() {
+  const choiceGrid = document.getElementById('choice-grid');
+  const typeRow = document.getElementById('type-row');
+  const typeHint = document.getElementById('type-hint');
+  const typeInput = document.getElementById('type-input');
+
+  if (frozenSetup.answer === 'mc') {
+    typeRow.classList.add('hidden');
+    typeHint.classList.add('hidden');
+    choiceGrid.classList.remove('hidden');
+    choiceGrid.innerHTML = currentQ.choices.map((c, i) =>
+      `<button class="choice-btn" id="choice-${i}" onclick="submitChoice(${i})">${c.html}</button>`
+    ).join('');
+  } else {
+    choiceGrid.classList.add('hidden');
+    choiceGrid.innerHTML = '';
+    typeRow.classList.remove('hidden');
+    typeHint.classList.remove('hidden');
+    typeInput.value = '';
+    typeInput.disabled = false;
+    document.getElementById('type-submit').disabled = false;
+    setTimeout(() => typeInput.focus(), 0);
+  }
+}
+
+function registerResult(ok) {
+  sessionStats.total++;
+  if (ok) {
+    sessionStats.correct++;
+    sessionStats.streak++;
+    sessionStats.bestStreak = Math.max(sessionStats.bestStreak, sessionStats.streak);
+  } else {
+    sessionStats.streak = 0;
+  }
+  document.getElementById('stat-streak').textContent = String(sessionStats.streak);
+  adjustLevelAfterAnswer(ok);
+}
+
+function showFeedback(ok) {
+  const fb = document.getElementById('feedback');
+  const banner = document.getElementById('fb-banner');
+  const answerEl = document.getElementById('fb-answer');
+  const stepsEl = document.getElementById('fb-steps');
+  fb.style.display = 'block';
+  banner.className = 'fb-banner ' + (ok ? 'ok' : 'err');
+  banner.textContent = ok ? 'Correct!' : 'Not quite.';
+  answerEl.innerHTML = 'Correct answer: ' + currentQ.correct.display;
+  if (!ok && currentQ.steps && currentQ.steps.length) {
+    stepsEl.innerHTML = '<div class="fb-steps-title">Worked solution:</div>' +
+      '<ol class="fb-steps-list">' + currentQ.steps.map(s => `<li>${s}</li>`).join('') + '</ol>';
+    stepsEl.classList.remove('hidden');
+  } else {
+    stepsEl.classList.add('hidden');
+    stepsEl.innerHTML = '';
+  }
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function submitChoice(i) {
+  if (answered) return;
+  answered = true;
+  const ok = currentQ.choices[i].correct;
+  currentQ.choices.forEach((c, idx) => {
+    const btn = document.getElementById('choice-' + idx);
+    btn.disabled = true;
+    if (c.correct) btn.classList.add('ok');
+    else if (idx === i) btn.classList.add('bad');
+  });
+  registerResult(ok);
+  showFeedback(ok);
+}
+
+function submitTyped() {
+  if (answered) return;
+  const input = document.getElementById('type-input');
+  const val = input.value;
+  if (!val.trim()) return;
+  answered = true;
+  input.disabled = true;
+  document.getElementById('type-submit').disabled = true;
+  const ok = checkTypedAnswer(val, currentQ);
+  registerResult(ok);
+  showFeedback(ok);
+}
+
+document.getElementById('type-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') submitTyped();
+});
+
+function endQuiz(timeUp) {
+  clearTimerIfRunning();
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('results-screen').classList.remove('hidden');
+  document.getElementById('results-title').textContent = timeUp ? "Time's Up!" : 'Quiz Complete!';
+  document.getElementById('results-sub').innerHTML = setupSummaryText().replace(/<br>/g, ' &middot; ');
+  const total = sessionStats.total;
+  const correct = sessionStats.correct;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('res-score').textContent = `${correct} / ${total} (${accuracy}%)`;
+  document.getElementById('res-beststreak').textContent = String(sessionStats.bestStreak);
+}
+
+function restartSameSetup() {
+  startQuiz();
+}
+
+function goToSetupFromResults() {
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  stepIndex = 0;
+  renderWizard();
+}
+function goToSetupFromQuiz() {
+  clearTimerIfRunning();
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  stepIndex = 0;
+  renderWizard();
+}
+
+// Introspection helper (used by the automated test harness; harmless to ship).
+function __testState() {
+  return { setup, stepIndex, frozenSetup, sessionStats, timeRemaining, timerHandle, currentQ, answered, currentLevel, topicLevels, topicRotationIndex };
+}
+
+renderWizard();
+</script>
+</body>
+</html>
