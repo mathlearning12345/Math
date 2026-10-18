@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ratios and Rates Quiz (Verdana 36pt)</title>
+<style>
+:root{
+  --bg:#f7f6fa;--card:#ffffff;--card2:#f7f5fb;--border:#e4e1ec;
+  --accent:#6d5ef5;--accent-hover:#5a4bdc;--accent-soft:#efecfd;
+  --green:#2e9e5e;--green-bg:#edfaf3;--green-border:#a8e4c0;
+  --red:#d94f4f;--red-bg:#fdf0f0;--red-border:#f0b0b0;
+  --text:#1c1a22;--muted:#8a8594;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Verdana,Geneva,sans-serif;
+  min-height:100vh;display:flex;justify-content:center;padding:16px 12px 60px;}
+.app{width:100%;max-width:1100px;}
+.hidden{display:none !important;}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:14px 0 12px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.hdr h1{font-size:1rem;font-weight:700;letter-spacing:-0.01em;}
+.stats{display:flex;gap:10px;font-size:1rem;color:var(--muted);}
+.stat strong{color:var(--text);font-weight:700;}
+
+/* ── SETUP WIZARD ─────────────────────────── */
+.wiz-dots{display:flex;justify-content:center;gap:6px;margin-bottom:14px;}
+.wiz-dot{width:7px;height:7px;border-radius:50%;background:#e4e1ec;transition:background .15s;}
+.wiz-dot.done{background:var(--accent);}
+.wiz-dot.current{background:var(--accent);width:18px;border-radius:4px;}
+.wiz-crumb{font-size:1rem;color:var(--muted);text-align:center;margin-bottom:18px;line-height:1.5;min-height:1.1em;}
+.setup-sec{margin-bottom:20px;}
+.setup-label{font-size:1rem;font-weight:700;color:#999;letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.step-num{display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;background:#ece9f3;color:#7a7488;
+  font-size:1rem;font-weight:700;letter-spacing:0;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.opt-grid.single{grid-template-columns:1fr;}
+.opt-card{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:11px 12px;cursor:pointer;transition:border-color .12s,background .12s;user-select:none;
+  position:relative;}
+.opt-card:hover{border-color:#cfc9df;}
+.opt-card.sel{border-color:var(--accent);background:var(--accent-soft);}
+.opt-badge{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:1rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.opt-title{font-size:1rem;font-weight:700;margin-bottom:2px;}
+.opt-card.sel .opt-title{color:var(--accent-hover);}
+
+.tog-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;user-select:none;}
+.tog-row.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent) inset;}
+.tog-num{width:1.4em;font-weight:800;color:var(--accent);font-size:1rem;text-align:right;flex:none;}
+.tog-text{flex:1;min-width:0;}
+.tog-switch{flex:none;width:40px;height:24px;border-radius:12px;background:#cfc9df;position:relative;transition:background .15s;}
+.tog-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s;}
+.tog-row.on .tog-switch{background:var(--accent);}
+.tog-row.on .tog-knob{transform:translateX(16px);}
+.opt-num{color:var(--accent);font-weight:800;}
+.opt-desc{font-size:1rem;color:var(--muted);line-height:1.35;}
+.setup-note{font-size:1rem;color:var(--muted);font-style:italic;margin-top:6px;min-height:1px;}
+.wiz-foot{display:flex;flex-direction:column;gap:10px;}
+.wiz-nav-row{display:flex;gap:8px;align-items:center;}
+.back-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);
+  font-size:1rem;font-weight:700;padding:12px 16px;cursor:pointer;}
+.back-btn:hover{border-color:#cfc9df;color:var(--text);}
+.continue-btn{flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px;font-size:1rem;font-weight:700;cursor:pointer;}
+.continue-btn:hover{background:var(--accent-hover);}
+.continue-btn:disabled{background:#cfc9df;cursor:default;}
+.wiz-review{margin-bottom:4px;}
+.review-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border);font-size:1rem;}
+.review-row:last-child{border-bottom:none;}
+.review-row .rlabel{color:var(--muted);font-size:1rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.review-row .rvalue{font-weight:700;text-align:right;}
+.start-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:1rem;font-weight:700;cursor:pointer;}
+.start-btn:hover{background:var(--accent-hover);}
+
+/* ── QUIZ SCREEN ──────────────────────────── */
+.quiz-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;}
+.quiz-bar-btns{display:flex;gap:6px;}
+.setup-summary{font-size:1rem;color:var(--muted);line-height:1.4;}
+.change-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);
+  font-size:1rem;font-weight:700;padding:6px 10px;cursor:pointer;white-space:nowrap;}
+.change-btn:hover{border-color:#cfc9df;color:var(--text);}
+
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:18px 16px;margin-bottom:14px;}
+.topic-label{font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:.05em;
+  text-transform:uppercase;margin-bottom:10px;}
+.context-wrap{background:var(--card2);border-left:3px solid var(--accent);border-radius:6px;
+  padding:10px 12px;margin-bottom:10px;font-size:1rem;line-height:1.5;color:var(--text);}
+.formula-wrap{font-size:1rem;font-weight:700;margin-bottom:10px;text-align:center;}
+.prompt{font-size:1rem;font-weight:600;text-align:center;line-height:1.4;margin-bottom:12px;}
+.expr-display{font-size:1rem;font-weight:700;text-align:center;line-height:1.6;
+  font-family:Verdana,Geneva,sans-serif;letter-spacing:.01em;padding:6px 4px;word-break:break-word;}
+.expr-display i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.words-display{font-size:1rem;font-weight:600;text-align:center;line-height:1.5;font-style:italic;}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  margin:0 .18em;font-size:.82em;line-height:1.15;position:relative;top:.08em;}
+.frac .fnum{border-bottom:1.6px solid currentColor;padding:0 .3em .1em;}
+.frac .fden{padding:.1em .3em 0;}
+.sqin{border-top:1.6px solid currentColor;padding:1px .15em 0;display:inline-block;}
+
+#answer-area{margin-bottom:14px;}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.choice-btn{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:13px 8px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;
+  font-family:Verdana,Geneva,sans-serif;}
+.choice-btn i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.choice-btn:hover{border-color:#cfc9df;}
+.choice-btn:disabled{cursor:default;}
+.choice-btn.ok{border-color:var(--green-border);background:var(--green-bg);color:var(--green);}
+.choice-btn.bad{border-color:var(--red-border);background:var(--red-bg);color:var(--red);}
+
+.type-row{display:flex;gap:8px;}
+.type-row input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:12px;
+  font-size:1rem;font-family:Verdana,Geneva,sans-serif;}
+.type-row input:focus{outline:none;border-color:var(--accent);}
+.type-hint{font-size:1rem;color:var(--muted);margin-top:6px;}
+.submit-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px 18px;font-size:1rem;font-weight:700;cursor:pointer;}
+.submit-btn:disabled{background:#cfc9df;cursor:default;}
+
+.feedback{display:none;background:var(--card2);border:1px solid var(--border);
+  border-radius:12px;padding:14px;margin-bottom:14px;}
+.fb-banner{font-size:1rem;font-weight:700;margin-bottom:6px;}
+.fb-banner.ok{color:var(--green);}
+.fb-banner.err{color:var(--red);}
+.fb-answer{font-size:1rem;font-weight:600;font-family:Verdana,Geneva,sans-serif;}
+.fb-answer i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.fb-steps-title{font-size:1rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:6px;}
+.fb-steps-list{padding-left:1.2em;}
+.fb-steps-list li{font-size:1rem;line-height:1.55;margin-bottom:4px;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps-list li i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps-list li b{font-weight:700;}
+.next-btn{display:none;width:100%;background:var(--text);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:1rem;font-weight:700;cursor:pointer;}
+.next-btn:hover{opacity:.9;}
+
+/* ── RESULTS SCREEN ───────────────────────── */
+.results-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:22px 18px;text-align:center;}
+.results-title{font-size:1rem;font-weight:800;margin-bottom:4px;}
+.results-sub{font-size:1rem;color:var(--muted);margin-bottom:18px;}
+.results-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:11px 0;border-bottom:1px solid var(--border);font-size:1rem;text-align:left;}
+.results-row:last-child{border-bottom:none;}
+.results-btns{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+.results-btns .start-btn{margin:0;}
+.results-secondary{background:none;border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:1rem;font-weight:700;padding:13px;cursor:pointer;}
+.results-secondary:hover{border-color:#cfc9df;}
+
+/* ---- Verdana 36pt version (36pt = 48px) ---- */
+html{font-size:36pt;}
+body,button,input,textarea{font-family:Verdana,Geneva,sans-serif;font-size:36pt;}
+.expr-display,.choice-btn,.fb-answer,.fb-steps-list li{font-family:Verdana,Geneva,sans-serif;}
+.expr-display i,.choice-btn i,.fb-answer i,.fb-steps-list li i{font-family:Verdana,Geneva,sans-serif;}
+.app{max-width:1600px;}
+body{padding:24px 28px 80px;}
+.step-num{width:1.5em;height:1.5em;font-size:.6em;}
+.opt-badge{width:1.4em;height:1.4em;top:-.35em;right:-.35em;font-size:.6em;}
+.wiz-dot{width:18px;height:18px;}.wiz-dot.current{width:48px;}
+.tog-switch{width:110px;height:64px;border-radius:32px;}
+.tog-knob{width:54px;height:54px;top:5px;left:5px;}
+.tog-row.on .tog-knob{transform:translateX(46px);}
+.tog-row{gap:24px;padding:20px 26px;}
+.tog-num{width:1.6em;color:#9a96a6;}
+.tog-row.on .tog-num{color:var(--accent);}
+.opt-card{padding:20px 24px;}
+.opt-grid{gap:18px;}
+.fb-steps-list li{line-height:1.5;}
+.choice-btn{padding:20px 28px;min-width:340px;}
+/* keep the answer buttons close together: shrink the grid to the buttons and centre it */
+.choice-grid{width:max-content;max-width:100%;margin:0 auto;gap:14px;}
+input[type=text],#type-input{padding:16px 20px;}
+.next-btn,#next-btn,#wiz-continue,#wiz-back{padding:18px 26px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <h1>Ratios and Rates</h1>
+    <div class="stats">
+      <span class="stat hidden" id="stat-timer-wrap">&#9201;&nbsp;<strong id="stat-timer">0:00</strong></span>
+      <span class="stat hidden" id="stat-streak-wrap">&#9733;&nbsp;<strong id="stat-streak">0</strong></span>
+    </div>
+  </div>
+
+  <!-- ===================== SETUP SCREEN ===================== -->
+  <div id="setup-screen">
+    <div class="wiz-dots" id="wiz-dots"></div>
+    <div class="wiz-crumb" id="wiz-crumb"></div>
+
+    <div id="wiz-body"></div>
+
+    <div class="wiz-foot">
+      <div class="wiz-nav-row">
+        <button class="back-btn hidden" id="wiz-back" onclick="stepBack()">&larr; Back</button>
+        <button class="continue-btn hidden" id="wiz-continue" onclick="stepContinue()">Continue &rarr;</button>
+      </div>
+      <div id="review-block" class="hidden">
+        <div class="wiz-review" id="wiz-review"></div>
+        <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== QUIZ SCREEN ===================== -->
+  <div id="quiz-screen" class="hidden">
+    <div class="quiz-bar">
+      <div class="setup-summary" id="setup-summary"></div>
+      <div class="quiz-bar-btns">
+        <button class="change-btn" onclick="goToSetupFromQuiz()">Change</button>
+        <button class="change-btn" onclick="endQuiz(false)">Finish</button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="topic-label" id="q-topic-label"></div>
+      <div class="context-wrap hidden" id="q-context"></div>
+      <div class="formula-wrap hidden" id="q-formula"></div>
+      <div class="prompt" id="q-prompt"></div>
+      <div class="expr-display hidden" id="q-expr"></div>
+      <div class="words-display hidden" id="q-words"></div>
+    </div>
+
+    <div id="answer-area">
+      <div class="choice-grid hidden" id="choice-grid"></div>
+      <div class="type-row hidden" id="type-row">
+        <input type="text" id="type-input" placeholder="Type your answer" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="submit-btn" id="type-submit" onclick="submitTyped()">Check</button>
+      </div>
+      <div class="type-hint hidden" id="type-hint">e.g. 3 : 2, or 24, or 3/8, or B</div>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <div class="fb-banner" id="fb-banner"></div>
+      <div class="fb-answer" id="fb-answer"></div>
+      <div class="fb-steps hidden" id="fb-steps"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question &rarr;</button>
+  </div>
+
+  <!-- ===================== RESULTS SCREEN ===================== -->
+  <div id="results-screen" class="hidden">
+    <div class="results-card">
+      <div class="results-title" id="results-title">Quiz Complete!</div>
+      <div class="results-sub" id="results-sub"></div>
+      <div class="results-row"><span class="rlabel">Score</span><span class="rvalue" id="res-score"></span></div>
+      <div class="results-row"><span class="rlabel">Best Streak</span><span class="rvalue" id="res-beststreak"></span></div>
+      <div class="results-btns">
+        <button class="start-btn" onclick="restartSameSetup()">Play Again</button>
+        <button class="results-secondary" onclick="goToSetupFromResults()">Change Setup</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =========================================================================
+// PURE LOGIC (expression engine, term builders, topic generators,
+// distractor generation) — tested independently via node before being
+// embedded here. See merged_logic.js / test_*.js in the build workspace.
+// =========================================================================
+</script>
+<script>
+// =========================================================================
+// Ratios & Rates quiz logic: 10 topics x 4 difficulty levels.
+// Every answer is a whole number, a whole-number ratio, a fraction, or a
+// letter.  Each generator picks the answer first and builds the question
+// around it, so the worked steps and the answer can never disagree.
+// =========================================================================
+
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randChoice(arr) { return arr[randInt(0, arr.length - 1)]; }
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = randInt(0, i); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function gcdList(arr) { return arr.reduce((g, x) => gcd(g, x)); }
+function sum(arr) { return arr.reduce((s, x) => s + x, 0); }
+
+const MAX_APP_LEVEL = 3;
+function clampLevel(level) { return Math.max(0, Math.min(MAX_APP_LEVEL, Math.floor(level) || 0)); }
+
+const TIMES = '&times;', DIV = '&divide;';
+const colon = (arr) => arr.join(' : ');
+const fracHtml = (p, q) => `<span class="frac"><span class="fnum">${p}</span><span class="fden">${q}</span></span>`;
+const money = (n) => `$${n}`;
+const plain = (n) => String(n);
+
+// ---------- distractor helpers ----------
+function keyOf(a) { return Array.isArray(a) ? a.join(',') : String(a); }
+
+function numericWrongs(ans, candidates) {
+  const out = [];
+  const ok = (n) => Number.isInteger(n) && n > 0 && n !== ans && !out.includes(n);
+  shuffle(candidates || []).forEach(n => { if (out.length < 3 && ok(n)) out.push(n); });
+  shuffle([ans + 1, ans - 1, ans + 2, ans - 2, ans * 2, ans + 5, ans - 5, ans + 10, ans + 3]).forEach(n => { if (out.length < 3 && ok(n)) out.push(n); });
+  let extra = ans + 4;
+  while (out.length < 3) { if (ok(extra)) out.push(extra); extra++; }
+  return out;
+}
+
+// Arrays (ratios / shares): candidates first, then nudge one entry.
+function arrayWrongs(ans, candidates) {
+  const used = new Set([keyOf(ans)]);
+  const out = [];
+  const ok = (a) => Array.isArray(a) && a.length === ans.length && a.every(n => Number.isInteger(n) && n > 0) && !used.has(keyOf(a));
+  shuffle(candidates || []).forEach(a => { if (out.length < 3 && ok(a)) { used.add(keyOf(a)); out.push(a); } });
+  let guard = 0;
+  while (out.length < 3 && guard++ < 400) {
+    const a = ans.slice();
+    const i = randInt(0, a.length - 1);
+    a[i] = Math.max(1, a[i] + randChoice([1, -1, 2, -2, 3]));
+    if (ok(a)) { used.add(keyOf(a)); out.push(a); }
+  }
+  return out;
+}
+
+// Fractions are compared by value, so 1/2 and 2/4 are never both offered.
+function fractionWrongs(p, q, candidates) {
+  const val = (f) => f[0] / f[1];
+  const out = [];
+  const taken = [p / q];
+  const ok = (f) => f[0] > 0 && f[1] > 0 && Number.isInteger(f[0]) && Number.isInteger(f[1]) && !taken.some(v => Math.abs(v - val(f)) < 1e-9);
+  const reduce = (f) => { const g = gcd(f[0], f[1]); return [f[0] / g, f[1] / g]; };
+  shuffle(candidates || []).forEach(f => { const r = reduce(f); if (out.length < 3 && ok(r)) { taken.push(val(r)); out.push(r); } });
+  let guard = 0;
+  while (out.length < 3 && guard++ < 400) {
+    const f = reduce([Math.max(1, p + randChoice([-1, 1, 2])), q + randChoice([-1, 0, 1, 2])]);
+    if (ok(f)) { taken.push(val(f)); out.push(f); }
+  }
+  return out;
+}
+
+// ---------- question builders (one per answer shape) ----------
+function base(topicLabel, g) {
+  return { topicLabel, promptText: g.prompt, bodyHtml: g.body || '', context: g.context || '', formula: '', steps: g.steps, meta: g.meta || {} };
+}
+function buildNumeric(topicLabel, g) {
+  const fmt = g.fmt || plain;
+  return Object.assign(base(topicLabel, g), {
+    answerKind: 'numeric',
+    correct: { display: fmt(g.answer), checkStr: String(g.answer), numeric: g.answer },
+    distractorsHtml: numericWrongs(g.answer, g.wrong).map(fmt),
+  });
+}
+function buildRatio(topicLabel, g) {
+  return Object.assign(base(topicLabel, g), {
+    answerKind: 'ratio',
+    correct: { display: colon(g.answer), checkStr: g.answer.join(':'), values: g.answer },
+    distractorsHtml: arrayWrongs(g.answer, g.wrong).map(colon),
+  });
+}
+function buildList(topicLabel, g) {
+  const fmt = g.fmt || plain;
+  const show = (arr) => arr.length === 2 ? `${fmt(arr[0])} and ${fmt(arr[1])}` : `${arr.slice(0, -1).map(fmt).join(', ')} and ${fmt(arr[arr.length - 1])}`;
+  return Object.assign(base(topicLabel, g), {
+    answerKind: 'list',
+    correct: { display: show(g.answer), checkStr: g.answer.join(','), values: g.answer },
+    distractorsHtml: arrayWrongs(g.answer, g.wrong).map(show),
+  });
+}
+function buildFraction(topicLabel, g) {
+  const [p, q] = g.answer;
+  return Object.assign(base(topicLabel, g), {
+    answerKind: 'fraction',
+    correct: { display: fracHtml(p, q), checkStr: `${p}/${q}`, values: [p, q] },
+    distractorsHtml: fractionWrongs(p, q, g.wrong).map(f => fracHtml(f[0], f[1])),
+  });
+}
+function buildChoice(topicLabel, g) {
+  // g.options: [{label:'A'}, ...]; choices stay in A, B, C order
+  const letters = g.options.map((_, i) => 'ABCDE'[i]);
+  const q = base(topicLabel, g);
+  return Object.assign(q, {
+    answerKind: 'choice',
+    correct: { display: `Option ${g.answer}`, checkStr: g.answer, values: [g.answer] },
+    fixedChoices: letters.map(L => ({ html: `Option ${L}`, correct: L === g.answer })),
+    distractorsHtml: [],
+  });
+}
+
+const reduceRatio = (arr) => { const g = gcdList(arr); return arr.map(n => n / g); };
+
+// Random scenario pools -------------------------------------------------
+const PAIRS = [
+  ['boys', 'girls', 'students in a class'], ['red', 'blue', 'counters in a bag'], ['cats', 'dogs', 'pets at a shelter'],
+  ['apples', 'oranges', 'pieces of fruit in a bowl'], ['fiction books', 'non-fiction books', 'books on a shelf'],
+  ['teachers', 'students', 'people on an excursion'], ['wins', 'losses', 'games played by a team'],
+];
+const TRIPLES = [
+  ['red', 'blue', 'green', 'marbles in a jar'], ['pop songs', 'rock songs', 'jazz songs', 'songs on a playlist'],
+  ['sandwiches', 'wraps', 'salads', 'items in a lunch order'], ['cars', 'buses', 'bikes', 'vehicles in a car park'],
+];
+
+// =========================================================================
+// 1. Writing ratios
+// =========================================================================
+function genWriteRatio(level) {
+  const T = 'Writing Ratios';
+  if (level === 2) {                                             // three parts
+    const [a, b, c, what] = randChoice(TRIPLES);
+    const n = [randInt(2, 12), randInt(2, 12), randInt(2, 12)];
+    const names = [a, b, c];
+    const order = shuffle([0, 1, 2]);
+    const ans = order.map(i => n[i]);
+    return buildRatio(T, {
+      context: `There are ${n[0]} ${a}, ${n[1]} ${b} and ${n[2]} ${c} among the ${what}.`,
+      prompt: `Write the ratio of ${order.map(i => names[i]).join(' : ')}. (Do not simplify.)`,
+      answer: ans, wrong: [ans.slice().reverse(), [ans[1], ans[0], ans[2]], [ans[0], ans[2], ans[1]]],
+      steps: [`Write the numbers in the order asked: ${order.map(i => names[i]).join(', then ')}.`, `${order.map(i => `${n[i]} ${names[i]}`).join(', ')}`, `Answer: ${colon(ans)}`],
+    });
+  }
+  const [a, b, what] = randChoice(PAIRS);
+  const x = randInt(3, 20); let y = randInt(3, 20); if (y === x) y += 2;
+  const ctx = `There are ${x + y} ${what}: ${x} ${a} and ${y} ${b}.`;
+  if (level === 0) {
+    return buildRatio(T, { context: ctx, prompt: `Write the ratio of ${a} to ${b}. (Do not simplify.)`, answer: [x, y],
+      wrong: [[y, x], [x, x + y], [x - y > 0 ? x - y : y - x, y]],
+      steps: [`${a} come first and ${b} come second, so the ratio is ${a} : ${b}.`.replace(/^./, c => c.toUpperCase()), `${x} ${a} and ${y} ${b}`, `Answer: ${x} : ${y}`] });
+  }
+  if (level === 1) {
+    return buildRatio(T, { context: ctx, prompt: `Write the ratio of ${b} to ${a}. (Do not simplify.)`, answer: [y, x],
+      wrong: [[x, y], [y, x + y], [Math.abs(x - y), x]],
+      steps: [`This time ${b} come first, so the ratio is ${b} : ${a}.`, `${y} ${b} and ${x} ${a}`, `Answer: ${y} : ${x}`] });
+  }
+  const first = randChoice([0, 1]);                              // level 3: part to whole
+  const part = first ? y : x, partName = first ? b : a, total = x + y;
+  return buildRatio(T, { context: ctx, prompt: `Write the ratio of ${partName} to the total number. (Do not simplify.)`,
+    answer: [part, total], wrong: [[total, part], [part, total - part], [total - part, part]],
+    steps: [`The whole is ${x} + ${y} = ${total}.`, `${partName.charAt(0).toUpperCase() + partName.slice(1)} to the whole is ${part} : ${total}.`, `Answer: ${part} : ${total}`] });
+}
+
+// =========================================================================
+// 2. Converting units for ratios
+// =========================================================================
+const UNIT_PAIRS = {
+  mcm: { big: 'm', small: 'cm', f: 100 }, cmmm: { big: 'cm', small: 'mm', f: 10 }, dc: { big: '$', small: 'c', f: 100, money: true },
+  kmm: { big: 'km', small: 'm', f: 1000 }, kgg: { big: 'kg', small: 'g', f: 1000 }, lml: { big: 'L', small: 'mL', f: 1000 },
+  hmin: { big: 'hours', small: 'minutes', f: 60 }, mins: { big: 'minutes', small: 'seconds', f: 60 },
+};
+const UNIT_POOLS = { 0: ['mcm', 'cmmm', 'dc'], 1: ['mcm', 'kmm', 'kgg', 'dc'], 2: ['kmm', 'kgg', 'lml', 'hmin'], 3: ['kmm', 'kgg', 'lml', 'hmin', 'mins', 'mcm'] };
+const sing = (w) => ({ hours: 'hour', minutes: 'minute', seconds: 'second' }[w] || w);
+function qty(n, unit, u) { return u.money ? (unit === '$' ? `$${n}` : `${n}c`) : `${n} ${unit}`; }
+
+function genConvertRatio(level) {
+  const T = 'Converting Units for Ratios';
+  const u = UNIT_PAIRS[randChoice(UNIT_POOLS[level])];
+  const simplify = level >= 1;
+  const bigFirst = level < 2 ? true : Math.random() < 0.5;
+  const a = randInt(2, level === 3 ? 9 : 6);                     // amount in the big unit
+  // small-unit amount: pick so that the converted ratio has something to simplify at level >= 1
+  const step = simplify ? Math.max(1, u.f / 10) : 1;
+  let b = randInt(1, Math.max(2, Math.floor(u.f * 0.9 / step))) * step;
+  if (!simplify) b = u.f >= 1000 ? randInt(2, 9) * 100 : u.f >= 100 ? randInt(2, 9) * 10 : randInt(2, 9) * 5;
+  if (b % u.f === 0) b += step;
+  const bigInSmall = a * u.f;
+  let conv = [bigInSmall, b];
+  const q1 = qty(a, u.big, u), q2 = qty(b, u.small, u);
+  const shown = bigFirst ? `${q1} : ${q2}` : `${q2} : ${q1}`;
+  const ans0 = bigFirst ? conv : [b, bigInSmall];
+  const ans = simplify ? reduceRatio(ans0) : ans0;
+  const unitName = u.money ? 'cents' : u.small;
+  const steps = [
+    `Both amounts must be in the same unit. Change ${u.money ? '$' : u.big} to ${unitName}.`,
+    u.money ? `$1 = 100c, so $${a} = ${a} ${TIMES} 100 = ${bigInSmall}c` : `1 ${sing(u.big)} = ${u.f} ${u.small}, so ${a} ${u.big} = ${a} ${TIMES} ${u.f} = ${bigInSmall} ${u.small}`,
+    `The ratio is now ${colon(ans0)}.`,
+  ];
+  if (simplify) { const g = gcdList(ans0); steps.push(`Divide both by their highest common factor, ${g}: ${colon(ans)}.`); }
+  const wrong = [
+    bigFirst ? [a, b] : [b, a],                                   // forgot to convert
+    ans.slice().reverse(),
+    bigFirst ? [a * u.f, b * u.f] : [b * u.f, a * u.f],           // converted both
+    bigFirst ? [a, b * u.f] : [b * u.f, a],
+  ];
+  return buildRatio(T, {
+    context: `A ratio is written as ${shown}.`,
+    prompt: simplify ? `Write it with the same units, in simplest form:` : `Write it with the same units (in ${unitName}). Do not simplify:`,
+    body: shown, answer: ans, wrong, steps,
+  });
+}
+
+// =========================================================================
+// 3. Simplifying ratios
+// =========================================================================
+function coprimeList(n, max) {
+  for (let tries = 0; tries < 200; tries++) {
+    const arr = Array.from({ length: n }, () => randInt(1, max));
+    if (gcdList(arr) === 1 && new Set(arr).size > 1) return arr;
+  }
+  return n === 2 ? [2, 3] : [1, 2, 3];
+}
+function genSimplifyRatio(level) {
+  const T = 'Simplifying Ratios';
+  const parts = level >= 2 ? 3 : 2;
+  const max = level === 0 ? 6 : level === 1 ? 9 : level === 2 ? 6 : 9;
+  const mult = randInt(2, level === 0 ? 6 : level === 1 ? 12 : level === 2 ? 6 : 12);
+  const ans = coprimeList(parts, max);
+  const orig = ans.map(n => n * mult);
+  const half = mult % 2 === 0 ? mult / 2 : (mult % 3 === 0 ? mult / 3 : 1);
+  const partial = half > 1 ? ans.map(n => n * (mult / half)) : ans.map(n => n * mult);
+  return buildRatio(T, {
+    prompt: 'Simplify the ratio:', body: colon(orig), answer: ans,
+    wrong: [orig, partial, ans.slice().reverse(), ans.map((n, i) => (i === 0 ? n + 1 : n))],
+    steps: [`Find the highest common factor of ${orig.join(', ')}: it is ${mult}.`, `Divide each number by ${mult}: ${orig.map(n => `${n} ${DIV} ${mult} = ${n / mult}`).join(', ')}.`, `Answer: ${colon(ans)}`],
+  });
+}
+
+// =========================================================================
+// 4. Parts of a whole
+// =========================================================================
+function genPartsWhole(level) {
+  const T = 'Parts of a Whole';
+  if (level <= 1) {
+    const [a, b, what] = randChoice(PAIRS);
+    const [p, q] = (() => { let r; do { r = [randInt(1, 7), randInt(1, 7)]; } while (r[0] === r[1] || gcd(r[0], r[1]) !== 1); return r; })();
+    const askFirst = level === 0 ? true : Math.random() < 0.5;
+    const part = askFirst ? p : q, name = askFirst ? a : b, tot = p + q;
+    return buildFraction(T, {
+      context: `The ratio of ${a} to ${b} is ${p} : ${q}.`, prompt: `What fraction of the ${what.replace(/^(.*?) (in|on|at|among|for|of) .*$/, '$1')} are ${name}?`,
+      answer: [part, tot], wrong: [[part, askFirst ? q : p], [tot - part, tot], [part, tot - 1], [tot, part]],
+      steps: [`Add the parts to find the total: ${p} + ${q} = ${tot} parts.`, `${name.charAt(0).toUpperCase() + name.slice(1)} make up ${part} of the ${tot} parts.`, `Answer: ${part}/${tot}`],
+    });
+  }
+  const [a, b, c, what] = randChoice(TRIPLES);
+  let r; do { r = [randInt(1, 6), randInt(1, 6), randInt(1, 6)]; } while (new Set(r).size < 3);
+  const tot = sum(r), names = [a, b, c];
+  const who = randInt(0, 2);
+  const short = what.replace(/^(.*?) (in|on|at|among|for|of) .*$/, '$1');
+  let num, text, stepText;
+  if (level === 2) { num = r[who]; text = names[who]; stepText = `${names[who].charAt(0).toUpperCase() + names[who].slice(1)} make up ${num} of the ${tot} parts.`; }
+  else { num = tot - r[who]; text = `not ${names[who]}`; stepText = `Not ${names[who]} means the other parts: ${tot} ${'−'} ${r[who]} = ${num} of the ${tot} parts.`; }
+  const g = gcd(num, tot), p = num / g, q = tot / g;
+  const steps = [`Add the parts to find the total: ${r.join(' + ')} = ${tot} parts.`, stepText];
+  if (g > 1) steps.push(`Simplify ${num}/${tot} by dividing by ${g}: ${p}/${q}.`);
+  steps.push(`Answer: ${p}/${q}`);
+  return buildFraction(T, {
+    context: `The ratio of ${a} : ${b} : ${c} is ${r.join(' : ')}.`, prompt: `What fraction of the ${short} are ${text}? (Simplify.)`,
+    answer: [p, q], wrong: [[r[who], tot - r[who]], [tot - num, tot], [num, tot + 1], [r[who], tot]].concat(level === 3 ? [[r[who], tot]] : []),
+    steps,
+  });
+}
+
+// =========================================================================
+// 5. The unitary method
+// =========================================================================
+const UNITARY = [
+  { one: (n, T) => `${n} pens cost $${T}.`, unitQ: 'How much does 1 pen cost?', cost: (m) => `How much do ${m} pens cost?`, rev: (X) => `How many pens can be bought for $${X}?`, fmtA: money, fmtN: plain, unitName: 'pen' },
+  { one: (n, T) => `${n} kg of apples cost $${T}.`, unitQ: 'How much does 1 kg of apples cost?', cost: (m) => `How much do ${m} kg of apples cost?`, rev: (X) => `How many kilograms of apples can be bought for $${X}?`, fmtA: money, fmtN: (n) => `${n} kg`, unitName: 'kg' },
+  { one: (n, T) => `A car uses ${n} L of petrol to travel ${T} km.`, unitQ: 'How far does it travel on 1 L?', cost: (m) => `How far can it travel on ${m} L?`, rev: (X) => `How many litres are needed to travel ${X} km?`, fmtA: (n) => `${n} km`, fmtN: (n) => `${n} L`, unitName: 'L' },
+  { one: (n, T) => `Sam earns $${T} for ${n} hours of work.`, unitQ: 'How much does Sam earn in 1 hour?', cost: (m) => `How much does Sam earn in ${m} hours?`, rev: (X) => `How many hours does Sam need to work to earn $${X}?`, fmtA: money, fmtN: (n) => `${n} hours`, unitName: 'hour' },
+  { one: (n, T) => `A machine fills ${T} bottles in ${n} minutes.`, unitQ: 'How many bottles does it fill in 1 minute?', cost: (m) => `How many bottles does it fill in ${m} minutes?`, rev: (X) => `How many minutes does it take to fill ${X} bottles?`, fmtA: plain, fmtN: (n) => `${n} minutes`, unitName: 'minute' },
+  { one: (n, T) => `${n} litres of paint cover ${T} m² of wall.`, unitQ: 'How many square metres does 1 litre cover?', cost: (m) => `How many square metres do ${m} litres cover?`, rev: (X) => `How many litres are needed to cover ${X} m²?`, fmtA: (n) => `${n} m²`, fmtN: (n) => `${n} litres`, unitName: 'litre' },
+];
+function genUnitary(level) {
+  const T = 'The Unitary Method';
+  const s = randChoice(UNITARY);
+  const big = level === 3;
+  const n = randInt(2, big ? 12 : 8), u = randInt(2, big ? 15 : 9);
+  const total = n * u;
+  let m = randInt(2, big ? 15 : 10); if (m === n) m += 1;
+  const mode = level === 0 ? 'unit' : level === 1 ? 'cost' : level === 2 ? 'rev' : randChoice(['cost', 'rev']);
+  const ctx = s.one(n, total);
+  const find1 = `Find the value of 1: ${total} ${DIV} ${n} = ${u}.`;
+  if (mode === 'unit') return buildNumeric(T, { context: ctx, prompt: s.unitQ, answer: u, fmt: s.fmtA, wrong: [total, total + n, n, total - n],
+    steps: [`Divide the total by ${n}: ${total} ${DIV} ${n} = ${u}.`, `Answer: ${s.fmtA(u)}`] });
+  if (mode === 'cost') return buildNumeric(T, { context: ctx, prompt: s.cost(m), answer: u * m, fmt: s.fmtA, wrong: [total * m, total + m, u + m, total - n + m],
+    steps: [find1, `Multiply by ${m}: ${u} ${TIMES} ${m} = ${u * m}.`, `Answer: ${s.fmtA(u * m)}`] });
+  const X = u * m;
+  return buildNumeric(T, { context: ctx, prompt: s.rev(X), answer: m, fmt: s.fmtN, wrong: [X * u, X - u, X + u, X / n],
+    steps: [find1, `Divide ${X} by the value of 1: ${X} ${DIV} ${u} = ${m}.`, `Answer: ${s.fmtN(m)}`] });
+}
+
+// =========================================================================
+// 6. Dividing quantities in a ratio
+// =========================================================================
+const SHARE_ITEMS = [
+  { total: (T) => `$${T}`, fmt: money, what: (T) => `Share $${T}` },
+  { total: (T) => `${T} marbles`, fmt: (n) => `${n} marbles`, what: (T) => `Share ${T} marbles` },
+  { total: (T) => `${T} lollies`, fmt: (n) => `${n} lollies`, what: (T) => `Share ${T} lollies` },
+];
+const PEOPLE = ['Amy', 'Ben', 'Cara', 'Dev', 'Eli', 'Fay'];
+function genDivide(level) {
+  const T = 'Dividing Quantities';
+  const item = randChoice(SHARE_ITEMS);
+  const who = shuffle(PEOPLE);
+  if (level <= 1) {
+    const parts = level === 0 ? 2 : 3;
+    let r; do { r = Array.from({ length: parts }, () => randInt(1, 5)); } while (new Set(r).size < Math.min(parts, 2) || gcdList(r) !== 1);
+    const total = sum(r) * randInt(2, level === 0 ? 9 : 7), one = total / sum(r);
+    const shares = r.map(n => n * one);
+    const names = who.slice(0, parts);
+    const eqSplit = Math.round(total / parts);
+    return buildList(T, {
+      context: `${item.what(total)} between ${names.slice(0, -1).join(', ')} and ${names[parts - 1]} in the ratio ${colon(r)}.`,
+      prompt: `How much does each person get? (${names.join(', ')} in that order)`, fmt: item.fmt, answer: shares,
+      wrong: [shares.slice().reverse(), Array(parts).fill(eqSplit), r.map(n => n * (one + 1)), r.map(n => n * Math.max(1, one - 1))],
+      steps: [`Add the parts: ${r.join(' + ')} = ${sum(r)} parts.`, `1 part = ${total} ${DIV} ${sum(r)} = ${one}.`, `${r.map((n, i) => `${names[i]}: ${n} ${TIMES} ${one} = ${n * one}`).join(', ')}.`, `Answer: ${shares.map(item.fmt).join(', ')}`],
+    });
+  }
+  const [x, y] = (() => { let r; do { r = [randInt(1, 9), randInt(1, 9)]; } while (r[0] === r[1] || gcd(r[0], r[1]) !== 1); return r; })();
+  const one = randInt(2, 9);
+  const [P, Q] = who;
+  if (level === 2) {
+    const givenIdx = randInt(0, 1);
+    const knownName = givenIdx ? Q : P, askName = givenIdx ? P : Q;
+    const known = (givenIdx ? y : x) * one, ask = (givenIdx ? x : y) * one;
+    const kp = givenIdx ? y : x, ap = givenIdx ? x : y;
+    return buildNumeric(T, {
+      context: `${P} and ${Q} share some ${item.fmt === money ? 'money' : item.fmt(2).replace(/^\d+ /, '')} in the ratio ${x} : ${y}. ${knownName} gets ${item.fmt(known)}.`,
+      prompt: `How much does ${askName} get?`, fmt: item.fmt, answer: ask, wrong: [known + (ap - kp), known * ap, known + ap, ask + one],
+      steps: [`${knownName}'s share is ${kp} ${kp === 1 ? 'part' : 'parts'} and it is worth ${known}, so 1 part = ${known} ${DIV} ${kp} = ${one}.`, `${askName} has ${ap} ${ap === 1 ? 'part' : 'parts'}: ${ap} ${TIMES} ${one} = ${ask}.`, `Answer: ${item.fmt(ask)}`],
+    });
+  }
+  const variant = randChoice(['diff', 'smallToTotal']);
+  const hi = Math.max(x, y), lo = Math.min(x, y);
+  if (variant === 'diff') {
+    const diff = (hi - lo) * one;
+    return buildNumeric(T, {
+      context: `${P} and ${Q} share some ${item.fmt === money ? 'money' : item.fmt(2).replace(/^\d+ /, '')} in the ratio ${hi} : ${lo}. ${P} gets ${item.fmt(diff)} more than ${Q}.`,
+      prompt: `How much does ${P} get?`, fmt: item.fmt, answer: hi * one, wrong: [diff * hi, lo * one, (hi + lo) * one, diff + hi],
+      steps: [`The difference between the shares is ${hi} ${MINUS_} ${lo} = ${hi - lo} ${hi - lo === 1 ? 'part' : 'parts'}.`, `${hi - lo} ${hi - lo === 1 ? 'part' : 'parts'} = ${diff}, so 1 part = ${diff} ${DIV} ${hi - lo} = ${one}.`, `${P} has ${hi} ${hi === 1 ? 'part' : 'parts'}: ${hi} ${TIMES} ${one} = ${hi * one}.`, `Answer: ${item.fmt(hi * one)}`],
+    });
+  }
+  return buildNumeric(T, {
+    context: `${P} and ${Q} share some ${item.fmt === money ? 'money' : item.fmt(2).replace(/^\d+ /, '')} in the ratio ${lo} : ${hi}. ${P} gets ${item.fmt(lo * one)}.`,
+    prompt: `How much was shared altogether?`, fmt: item.fmt, answer: (hi + lo) * one, wrong: [hi * one, lo * one + hi, (hi + lo) * lo, (hi + lo) * one - one],
+    steps: [`${P}'s share is ${lo} ${lo === 1 ? 'part' : 'parts'} and it is worth ${lo * one}, so 1 part = ${lo * one} ${DIV} ${lo} = ${one}.`, `Total parts = ${lo} + ${hi} = ${lo + hi}.`, `Total = ${lo + hi} ${TIMES} ${one} = ${(hi + lo) * one}.`, `Answer: ${item.fmt((hi + lo) * one)}`],
+  });
+}
+const MINUS_ = '&minus;';
+
+// =========================================================================
+// 7. Rates
+// =========================================================================
+const RATE_SCENARIOS = [
+  { rate: 'km/h', q: 'km', t: 'hours', ctx0: (Q, t) => `A car travels ${Q} km in ${t} hours.`, ask0: 'What is its average speed, in km/h?', ctx1: (r, t) => `A cyclist rides at ${r} km/h for ${t} hours.`, ask1: 'How far does the cyclist ride?', ctx2: (r, Q) => `A truck travels at ${r} km/h.`, ask2: (Q) => `How many hours does it take to travel ${Q} km?` },
+  { rate: '$/hour', q: '$', t: 'hours', ctx0: (Q, t) => `Jo earns $${Q} for ${t} hours of work.`, ask0: 'What is her hourly rate, in $ per hour?', ctx1: (r, t) => `Jo is paid $${r} per hour and works ${t} hours.`, ask1: 'How much does she earn?', ctx2: (r, Q) => `Jo is paid $${r} per hour.`, ask2: (Q) => `How many hours must she work to earn $${Q}?` },
+  { rate: 'L/min', q: 'L', t: 'minutes', ctx0: (Q, t) => `A pump moves ${Q} litres of water in ${t} minutes.`, ask0: 'What is the pumping rate, in litres per minute?', ctx1: (r, t) => `A tap fills a tank at ${r} litres per minute for ${t} minutes.`, ask1: 'How many litres are in the tank?', ctx2: (r, Q) => `A tap fills a tank at ${r} litres per minute.`, ask2: (Q) => `How many minutes does it take to put in ${Q} litres?` },
+  { rate: 'words/min', q: 'words', t: 'minutes', ctx0: (Q, t) => `Mia types ${Q} words in ${t} minutes.`, ask0: 'What is her typing rate, in words per minute?', ctx1: (r, t) => `Mia types at ${r} words per minute for ${t} minutes.`, ask1: 'How many words does she type?', ctx2: (r, Q) => `Mia types at ${r} words per minute.`, ask2: (Q) => `How many minutes does she need to type ${Q} words?` },
+  { rate: 'pages/min', q: 'pages', t: 'minutes', ctx0: (Q, t) => `A printer prints ${Q} pages in ${t} minutes.`, ask0: 'What is its rate, in pages per minute?', ctx1: (r, t) => `A printer prints ${r} pages per minute for ${t} minutes.`, ask1: 'How many pages does it print?', ctx2: (r, Q) => `A printer prints ${r} pages per minute.`, ask2: (Q) => `How many minutes does it take to print ${Q} pages?` },
+];
+function genRates(level) {
+  const T = 'Rates';
+  const s = randChoice(RATE_SCENARIOS);
+  const fmtQ = s.q === '$' ? money : (n) => `${n} ${s.q}`;
+  const fmtT = (n) => `${n} ${s.t}`;
+  const fmtR = (n) => s.rate.startsWith('$') ? `$${n}/hour` : `${n} ${s.rate}`;
+  const mode = level === 0 ? 0 : level === 1 ? 1 : level === 2 ? 2 : 3;
+  const r = randInt(2, level === 3 ? 15 : 12), t = randInt(2, 9), Q = r * t;
+  if (mode === 0) return buildNumeric(T, { context: s.ctx0(Q, t), prompt: s.ask0, answer: r, fmt: fmtR, wrong: [Q, Q + t, t, Q - t],
+    steps: [`A rate is an amount per 1 unit of time: divide by the time.`, `${Q} ${DIV} ${t} = ${r}`, `Answer: ${fmtR(r)}`] });
+  if (mode === 1) return buildNumeric(T, { context: s.ctx1(r, t), prompt: s.ask1, answer: Q, fmt: fmtQ, wrong: [r + t, Q + r, Q - t, r * t * 2],
+    steps: [`Multiply the rate by the time.`, `${r} ${TIMES} ${t} = ${Q}`, `Answer: ${fmtQ(Q)}`] });
+  if (mode === 2) return buildNumeric(T, { context: s.ctx2(r, Q), prompt: s.ask2(Q), answer: t, fmt: fmtT, wrong: [Q - r, Q + r, r, Q],
+    steps: [`Divide the total by the rate.`, `${Q} ${DIV} ${r} = ${t}`, `Answer: ${fmtT(t)}`] });
+  // level 3: average speed for a trip made in two stages
+  for (let guard = 0; guard < 500; guard++) {
+    const t1 = randInt(1, 5), t2 = randInt(1, 5), s1 = randInt(2, 9) * 10, s2 = randInt(2, 9) * 10;
+    if (s1 === s2) continue;
+    const d1 = s1 * t1, d2 = s2 * t2, D = d1 + d2, TT = t1 + t2;
+    if (D % TT !== 0) continue;
+    const avg = D / TT;
+    return buildNumeric(T, { context: `A car travels ${d1} km in ${t1} ${t1 === 1 ? 'hour' : 'hours'}, then ${d2} km in ${t2} ${t2 === 1 ? 'hour' : 'hours'}.`, prompt: 'What is its average speed for the whole trip, in km/h?',
+      answer: avg, fmt: (n) => `${n} km/h`, wrong: [(s1 + s2) / 2, d1 / t1, d2 / t2, D, avg + 10],
+      steps: [`Total distance = ${d1} + ${d2} = ${D} km.`, `Total time = ${t1} + ${t2} = ${TT} hours.`, `Average speed = total distance ${DIV} total time = ${D} ${DIV} ${TT} = ${avg}.`, `Answer: ${avg} km/h`] });
+  }
+  return genRates(2);
+}
+
+// =========================================================================
+// 8. Best buy
+// =========================================================================
+const BUY_ITEMS = [
+  { name: 'rice', unit: 'kg' }, { name: 'orange juice', unit: 'L' }, { name: 'pasta', unit: 'kg' }, { name: 'olive oil', unit: 'L' },
+  { name: 'flour', unit: 'kg' }, { name: 'milk', unit: 'L' },
+];
+const BUY_GRAMS = [{ name: 'cheese' }, { name: 'rice crackers' }, { name: 'coffee' }, { name: 'nuts' }];
+function genBestBuy(level) {
+  const T = 'Best Buy';
+  const nOpt = level === 0 ? 2 : 3;
+  let lines = [], unitPrices = [], steps = [], per;
+  if (level <= 1) {
+    const item = randChoice(BUY_ITEMS);
+    const ups = shuffle([2, 3, 4, 5, 6, 7, 8, 9, 10, 12]).slice(0, nOpt);
+    const qs = shuffle([1, 2, 3, 4, 5, 6]).slice(0, nOpt);
+    qs.forEach((qv, i) => { lines.push(`Option ${'ABC'[i]}: ${qv} ${item.unit} of ${item.name} for $${qv * ups[i]}`); steps.push(`Option ${'ABC'[i]}: $${qv * ups[i]} ${DIV} ${qv} = $${ups[i]} per ${item.unit}`); });
+    unitPrices = ups; per = `per ${item.unit}`;
+  } else if (level === 2) {
+    const item = randChoice(BUY_GRAMS);
+    const ups = shuffle([2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 3);
+    const qs = shuffle([200, 300, 400, 500, 600]).slice(0, 3);
+    qs.forEach((qv, i) => { lines.push(`Option ${'ABC'[i]}: ${qv} g of ${item.name} for $${qv / 100 * ups[i]}`); steps.push(`Option ${'ABC'[i]}: ${qv} g is ${qv / 100} lots of 100 g, so $${qv / 100 * ups[i]} ${DIV} ${qv / 100} = $${ups[i]} per 100 g`); });
+    unitPrices = ups; per = 'per 100 g';
+  } else {
+    const item = randChoice([{ name: 'rice' }, { name: 'sugar' }, { name: 'oats' }, { name: 'lentils' }]);
+    const ups = shuffle([4, 8, 12, 16, 20, 24]).slice(0, 3);
+    const forms = shuffle(['500g', '250g', 'kg']);
+    forms.forEach((f, i) => {
+      const L = 'ABC'[i], up = ups[i];
+      if (f === '500g') { lines.push(`Option ${L}: 500 g of ${item.name} for $${up / 2}`); steps.push(`Option ${L}: 500 g is half a kilogram, so 1 kg costs 2 ${TIMES} $${up / 2} = $${up}`); }
+      else if (f === '250g') { lines.push(`Option ${L}: 250 g of ${item.name} for $${up / 4}`); steps.push(`Option ${L}: 250 g is a quarter of a kilogram, so 1 kg costs 4 ${TIMES} $${up / 4} = $${up}`); }
+      else { const kg = randInt(2, 3); lines.push(`Option ${L}: ${kg} kg of ${item.name} for $${kg * up}`); steps.push(`Option ${L}: $${kg * up} ${DIV} ${kg} = $${up} per kg`); }
+    });
+    unitPrices = ups; per = 'per kg';
+  }
+  const best = unitPrices.indexOf(Math.min(...unitPrices));
+  const letter = 'ABC'[best];
+  steps.push(`The lowest price ${per} is $${unitPrices[best]}, so the best buy is Option ${letter}.`);
+  return buildChoice(T, {
+    context: lines.join('<br>'), prompt: 'Which is the best buy?', options: lines, answer: letter, steps,
+    meta: { unitPrices, best: letter },
+  });
+}
+
+// =========================================================================
+// 9. Converting units for rates
+// =========================================================================
+function genConvertRates(level) {
+  const T = 'Converting Units for Rates';
+  const forms = {
+    0: ['kmhToKmMin', 'perMinToPerHour'],
+    1: ['kmhToKmMin', 'perMinToPerHour', 'msToMmin'],
+    2: ['kmhToMs', 'msToKmh'],
+    3: ['kmhToMmin', 'lminToMls', 'kmhToMs', 'msToKmh'],
+  };
+  const kind = randChoice(forms[level]);
+  let from, to, answer, steps, wrong, unitFrom, unitTo, fmtTo;
+  if (kind === 'kmhToKmMin') {
+    answer = randInt(2, 9); from = answer * 60; unitFrom = 'km/h'; unitTo = 'km/min'; fmtTo = (n) => `${n} km/min`;
+    steps = [`There are 60 minutes in 1 hour, so divide by 60.`, `${from} ${DIV} 60 = ${answer}`, `Answer: ${answer} km/min`]; wrong = [from * 60, from - 60, from / 6, answer + 10];
+  } else if (kind === 'perMinToPerHour') {
+    const f = randInt(2, 9); const u = randChoice([['km/min', 'km/h'], ['L/min', 'L/h'], ['$/min', '$/h']]);
+    from = f; answer = f * 60; unitFrom = u[0]; unitTo = u[1]; fmtTo = (n) => `${n} ${u[1]}`;
+    steps = [`There are 60 minutes in 1 hour, so multiply by 60.`, `${f} ${TIMES} 60 = ${answer}`, `Answer: ${answer} ${u[1]}`]; wrong = [f + 60, f * 6, Math.round(f * 60 / 10), f * 100];
+  } else if (kind === 'msToMmin') {
+    const f = randInt(2, 9) * 2; from = f; answer = f * 60; unitFrom = 'm/s'; unitTo = 'm/min'; fmtTo = (n) => `${n} m/min`;
+    steps = [`There are 60 seconds in 1 minute, so multiply by 60.`, `${f} ${TIMES} 60 = ${answer}`, `Answer: ${answer} m/min`]; wrong = [f * 3.6, f + 60, f * 100, f * 6];
+  } else if (kind === 'kmhToMs') {
+    const k = randInt(1, 8); from = 18 * k; answer = 5 * k; unitFrom = 'km/h'; unitTo = 'm/s'; fmtTo = (n) => `${n} m/s`;
+    steps = [`1 km = 1000 m and 1 hour = 3600 seconds.`, `${from} ${TIMES} 1000 ${DIV} 3600 = ${answer}`, `Answer: ${answer} m/s`]; wrong = [from * 1000, from * 3600 / 1000 | 0, from - 18, Math.round(from / 6)];
+  } else if (kind === 'msToKmh') {
+    const k = randInt(1, 8); from = 5 * k; answer = 18 * k; unitFrom = 'm/s'; unitTo = 'km/h'; fmtTo = (n) => `${n} km/h`;
+    steps = [`In 1 hour there are 3600 seconds, so ${from} m/s = ${from} ${TIMES} 3600 = ${from * 3600} m/h.`, `${from * 3600} m = ${from * 3600} ${DIV} 1000 = ${answer} km, so the rate is ${answer} km/h.`, `Answer: ${answer} km/h`]; wrong = [from * 60, from * 3600, from * 6, from * 3];
+  } else if (kind === 'kmhToMmin') {
+    const k = randInt(1, 8); from = 3 * k; answer = 50 * k; unitFrom = 'km/h'; unitTo = 'm/min'; fmtTo = (n) => `${n} m/min`;
+    steps = [`1 km = 1000 m and 1 hour = 60 minutes.`, `${from} ${TIMES} 1000 ${DIV} 60 = ${answer}`, `Answer: ${answer} m/min`]; wrong = [from * 1000, from * 60, from * 5, from * 100];
+  } else {
+    const k = randInt(1, 8); from = 6 * k; answer = 100 * k; unitFrom = 'L/min'; unitTo = 'mL/s'; fmtTo = (n) => `${n} mL/s`;
+    steps = [`1 L = 1000 mL and 1 minute = 60 seconds.`, `${from} ${TIMES} 1000 ${DIV} 60 = ${answer}`, `Answer: ${answer} mL/s`]; wrong = [from * 1000, from * 60, from * 10, from * 50];
+  }
+  return buildNumeric(T, { prompt: `Convert ${from} ${unitFrom} to ${unitTo}.`, answer, fmt: fmtTo, wrong: wrong.map(Math.round), steps });
+}
+
+// =========================================================================
+// 10. Time-distance graphs
+// =========================================================================
+function niceStep(maxD) {
+  for (const s of [10, 20, 25, 30, 40, 50, 60, 80, 100, 120, 150, 200]) if (maxD / s <= 8 && maxD % s === 0) return s;
+  return 10;
+}
+function stepForAll(values) {
+  for (const s of [10, 20, 30, 40, 60, 80, 100, 120]) if (values.every(v => v % s === 0) && Math.max(...values) / s <= 8) return s;
+  for (const s of [10, 20, 30, 40, 60, 80, 100, 120, 150, 200]) if (values.every(v => v % s === 0)) return s;
+  return 10;
+}
+function graphSvg(pts, ystep, yTitle) {
+  const T = Math.max(...pts.map(p => p[0])), D = Math.max(...pts.map(p => p[1]));
+  const W = 900, H = 580, L = 110, B = 90, R = 30, TP = 30;
+  const rows = Math.ceil(D / ystep);
+  const X = (t) => L + (W - L - R) * t / T, Y = (d) => H - B - (H - B - TP) * d / (rows * ystep);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Distance-time graph" style="width:100%;max-width:900px;display:block;margin:0 auto;font-family:Verdana,sans-serif" data-pts="${pts.map(p => p.join(',')).join(';')}">`;
+  for (let t = 0; t <= T; t++) s += `<line x1="${X(t)}" y1="${TP}" x2="${X(t)}" y2="${H - B}" stroke="#c9c7d6" stroke-width="1.5"/><text x="${X(t)}" y="${H - B + 34}" text-anchor="middle" font-size="26" fill="currentColor">${t}</text>`;
+  for (let i = 0; i <= rows; i++) { const d = i * ystep; s += `<line x1="${L}" y1="${Y(d)}" x2="${W - R}" y2="${Y(d)}" stroke="#c9c7d6" stroke-width="1.5"/><text x="${L - 12}" y="${Y(d) + 9}" text-anchor="end" font-size="26" fill="currentColor">${d}</text>`; }
+  s += `<line x1="${L}" y1="${TP}" x2="${L}" y2="${H - B}" stroke="currentColor" stroke-width="3"/><line x1="${L}" y1="${H - B}" x2="${W - R}" y2="${H - B}" stroke="currentColor" stroke-width="3"/>`;
+  s += `<text x="${(L + W - R) / 2}" y="${H - 14}" text-anchor="middle" font-size="26" fill="currentColor">Time (hours)</text>`;
+  s += `<text x="26" y="${(TP + H - B) / 2}" text-anchor="middle" font-size="26" fill="currentColor" transform="rotate(-90 26 ${(TP + H - B) / 2})">${yTitle}</text>`;
+  s += `<polyline fill="none" stroke="#6c5ce7" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p => `${X(p[0])},${Y(p[1])}`).join(' ')}"/>`;
+  pts.forEach(p => { s += `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="8" fill="#6c5ce7"/>`; });
+  return s + '</svg>';
+}
+function genGraph(level) {
+  const T = 'Time–Distance Graphs';
+  const fmtKm = (n) => `${n} km`, fmtH = (n) => `${n} ${n === 1 ? 'hour' : 'hours'}`, fmtS = (n) => `${n} km/h`;
+  if (level === 0) {                                              // read a distance off a straight line
+    const s = randChoice([20, 30, 40, 50, 60]), TT = randInt(4, 7);
+    const t = randInt(2, TT - 1);
+    const pts = [[0, 0], [TT, s * TT]];
+    return buildNumeric(T, { context: 'The graph shows a car’s journey.', body: graphSvg(pts, s, 'Distance (km)'), prompt: `How far had the car travelled after ${t} hours?`, answer: s * t, fmt: fmtKm,
+      wrong: [s * (t + 1), s * (t - 1), s * TT, s * t + 10], steps: [`Find ${t} on the time axis (horizontal).`, `Go straight up to the line, then straight across to the distance axis.`, `Answer: ${s * t} km`], meta: { pts, ask: 'dist', t } });
+  }
+  if (level === 1) {                                              // speed from a straight line
+    const s = randChoice([20, 30, 40, 50, 60, 80]), TT = randInt(2, 6), D = s * TT;
+    const pts = [[0, 0], [TT, D]];
+    return buildNumeric(T, { context: 'The graph shows a car’s journey.', body: graphSvg(pts, stepForAll([D]), 'Distance (km)'), prompt: 'What was the car’s speed?', answer: s, fmt: fmtS, wrong: [D, D + TT, TT, s + 10],
+      steps: [`Read the end of the line: ${D} km after ${TT} hours.`, `Speed = distance ${DIV} time = ${D} ${DIV} ${TT} = ${s}`, `Answer: ${s} km/h`], meta: { pts, ask: 'speed' } });
+  }
+  if (level === 2) {                                              // go, stop, go
+    for (let guard = 0; guard < 300; guard++) {
+      const s1 = randChoice([20, 30, 40, 60]), s2 = randChoice([20, 30, 40, 60]), t1 = randInt(1, 3), r = randInt(1, 3), t3 = randInt(1, 3);
+      if (t1 + r + t3 > 8) continue;
+      const d1 = s1 * t1, d2 = d1 + s2 * t3;
+      const pts = [[0, 0], [t1, d1], [t1 + r, d1], [t1 + r + t3, d2]];
+      const ystep = stepForAll([d1, d2]);
+      const ask = randChoice(['rest', 'dist1', 'speed2']);
+      const common = { context: 'The graph shows a car’s journey.', body: graphSvg(pts, ystep, 'Distance (km)'), meta: { pts, ask } };
+      if (ask === 'rest') return buildNumeric(T, Object.assign(common, { prompt: 'For how long was the car stopped?', answer: r, fmt: fmtH, wrong: [t1, t3, t1 + r, r + 1],
+        steps: [`When the car is stopped the distance does not change, so the line is flat.`, `The flat part runs from ${t1} hours to ${t1 + r} hours.`, `${t1 + r} ${MINUS_} ${t1} = ${r}`, `Answer: ${fmtH(r)}`] }));
+      if (ask === 'dist1') return buildNumeric(T, Object.assign(common, { prompt: 'How far had the car travelled when it first stopped?', answer: d1, fmt: fmtKm, wrong: [d2, d1 + s1, d2 - d1, d1 - 10],
+        steps: [`The car stops where the line goes flat, at ${t1} ${t1 === 1 ? 'hour' : 'hours'}.`, `Read across to the distance axis.`, `Answer: ${d1} km`] }));
+      return buildNumeric(T, Object.assign(common, { prompt: 'What was the car’s speed in the last part of the journey (after the stop)?', answer: s2, fmt: fmtS, wrong: [s1, d2, s2 + 10, Math.round(d2 / (t1 + r + t3)) || 1],
+        steps: [`The last part runs from ${t1 + r} hours to ${t1 + r + t3} hours.`, `Distance in that part = ${d2} ${MINUS_} ${d1} = ${d2 - d1} km, time = ${t3} ${t3 === 1 ? 'hour' : 'hours'}.`, `Speed = ${d2 - d1} ${DIV} ${t3} = ${s2}`, `Answer: ${s2} km/h`] }));
+    }
+  }
+  // level 3: out and back
+  for (let guard = 0; guard < 500; guard++) {
+    const d = randChoice([60, 80, 90, 120, 180, 240]);
+    const divs = [1, 2, 3, 4].filter(x => d % x === 0);
+    const t1 = randChoice(divs), t3 = randChoice(divs), r = randInt(0, 2);
+    if (t1 + r + t3 > 9 || d / t3 === d / t1 && r === 0) continue;
+    const s1 = d / t1, s3 = d / t3;
+    const pts = r === 0 ? [[0, 0], [t1, d], [t1 + t3, 0]] : [[0, 0], [t1, d], [t1 + r, d], [t1 + r + t3, 0]];
+    const ystep = stepForAll([d]);
+    const ask = randChoice(['total', 'return', 'out']);
+    const common = { context: 'The graph shows a trip away from home and back again.', body: graphSvg(pts, ystep, 'Distance from home (km)'), meta: { pts, ask } };
+    if (ask === 'total') return buildNumeric(T, Object.assign(common, { prompt: 'What was the total distance travelled?', answer: 2 * d, fmt: fmtKm, wrong: [d, d + d / 2, 0 + 3 * d, 2 * d - 10],
+      steps: [`The furthest point from home is ${d} km.`, `The car travelled out ${d} km and back ${d} km.`, `${d} + ${d} = ${2 * d}`, `Answer: ${2 * d} km`] }));
+    if (ask === 'return') return buildNumeric(T, Object.assign(common, { prompt: 'What was the car’s speed on the way home?', answer: s3, fmt: fmtS, wrong: [s1, d, s3 + 10, Math.round(2 * d / (t1 + r + t3)) || 1],
+      steps: [`The way home is the part where the line goes down: ${d} km in ${t3} ${t3 === 1 ? 'hour' : 'hours'}.`, `Speed = ${d} ${DIV} ${t3} = ${s3}`, `Answer: ${s3} km/h`] }));
+    return buildNumeric(T, Object.assign(common, { prompt: 'What was the car’s speed on the way out?', answer: s1, fmt: fmtS, wrong: [s3, d, s1 + 10, Math.round(d / (t1 + t3)) || 1],
+      steps: [`The way out is the part where the line goes up: ${d} km in ${t1} ${t1 === 1 ? 'hour' : 'hours'}.`, `Speed = ${d} ${DIV} ${t1} = ${s1}`, `Answer: ${s1} km/h`] }));
+  }
+  return genGraph(2);
+}
+
+// =========================================================================
+// Registry + public API
+// =========================================================================
+const TOPIC_CONFIG = {
+  writeRatio:   { label: 'Writing Ratios', blurb: 'Write a ratio from a description', build: genWriteRatio },
+  convertRatio: { label: 'Converting Units for Ratios', blurb: 'Put both quantities in the same unit', build: genConvertRatio },
+  simplifyRatio:{ label: 'Simplifying Ratios', blurb: 'Divide by the highest common factor', build: genSimplifyRatio },
+  partsWhole:   { label: 'Parts of a Whole', blurb: 'Write a ratio part as a fraction', build: genPartsWhole },
+  unitary:      { label: 'The Unitary Method', blurb: 'Find the value of one, then scale', build: genUnitary },
+  divide:       { label: 'Dividing Quantities', blurb: 'Share an amount in a given ratio', build: genDivide },
+  rates:        { label: 'Rates', blurb: 'Speed, pay and other rates', build: genRates },
+  bestBuy:      { label: 'Best Buy', blurb: 'Compare the cost of one unit', build: genBestBuy },
+  convertRates: { label: 'Converting Units for Rates', blurb: 'Change km/h, m/s and more', build: genConvertRates },
+  graphs:       { label: 'Time–Distance Graphs', blurb: 'Read distance, time and speed from a graph', build: genGraph },
+};
+const TOPIC_ORDER = ['writeRatio', 'convertRatio', 'simplifyRatio', 'partsWhole', 'unitary', 'divide', 'rates', 'bestBuy', 'convertRates', 'graphs'];
+
+function generateQuestion(topicKey, level) {
+  const q = TOPIC_CONFIG[topicKey].build(clampLevel(level));
+  if (q.fixedChoices) return Object.assign({}, q, { choices: q.fixedChoices });
+  const choiceObjs = [{ html: q.correct.display, correct: true }].concat(q.distractorsHtml.slice(0, 3).map(h => ({ html: h, correct: false })));
+  return Object.assign({}, q, { choices: shuffle(choiceObjs) });
+}
+
+// ---------- typed answers ----------
+function checkTypedAnswer(userInput, q) {
+  const s = String(userInput || '').toLowerCase().replace(/[−–]/g, '-').replace(/\s+/g, ' ').trim();
+  if (!s) return false;
+  const kind = q.answerKind;
+  if (kind === 'numeric') {
+    const m = s.replace(/,/g, '').match(/^\$?\s*(\d+(?:\.\d+)?)\s*[a-z/² ]*$/);
+    return !!m && Math.abs(parseFloat(m[1]) - q.correct.numeric) < 1e-9;
+  }
+  if (kind === 'ratio' || kind === 'list') {
+    if (!/^[\d\s:,.$a-z]+$/.test(s)) return false;
+    const nums = (s.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+    const want = q.correct.values;
+    return nums.length === want.length && nums.every((n, i) => n === want[i]);
+  }
+  if (kind === 'fraction') {
+    const m = s.match(/^(\d+)\s*\/\s*(\d+)$/);
+    if (!m) return false;
+    const [p, q2] = q.correct.values;
+    return +m[2] !== 0 && +m[1] * q2 === p * +m[2];
+  }
+  if (kind === 'choice') {
+    const m = s.match(/^(?:option\s*)?([a-e])$/);
+    return !!m && m[1].toUpperCase() === q.correct.checkStr;
+  }
+  return false;
+}
+
+</script>
+<script>
+// =========================================================================
+// UI GLUE
+// =========================================================================
+
+const TOPIC_ORDER_UI = TOPIC_ORDER;
+
+let setup = { topic: ['writeRatio'], answer: 'mc', timer: 'none' };
+
+const STEP_ORDER = ['topic', 'answer', 'timer'];
+const STEP_META = {
+  topic: {
+    title: 'Choose Topics', multi: true,
+    options: TOPIC_ORDER_UI.map(k => ({ key: k, title: TOPIC_CONFIG[k].label, desc: TOPIC_CONFIG[k].blurb })),
+  },
+  answer: {
+    title: 'Answer Method', multi: false,
+    options: [
+      { key: 'mc', title: 'Multiple Choice', desc: 'Pick from 4 options' },
+      { key: 'type', title: 'Typed Answer', desc: 'Type your own answer' },
+    ],
+  },
+  timer: {
+    title: 'Timer', multi: false,
+    options: [
+      { key: 'none', title: 'No Timer', desc: 'Untimed practice' },
+      { key: 'm2', title: '2 Minutes', desc: 'Quick sprint' },
+      { key: 'm5', title: '5 Minutes', desc: 'Standard round' },
+      { key: 'm10', title: '10 Minutes', desc: 'Longer session' },
+    ],
+  },
+};
+const TIMER_SECONDS = { none: null, m2: 120, m5: 300, m10: 600 };
+
+let stepIndex = 0;
+
+function activeSteps() { return STEP_ORDER; }
+
+function isStepValid(stepName) {
+  const meta = STEP_META[stepName];
+  if (meta.multi) return setup[stepName].length >= 1;
+  return !!setup[stepName];
+}
+
+function selectOption(stepName, key) {
+  const meta = STEP_META[stepName];
+  if (meta.multi) {
+    const arr = setup[stepName];
+    const idx = arr.indexOf(key);
+    if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+    if (stepName === 'topic') arr.sort((a, b) => TOPIC_ORDER.indexOf(a) - TOPIC_ORDER.indexOf(b));
+  } else {
+    setup[stepName] = key;
+  }
+  renderWizard();
+}
+
+function stepContinue() {
+  const steps = activeSteps();
+  const stepName = steps[stepIndex];
+  if (!isStepValid(stepName)) return;
+  stepIndex++; // may reach steps.length, which renderWizard treats as the review screen
+  renderWizard();
+}
+function stepBack() {
+  if (stepIndex > 0) { stepIndex--; renderWizard(); }
+}
+
+function optLabel(stepName, key) {
+  if (stepName === 'topic') return TOPIC_CONFIG[key].label;
+  const opt = STEP_META[stepName].options.find(o => o.key === key);
+  return opt ? opt.title : key;
+}
+
+function renderWizard() {
+  const steps = activeSteps();
+  const body = document.getElementById('wiz-body');
+  const dotsEl = document.getElementById('wiz-dots');
+  const crumbEl = document.getElementById('wiz-crumb');
+  const backBtn = document.getElementById('wiz-back');
+  const continueBtn = document.getElementById('wiz-continue');
+  const reviewBlock = document.getElementById('review-block');
+
+  const atReview = stepIndex >= steps.length;
+
+  dotsEl.innerHTML = steps.map((s, i) => {
+    let cls = 'wiz-dot';
+    if (i < stepIndex || atReview) cls += ' done';
+    else if (i === stepIndex) cls += ' current';
+    return `<span class="${cls}"></span>`;
+  }).join('') + `<span class="wiz-dot${atReview ? ' current' : ''}"></span>`;
+
+  if (atReview) {
+    crumbEl.textContent = 'Review your setup';
+    body.innerHTML = '';
+    backBtn.classList.remove('hidden');
+    continueBtn.classList.add('hidden');
+    reviewBlock.classList.remove('hidden');
+    const rows = [
+      ['Topics', setup.topic.map(k => `${TOPIC_ORDER.indexOf(k) + 1}. ${optLabel('topic', k)}`).join('<br>')],
+      ['Answer Method', optLabel('answer', setup.answer)],
+      ['Timer', optLabel('timer', setup.timer)],
+    ];
+    document.getElementById('wiz-review').innerHTML = rows.map(([label, value]) =>
+      `<div class="review-row"><span class="rlabel">${label}</span><span class="rvalue">${value}</span></div>`
+    ).join('');
+    return;
+  }
+
+  reviewBlock.classList.add('hidden');
+  const stepName = steps[stepIndex];
+  const meta = STEP_META[stepName];
+  crumbEl.textContent = `Step ${stepIndex + 1} of ${steps.length}: ${meta.title}`;
+
+  const isSel = (key) => meta.multi ? setup[stepName].includes(key) : setup[stepName] === key;
+  const gridClass = meta.options.length <= 2 || stepName === 'answer' || stepName === 'topic' ? 'opt-grid single' : 'opt-grid';
+  body.innerHTML = `
+    <div class="setup-sec">
+      <div class="setup-label"><span class="step-num">${stepIndex + 1}</span>${meta.title}</div>
+      <div class="${gridClass}">
+        ${stepName === 'topic' ? meta.options.map(o => {
+          const on = isSel(o.key);
+          const n = TOPIC_ORDER.indexOf(o.key) + 1;
+          return `
+          <div class="tog-row${on ? ' on' : ''}" role="switch" aria-checked="${on}" tabindex="0" onclick="selectOption('topic','${o.key}')" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();selectOption('topic','${o.key}')}">
+            <span class="tog-num">${n}.</span>
+            <div class="tog-text"><div class="opt-title">${o.title}</div></div>
+          </div>`;
+        }).join('') : meta.options.map(o => {
+          const selected = isSel(o.key);
+          const orderNum = (stepName === 'topic' && selected) ? setup.topic.indexOf(o.key) + 1 : null;
+          return `
+          <div class="opt-card${selected ? ' sel' : ''}" onclick="selectOption('${stepName}','${o.key}')">
+            ${orderNum ? `<span class="opt-badge">${orderNum}</span>` : ''}
+            <div class="opt-title">${orderNum ? `<span class="opt-num">${orderNum}.</span> ` : ''}${o.title}</div>
+            <div class="opt-desc">${o.desc}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="setup-note">${meta.multi ? 'Select one or more. Questions go through your chosen topics in number order.' : ''}</div>
+    </div>
+  `;
+
+  backBtn.classList.toggle('hidden', stepIndex === 0);
+  continueBtn.classList.remove('hidden');
+  continueBtn.disabled = !isStepValid(stepName);
+}
+
+// ---------------- Quiz state & flow ----------------
+let sessionStats = { total: 0, correct: 0, bestStreak: 0, streak: 0 };
+let timerHandle = null;
+let timeRemaining = 0;
+let currentQ = null;
+let answered = false;
+let frozenSetup = null;
+
+function clearTimerIfRunning() {
+  if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+}
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
+function tickTimer() {
+  timeRemaining--;
+  document.getElementById('stat-timer').textContent = formatTime(Math.max(0, timeRemaining));
+  if (timeRemaining <= 0) { clearTimerIfRunning(); endQuiz(true); }
+}
+
+function setupSummaryText() {
+  const topicNames = frozenSetup.topic.map(k => `${TOPIC_ORDER.indexOf(k) + 1}. ${TOPIC_CONFIG[k].label}`).join(', ');
+  return `${topicNames}<br>${optLabel('answer', frozenSetup.answer)}`;
+}
+
+// ---- Adaptive difficulty ----
+// Every topic has its own level, 0 (easiest) to 3 (hardest), following the
+// worksheet's order. Three correct answers in a row on a topic move it up one
+// level; a wrong answer moves it back down one, so a student who keeps
+// missing easier questions stays at the easier level.
+const MAX_LEVEL = 3;
+const LEVEL_UP_STREAK = 3;
+let topicLevels = {};
+let topicStreaks = {};
+let currentTopicKey = null;
+let currentLevel = 0;   // level of the topic just asked
+function levelFor(topicKey) { return topicLevels[topicKey] || 0; }
+function adjustLevelAfterAnswer(ok) {
+  const k = currentTopicKey;
+  if (!k) return;
+  let lvl = levelFor(k), st = topicStreaks[k] || 0;
+  if (ok) {
+    st++;
+    if (st >= LEVEL_UP_STREAK) { lvl = Math.min(lvl + 1, MAX_LEVEL); st = 0; }
+  } else {
+    lvl = Math.max(lvl - 1, 0); st = 0;
+  }
+  topicLevels[k] = lvl; topicStreaks[k] = st; currentLevel = lvl;
+}
+
+// ---- Topic rotation ----
+// Questions cycle through the selected topics in the order they were
+// selected (topic "1" asked first), looping back to the start.
+let topicRotationIndex = 0;
+function nextTopicForQuestion() {
+  const t = frozenSetup.topic;
+  const topic = t[topicRotationIndex % t.length];
+  topicRotationIndex++;
+  return topic;
+}
+
+function startQuiz() {
+  cancelAutoAdvance();
+  frozenSetup = JSON.parse(JSON.stringify(setup));
+  sessionStats = { total: 0, correct: 0, bestStreak: 0, streak: 0 };
+  currentLevel = 0;
+  topicLevels = {}; topicStreaks = {}; currentTopicKey = null;
+  topicRotationIndex = 0;
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('quiz-screen').classList.remove('hidden');
+  document.getElementById('setup-summary').innerHTML = setupSummaryText();
+
+  const timerStatWrap = document.getElementById('stat-timer-wrap');
+  clearTimerIfRunning();
+  const secs = TIMER_SECONDS[frozenSetup.timer];
+  if (secs) {
+    timeRemaining = secs;
+    timerStatWrap.classList.remove('hidden');
+    document.getElementById('stat-timer').textContent = formatTime(timeRemaining);
+    timerHandle = setInterval(tickTimer, 1000);
+  } else {
+    timerStatWrap.classList.add('hidden');
+  }
+  document.getElementById('stat-streak-wrap').classList.remove('hidden');
+  document.getElementById('stat-streak').textContent = '0';
+
+  nextQuestion();
+}
+
+function nextQuestion() {
+  cancelAutoAdvance();
+  answered = false;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+
+  const topicKey = nextTopicForQuestion();
+  currentTopicKey = topicKey;
+  currentLevel = levelFor(topicKey);
+  currentQ = generateQuestion(topicKey, currentLevel);
+
+  document.getElementById('q-topic-label').textContent = currentQ.topicLabel;
+
+  const contextEl = document.getElementById('q-context');
+  if (currentQ.context) { contextEl.innerHTML = currentQ.context; contextEl.classList.remove('hidden'); }
+  else contextEl.classList.add('hidden');
+
+  const formulaEl = document.getElementById('q-formula');
+  if (currentQ.formula) { formulaEl.innerHTML = currentQ.formula; formulaEl.classList.remove('hidden'); }
+  else formulaEl.classList.add('hidden');
+
+  document.getElementById('q-prompt').textContent = currentQ.promptText;
+
+  const exprEl = document.getElementById('q-expr');
+  const wordsEl = document.getElementById('q-words');
+  if (currentQ.topicLabel === 'Words to Expressions') {
+    wordsEl.innerHTML = currentQ.bodyHtml;
+    wordsEl.classList.remove('hidden');
+    exprEl.classList.add('hidden');
+  } else if (currentQ.bodyHtml) {
+    exprEl.innerHTML = currentQ.bodyHtml;
+    exprEl.classList.remove('hidden');
+    wordsEl.classList.add('hidden');
+  } else {
+    exprEl.classList.add('hidden');
+    wordsEl.classList.add('hidden');
+  }
+
+  renderAnswerArea();
+}
+
+function renderAnswerArea() {
+  const choiceGrid = document.getElementById('choice-grid');
+  const typeRow = document.getElementById('type-row');
+  const typeHint = document.getElementById('type-hint');
+  const typeInput = document.getElementById('type-input');
+
+  if (frozenSetup.answer === 'mc') {
+    typeRow.classList.add('hidden');
+    typeHint.classList.add('hidden');
+    choiceGrid.classList.remove('hidden');
+    choiceGrid.innerHTML = currentQ.choices.map((c, i) =>
+      `<button class="choice-btn" id="choice-${i}" onclick="submitChoice(${i})">${c.html}</button>`
+    ).join('');
+  } else {
+    choiceGrid.classList.add('hidden');
+    choiceGrid.innerHTML = '';
+    typeRow.classList.remove('hidden');
+    typeHint.classList.remove('hidden');
+    typeInput.value = '';
+    typeInput.disabled = false;
+    document.getElementById('type-submit').disabled = false;
+    setTimeout(() => typeInput.focus(), 0);
+  }
+}
+
+function registerResult(ok) {
+  sessionStats.total++;
+  if (ok) {
+    sessionStats.correct++;
+    sessionStats.streak++;
+    sessionStats.bestStreak = Math.max(sessionStats.bestStreak, sessionStats.streak);
+  } else {
+    sessionStats.streak = 0;
+  }
+  document.getElementById('stat-streak').textContent = String(sessionStats.streak);
+  adjustLevelAfterAnswer(ok);
+}
+
+// A correct answer moves straight on to the next question after a short pause
+// (so the green "Correct!" can be seen); a wrong answer waits for the student
+// to read the worked solution and press Next.
+const AUTO_ADVANCE_MS = 800;
+let autoAdvanceHandle = null;
+function cancelAutoAdvance() { if (autoAdvanceHandle) { clearTimeout(autoAdvanceHandle); autoAdvanceHandle = null; } }
+
+function showFeedback(ok) {
+  const fb = document.getElementById('feedback');
+  const banner = document.getElementById('fb-banner');
+  const answerEl = document.getElementById('fb-answer');
+  const stepsEl = document.getElementById('fb-steps');
+  fb.style.display = 'block';
+  banner.className = 'fb-banner ' + (ok ? 'ok' : 'err');
+  banner.textContent = ok ? 'Correct!' : 'Not quite.';
+  answerEl.innerHTML = 'Correct answer: ' + currentQ.correct.display;
+  if (!ok && currentQ.steps && currentQ.steps.length) {
+    stepsEl.innerHTML = '<div class="fb-steps-title">Worked solution:</div>' +
+      '<ol class="fb-steps-list">' + currentQ.steps.map(s => `<li>${s}</li>`).join('') + '</ol>';
+    stepsEl.classList.remove('hidden');
+  } else {
+    stepsEl.classList.add('hidden');
+    stepsEl.innerHTML = '';
+  }
+  if (ok) {
+    document.getElementById('next-btn').style.display = 'none';
+    answerEl.innerHTML = '';
+    cancelAutoAdvance();
+    autoAdvanceHandle = setTimeout(() => {
+      autoAdvanceHandle = null;
+      if (answered && !document.getElementById('quiz-screen').classList.contains('hidden')) nextQuestion();
+    }, AUTO_ADVANCE_MS);
+  } else {
+    document.getElementById('next-btn').style.display = 'block';
+  }
+}
+
+function submitChoice(i) {
+  if (answered) return;
+  answered = true;
+  const ok = currentQ.choices[i].correct;
+  currentQ.choices.forEach((c, idx) => {
+    const btn = document.getElementById('choice-' + idx);
+    btn.disabled = true;
+    if (c.correct) btn.classList.add('ok');
+    else if (idx === i) btn.classList.add('bad');
+  });
+  registerResult(ok);
+  showFeedback(ok);
+}
+
+function submitTyped() {
+  if (answered) return;
+  const input = document.getElementById('type-input');
+  const val = input.value;
+  if (!val.trim()) return;
+  answered = true;
+  input.disabled = true;
+  document.getElementById('type-submit').disabled = true;
+  const ok = checkTypedAnswer(val, currentQ);
+  registerResult(ok);
+  showFeedback(ok);
+}
+
+document.getElementById('type-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') submitTyped();
+});
+
+function endQuiz(timeUp) {
+  cancelAutoAdvance();
+  clearTimerIfRunning();
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('results-screen').classList.remove('hidden');
+  document.getElementById('results-title').textContent = timeUp ? "Time's Up!" : 'Quiz Complete!';
+  document.getElementById('results-sub').innerHTML = setupSummaryText().replace(/<br>/g, ' &middot; ');
+  const total = sessionStats.total;
+  const correct = sessionStats.correct;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('res-score').textContent = `${correct} / ${total} (${accuracy}%)`;
+  document.getElementById('res-beststreak').textContent = String(sessionStats.bestStreak);
+}
+
+function restartSameSetup() {
+  startQuiz();
+}
+
+function goToSetupFromResults() {
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  stepIndex = 0;
+  renderWizard();
+}
+function goToSetupFromQuiz() {
+  cancelAutoAdvance();
+  clearTimerIfRunning();
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  stepIndex = 0;
+  renderWizard();
+}
+
+// Introspection helper (used by the automated test harness; harmless to ship).
+function __testState() {
+  return { setup, stepIndex, frozenSetup, sessionStats, timeRemaining, timerHandle, currentQ, answered, currentLevel, topicLevels, topicRotationIndex };
+}
+
+renderWizard();
+</script>
+</body>
+</html>

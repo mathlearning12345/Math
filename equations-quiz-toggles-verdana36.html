@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Equations Quiz (Verdana 36pt)</title>
+<style>
+:root{
+  --bg:#f7f6fa;--card:#ffffff;--card2:#f7f5fb;--border:#e4e1ec;
+  --accent:#6d5ef5;--accent-hover:#5a4bdc;--accent-soft:#efecfd;
+  --green:#2e9e5e;--green-bg:#edfaf3;--green-border:#a8e4c0;
+  --red:#d94f4f;--red-bg:#fdf0f0;--red-border:#f0b0b0;
+  --text:#1c1a22;--muted:#8a8594;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Verdana,Geneva,sans-serif;
+  min-height:100vh;display:flex;justify-content:center;padding:16px 12px 60px;}
+.app{width:100%;max-width:1100px;}
+.hidden{display:none !important;}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:14px 0 12px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.hdr h1{font-size:1rem;font-weight:700;letter-spacing:-0.01em;}
+.stats{display:flex;gap:10px;font-size:1rem;color:var(--muted);}
+.stat strong{color:var(--text);font-weight:700;}
+
+/* ── SETUP WIZARD ─────────────────────────── */
+.wiz-dots{display:flex;justify-content:center;gap:6px;margin-bottom:14px;}
+.wiz-dot{width:7px;height:7px;border-radius:50%;background:#e4e1ec;transition:background .15s;}
+.wiz-dot.done{background:var(--accent);}
+.wiz-dot.current{background:var(--accent);width:18px;border-radius:4px;}
+.wiz-crumb{font-size:1rem;color:var(--muted);text-align:center;margin-bottom:18px;line-height:1.5;min-height:1.1em;}
+.setup-sec{margin-bottom:20px;}
+.setup-label{font-size:1rem;font-weight:700;color:#999;letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.step-num{display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;background:#ece9f3;color:#7a7488;
+  font-size:1rem;font-weight:700;letter-spacing:0;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.opt-grid.single{grid-template-columns:1fr;}
+.opt-card{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:11px 12px;cursor:pointer;transition:border-color .12s,background .12s;user-select:none;
+  position:relative;}
+.opt-card:hover{border-color:#cfc9df;}
+.opt-card.sel{border-color:var(--accent);background:var(--accent-soft);}
+.opt-badge{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:1rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.opt-title{font-size:1rem;font-weight:700;margin-bottom:2px;}
+.opt-card.sel .opt-title{color:var(--accent-hover);}
+
+.tog-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;user-select:none;}
+.tog-row.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent) inset;}
+.tog-num{width:1.4em;font-weight:800;color:var(--accent);font-size:1rem;text-align:right;flex:none;}
+.tog-text{flex:1;min-width:0;}
+.tog-switch{flex:none;width:40px;height:24px;border-radius:12px;background:#cfc9df;position:relative;transition:background .15s;}
+.tog-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s;}
+.tog-row.on .tog-switch{background:var(--accent);}
+.tog-row.on .tog-knob{transform:translateX(16px);}
+.opt-num{color:var(--accent);font-weight:800;}
+.opt-desc{font-size:1rem;color:var(--muted);line-height:1.35;}
+.setup-note{font-size:1rem;color:var(--muted);font-style:italic;margin-top:6px;min-height:1px;}
+.wiz-foot{display:flex;flex-direction:column;gap:10px;}
+.wiz-nav-row{display:flex;gap:8px;align-items:center;}
+.back-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);
+  font-size:1rem;font-weight:700;padding:12px 16px;cursor:pointer;}
+.back-btn:hover{border-color:#cfc9df;color:var(--text);}
+.continue-btn{flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px;font-size:1rem;font-weight:700;cursor:pointer;}
+.continue-btn:hover{background:var(--accent-hover);}
+.continue-btn:disabled{background:#cfc9df;cursor:default;}
+.wiz-review{margin-bottom:4px;}
+.review-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border);font-size:1rem;}
+.review-row:last-child{border-bottom:none;}
+.review-row .rlabel{color:var(--muted);font-size:1rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.review-row .rvalue{font-weight:700;text-align:right;}
+.start-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:1rem;font-weight:700;cursor:pointer;}
+.start-btn:hover{background:var(--accent-hover);}
+
+/* ── QUIZ SCREEN ──────────────────────────── */
+.quiz-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;}
+.quiz-bar-btns{display:flex;gap:6px;}
+.setup-summary{font-size:1rem;color:var(--muted);line-height:1.4;}
+.change-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);
+  font-size:1rem;font-weight:700;padding:6px 10px;cursor:pointer;white-space:nowrap;}
+.change-btn:hover{border-color:#cfc9df;color:var(--text);}
+
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:18px 16px;margin-bottom:14px;}
+.topic-label{font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:.05em;
+  text-transform:uppercase;margin-bottom:10px;}
+.context-wrap{background:var(--card2);border-left:3px solid var(--accent);border-radius:6px;
+  padding:10px 12px;margin-bottom:10px;font-size:1rem;line-height:1.5;color:var(--text);}
+.formula-wrap{font-size:1rem;font-weight:700;margin-bottom:10px;text-align:center;}
+.prompt{font-size:1rem;font-weight:600;text-align:center;line-height:1.4;margin-bottom:12px;}
+.expr-display{font-size:1rem;font-weight:700;text-align:center;line-height:1.6;
+  font-family:Verdana,Geneva,sans-serif;letter-spacing:.01em;padding:6px 4px;word-break:break-word;}
+.expr-display i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.words-display{font-size:1rem;font-weight:600;text-align:center;line-height:1.5;font-style:italic;}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  margin:0 .18em;font-size:.82em;line-height:1.15;position:relative;top:.08em;}
+.frac .fnum{border-bottom:1.6px solid currentColor;padding:0 .3em .1em;}
+.frac .fden{padding:.1em .3em 0;}
+.sqin{border-top:1.6px solid currentColor;padding:1px .15em 0;display:inline-block;}
+
+#answer-area{margin-bottom:14px;}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.choice-btn{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:13px 8px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;
+  font-family:Verdana,Geneva,sans-serif;}
+.choice-btn i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.choice-btn:hover{border-color:#cfc9df;}
+.choice-btn:disabled{cursor:default;}
+.choice-btn.ok{border-color:var(--green-border);background:var(--green-bg);color:var(--green);}
+.choice-btn.bad{border-color:var(--red-border);background:var(--red-bg);color:var(--red);}
+
+.type-row{display:flex;gap:8px;}
+.type-row input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:12px;
+  font-size:1rem;font-family:Verdana,Geneva,sans-serif;}
+.type-row input:focus{outline:none;border-color:var(--accent);}
+.type-hint{font-size:1rem;color:var(--muted);margin-top:6px;}
+.submit-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px 18px;font-size:1rem;font-weight:700;cursor:pointer;}
+.submit-btn:disabled{background:#cfc9df;cursor:default;}
+
+.feedback{display:none;background:var(--card2);border:1px solid var(--border);
+  border-radius:12px;padding:14px;margin-bottom:14px;}
+.fb-banner{font-size:1rem;font-weight:700;margin-bottom:6px;}
+.fb-banner.ok{color:var(--green);}
+.fb-banner.err{color:var(--red);}
+.fb-answer{font-size:1rem;font-weight:600;font-family:Verdana,Geneva,sans-serif;}
+.fb-answer i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.fb-steps-title{font-size:1rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:6px;}
+.fb-steps-list{padding-left:1.2em;}
+.fb-steps-list li{font-size:1rem;line-height:1.55;margin-bottom:4px;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps-list li i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps-list li b{font-weight:700;}
+.next-btn{display:none;width:100%;background:var(--text);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:1rem;font-weight:700;cursor:pointer;}
+.next-btn:hover{opacity:.9;}
+
+/* ── RESULTS SCREEN ───────────────────────── */
+.results-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:22px 18px;text-align:center;}
+.results-title{font-size:1rem;font-weight:800;margin-bottom:4px;}
+.results-sub{font-size:1rem;color:var(--muted);margin-bottom:18px;}
+.results-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:11px 0;border-bottom:1px solid var(--border);font-size:1rem;text-align:left;}
+.results-row:last-child{border-bottom:none;}
+.results-btns{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+.results-btns .start-btn{margin:0;}
+.results-secondary{background:none;border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:1rem;font-weight:700;padding:13px;cursor:pointer;}
+.results-secondary:hover{border-color:#cfc9df;}
+
+/* ---- Verdana 36pt version (36pt = 48px) ---- */
+html{font-size:36pt;}
+body,button,input,textarea{font-family:Verdana,Geneva,sans-serif;font-size:36pt;}
+.expr-display,.choice-btn,.fb-answer,.fb-steps-list li{font-family:Verdana,Geneva,sans-serif;}
+.expr-display i,.choice-btn i,.fb-answer i,.fb-steps-list li i{font-family:Verdana,Geneva,sans-serif;}
+.app{max-width:1600px;}
+body{padding:24px 28px 80px;}
+.step-num{width:1.5em;height:1.5em;font-size:.6em;}
+.opt-badge{width:1.4em;height:1.4em;top:-.35em;right:-.35em;font-size:.6em;}
+.wiz-dot{width:18px;height:18px;}.wiz-dot.current{width:48px;}
+.tog-switch{width:110px;height:64px;border-radius:32px;}
+.tog-knob{width:54px;height:54px;top:5px;left:5px;}
+.tog-row.on .tog-knob{transform:translateX(46px);}
+.tog-row{gap:24px;padding:20px 26px;}
+.tog-num{width:1.6em;color:#9a96a6;}
+.tog-row.on .tog-num{color:var(--accent);}
+.opt-card{padding:20px 24px;}
+.opt-grid{gap:18px;}
+.fb-steps-list li{line-height:1.5;}
+.choice-btn{padding:20px 28px;min-width:340px;}
+/* keep the answer buttons close together: shrink the grid to the buttons and centre it */
+.choice-grid{width:max-content;max-width:100%;margin:0 auto;gap:14px;}
+input[type=text],#type-input{padding:16px 20px;}
+.next-btn,#next-btn,#wiz-continue,#wiz-back{padding:18px 26px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <h1>Equations</h1>
+    <div class="stats">
+      <span class="stat hidden" id="stat-timer-wrap">&#9201;&nbsp;<strong id="stat-timer">0:00</strong></span>
+      <span class="stat hidden" id="stat-streak-wrap">&#9733;&nbsp;<strong id="stat-streak">0</strong></span>
+    </div>
+  </div>
+
+  <!-- ===================== SETUP SCREEN ===================== -->
+  <div id="setup-screen">
+    <div class="wiz-dots" id="wiz-dots"></div>
+    <div class="wiz-crumb" id="wiz-crumb"></div>
+
+    <div id="wiz-body"></div>
+
+    <div class="wiz-foot">
+      <div class="wiz-nav-row">
+        <button class="back-btn hidden" id="wiz-back" onclick="stepBack()">&larr; Back</button>
+        <button class="continue-btn hidden" id="wiz-continue" onclick="stepContinue()">Continue &rarr;</button>
+      </div>
+      <div id="review-block" class="hidden">
+        <div class="wiz-review" id="wiz-review"></div>
+        <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== QUIZ SCREEN ===================== -->
+  <div id="quiz-screen" class="hidden">
+    <div class="quiz-bar">
+      <div class="setup-summary" id="setup-summary"></div>
+      <div class="quiz-bar-btns">
+        <button class="change-btn" onclick="goToSetupFromQuiz()">Change</button>
+        <button class="change-btn" onclick="endQuiz(false)">Finish</button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="topic-label" id="q-topic-label"></div>
+      <div class="context-wrap hidden" id="q-context"></div>
+      <div class="formula-wrap hidden" id="q-formula"></div>
+      <div class="prompt" id="q-prompt"></div>
+      <div class="expr-display hidden" id="q-expr"></div>
+      <div class="words-display hidden" id="q-words"></div>
+    </div>
+
+    <div id="answer-area">
+      <div class="choice-grid hidden" id="choice-grid"></div>
+      <div class="type-row hidden" id="type-row">
+        <input type="text" id="type-input" placeholder="Type your answer" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="submit-btn" id="type-submit" onclick="submitTyped()">Check</button>
+      </div>
+      <div class="type-hint hidden" id="type-hint">e.g. 7 (for two answers: 5, -5)</div>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <div class="fb-banner" id="fb-banner"></div>
+      <div class="fb-answer" id="fb-answer"></div>
+      <div class="fb-steps hidden" id="fb-steps"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question &rarr;</button>
+  </div>
+
+  <!-- ===================== RESULTS SCREEN ===================== -->
+  <div id="results-screen" class="hidden">
+    <div class="results-card">
+      <div class="results-title" id="results-title">Quiz Complete!</div>
+      <div class="results-sub" id="results-sub"></div>
+      <div class="results-row"><span class="rlabel">Score</span><span class="rvalue" id="res-score"></span></div>
+      <div class="results-row"><span class="rlabel">Best Streak</span><span class="rvalue" id="res-beststreak"></span></div>
+      <div class="results-btns">
+        <button class="start-btn" onclick="restartSameSetup()">Play Again</button>
+        <button class="results-secondary" onclick="goToSetupFromResults()">Change Setup</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =========================================================================
+// PURE LOGIC (expression engine, term builders, topic generators,
+// distractor generation) — tested independently via node before being
+// embedded here. See merged_logic.js / test_*.js in the build workspace.
+// =========================================================================
+</script>
+<script>
+// =========================================================================
+// Equations quiz logic: 6 topics x 4 difficulty levels.
+// Every answer is a whole number (quadratics: a pair of whole numbers +/-).
+// Each generator builds the equation from a chosen answer, so the answer is
+// known exactly and the worked steps are written from the same numbers.
+// =========================================================================
+
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randChoice(arr) { return arr[randInt(0, arr.length - 1)]; }
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = randInt(0, i); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+const MAX_APP_LEVEL = 3;
+function clampLevel(level) { return Math.max(0, Math.min(MAX_APP_LEVEL, Math.floor(level) || 0)); }
+
+const VAR_POOL = ['x', 'y', 'a', 'b', 'm', 'n', 'p', 't', 'w', 'k'];
+const MINUS = '&minus;', TIMES = '&times;', DIV = '&divide;';
+
+// ---------- html helpers ----------
+const V = (v) => `<i>${v}</i>`;
+const cv = (c, v) => (c === 1 ? V(v) : `${c}${V(v)}`);                 // coefficient + variable
+const frac = (n, d) => `<span class="frac"><span class="fnum">${n}</span><span class="fden">${d}</span></span>`;
+const eq = (l, r) => `${l} = ${r}`;
+const plus = (a, b) => `${a} + ${b}`;
+const minus = (a, b) => `${a} ${MINUS} ${b}`;
+const solved = (v, n) => `${V(v)} = ${n}`;
+const sq = (v) => `${V(v)}<sup>2</sup>`;
+
+// ---------- distractors ----------
+// Numeric answers: use the "typical mistake" candidates first, then pad with near misses.
+function numericWrongs(ans, candidates) {
+  const out = [];
+  const ok = (n) => Number.isInteger(n) && n > 0 && n !== ans && !out.includes(n);
+  shuffle(candidates || []).forEach(n => { if (out.length < 3 && ok(n)) out.push(n); });
+  const pad = shuffle([ans + 1, ans - 1, ans + 2, ans - 2, ans * 2, ans + 3, ans + 5, ans - 3, ans + 10]);
+  pad.forEach(n => { if (out.length < 3 && ok(n)) out.push(n); });
+  let extra = ans + 4;
+  while (out.length < 3) { if (ok(extra)) out.push(extra); extra++; }
+  return out;
+}
+
+// ---------- question shell ----------
+function finishNumeric(topicLabel, g) {
+  const disp = solved(g.v, g.answer);
+  return {
+    topicLabel, promptText: g.prompt, bodyHtml: g.body || '',
+    context: g.context || '', formula: g.formula || '',
+    answerKind: 'numeric',
+    correct: { display: disp, checkStr: String(g.answer), numeric: g.answer },
+    distractorsHtml: numericWrongs(g.answer, g.wrong).map(n => solved(g.v, n)),
+    steps: g.steps,
+  };
+}
+
+// =========================================================================
+// 1. One-step equations
+// =========================================================================
+function genOneStep(level) {
+  const v = randChoice(VAR_POOL);
+  // level 0: x + a = b, x - a = b | 1: ax = b | 2: x/a = b | 3: any of them with the unknown on the right
+  const kinds = { 0: ['add', 'sub'], 1: ['mul'], 2: ['div'], 3: ['add', 'sub', 'mul', 'div'] };
+  const kind = randChoice(kinds[level]);
+  const flip = level === 3;
+  let ans, a, left, right, steps, wrong, how;
+  if (kind === 'add') {            // v + a = b
+    a = randInt(2, level === 3 ? 20 : 12); ans = randInt(2, level === 3 ? 25 : 15);
+    const b = ans + a;
+    left = plus(V(v), a); right = String(b);
+    how = `To get ${V(v)} on its own, subtract ${a} from both sides.`;
+    steps = [how, `${V(v)} = ${b} ${MINUS} ${a} = ${ans}`];
+    wrong = [b + a, a - b, b];
+  } else if (kind === 'sub') {     // v - a = b
+    a = randInt(2, level === 3 ? 20 : 12); ans = randInt(a + 1, a + (level === 3 ? 25 : 15));
+    const b = ans - a;
+    left = minus(V(v), a); right = String(b);
+    how = `To get ${V(v)} on its own, add ${a} to both sides.`;
+    steps = [how, `${V(v)} = ${b} + ${a} = ${ans}`];
+    wrong = [b - a > 0 ? b - a : 0, a - b, b];
+  } else if (kind === 'mul') {     // a v = b
+    a = randInt(2, level === 3 ? 12 : 9); ans = randInt(2, level === 3 ? 12 : 10);
+    const b = a * ans;
+    left = cv(a, v); right = String(b);
+    how = `${cv(a, v)} means ${a} ${TIMES} ${V(v)}, so divide both sides by ${a}.`;
+    steps = [how, `${V(v)} = ${b} ${DIV} ${a} = ${ans}`];
+    wrong = [b - a, b + a, a];
+  } else {                         // v / a = b
+    a = randInt(2, level === 3 ? 10 : 8); const b = randInt(2, level === 3 ? 12 : 10);
+    ans = a * b;
+    left = frac(V(v), a); right = String(b);
+    how = `${V(v)} is divided by ${a}, so multiply both sides by ${a}.`;
+    steps = [how, `${V(v)} = ${b} ${TIMES} ${a} = ${ans}`];
+    wrong = [b + a, b - a, Math.round(b / a) || 1];
+  }
+  const body = flip ? eq(right, left) : eq(left, right);
+  if (flip) steps.unshift(`The equation can be read either way round, so work on the side with ${V(v)} in it.`);
+  return finishNumeric('One-Step Equations', { v, answer: ans, prompt: `Solve for ${v}:`, body, steps, wrong });
+}
+
+// =========================================================================
+// 2. Two-step equations: remove the constant first
+// =========================================================================
+function genTwoStepConst(level) {
+  const v = randChoice(VAR_POOL);
+  const big = level === 3;
+  const a = randInt(2, big ? 9 : 5);
+  const ans = randInt(2, big ? 12 : 9);
+  const b = randInt(1, big ? 30 : 12);
+  const isPlus = level === 0 ? true : (level === 1 ? false : randChoice([true, false]));
+  const flip = level >= 2;                         // level 2 and 3 sometimes written the other way round
+  const ax = a * ans;
+  const c = isPlus ? ax + b : ax - b;
+  if (c <= 0) return genTwoStepConst(level);
+  const lhs = isPlus ? plus(cv(a, v), b) : minus(cv(a, v), b);
+  const useFlip = flip && Math.random() < 0.5;
+  const body = useFlip ? eq(String(c), lhs) : eq(lhs, String(c));
+  const steps = isPlus
+    ? [`Remove the constant first: subtract ${b} from both sides.`, `${cv(a, v)} = ${c} ${MINUS} ${b} = ${ax}`,
+       `Now divide both sides by ${a}.`, `${V(v)} = ${ax} ${DIV} ${a} = ${ans}`]
+    : [`Remove the constant first: add ${b} to both sides.`, `${cv(a, v)} = ${c} + ${b} = ${ax}`,
+       `Now divide both sides by ${a}.`, `${V(v)} = ${ax} ${DIV} ${a} = ${ans}`];
+  const wrong = isPlus
+    ? [Math.round((c + b) / a), c - b, (c - b) / a + b, ans + b]
+    : [Math.round((c - b) / a), c + b, (c + b) / a + b, ans - 1];
+  return finishNumeric('Two-Step Equations (constant first)', { v, answer: ans, prompt: `Solve for ${v}:`, body, steps, wrong });
+}
+
+// =========================================================================
+// 3. Pronumerals on both sides
+// =========================================================================
+function genBothSides(level) {
+  const v = randChoice(VAR_POOL);
+  let a, c, b, d, ans, body, steps, wrong;
+  if (level === 0) {                               // ax = cx + d
+    c = randInt(1, 3); a = c + randInt(2, 4); ans = randInt(2, 9); d = (a - c) * ans;
+    body = eq(cv(a, v), plus(cv(c, v), d));
+    steps = [`Collect the ${V(v)} terms on one side: subtract ${cv(c, v)} from both sides.`,
+      `${cv(a - c, v)} = ${d}`, `Divide both sides by ${a - c}.`, `${V(v)} = ${d} ${DIV} ${a - c} = ${ans}`];
+    wrong = [Math.round(d / (a + c)), d, d - (a - c), ans + c];
+  } else if (level === 1) {                        // ax + b = cx + d
+    c = randInt(1, 3); a = c + randInt(2, 4); ans = randInt(2, 9); b = randInt(1, 12); d = b + (a - c) * ans;
+    body = eq(plus(cv(a, v), b), plus(cv(c, v), d));
+    steps = [`Subtract ${cv(c, v)} from both sides so the ${V(v)} terms are together.`, `${plus(cv(a - c, v), b)} = ${d}`,
+      `Subtract ${b} from both sides.`, `${cv(a - c, v)} = ${d} ${MINUS} ${b} = ${d - b}`,
+      `Divide both sides by ${a - c}.`, `${V(v)} = ${d - b} ${DIV} ${a - c} = ${ans}`];
+    wrong = [Math.round((d + b) / (a - c)), Math.round((d - b) / (a + c)), d - b, ans + 1];
+  } else if (level === 2) {                        // ax - b = cx + d
+    c = randInt(1, 3); a = c + randInt(2, 4); ans = randInt(2, 9); b = randInt(1, 10); d = (a - c) * ans - b;
+    if (d <= 0) return genBothSides(level);
+    body = eq(minus(cv(a, v), b), plus(cv(c, v), d));
+    steps = [`Subtract ${cv(c, v)} from both sides so the ${V(v)} terms are together.`, `${minus(cv(a - c, v), b)} = ${d}`,
+      `Add ${b} to both sides.`, `${cv(a - c, v)} = ${d} + ${b} = ${d + b}`,
+      `Divide both sides by ${a - c}.`, `${V(v)} = ${d + b} ${DIV} ${a - c} = ${ans}`];
+    wrong = [Math.round((d - b) / (a - c)), Math.round((d + b) / (a + c)), d + b, ans + 1];
+  } else {                                         // ax + b = cx - d  (the larger x-term is on the right)
+    a = randInt(1, 3); c = a + randInt(2, 4); ans = randInt(2, 9); d = randInt(1, 10); b = (c - a) * ans - d;
+    if (b <= 0) return genBothSides(level);
+    body = eq(plus(cv(a, v), b), minus(cv(c, v), d));
+    steps = [`The larger ${V(v)} term is on the right, so subtract ${cv(a, v)} from both sides.`, `${b} = ${minus(cv(c - a, v), d)}`,
+      `Add ${d} to both sides.`, `${b + d} = ${cv(c - a, v)}`,
+      `Divide both sides by ${c - a}.`, `${V(v)} = ${b + d} ${DIV} ${c - a} = ${ans}`];
+    wrong = [Math.round((b - d) / (c - a)), Math.round((b + d) / (c + a)), b + d, ans + 1];
+  }
+  return finishNumeric('Pronumerals on Both Sides', { v, answer: ans, prompt: `Solve for ${v}:`, body, steps, wrong });
+}
+
+// =========================================================================
+// 4. Two-step equations: remove the denominator first, then the constant
+// =========================================================================
+function genTwoStepDenom(level) {
+  const v = randChoice(VAR_POOL);
+  const big = level === 3;
+  const a = randInt(2, big ? 9 : 5);
+  const c = randInt(2, big ? 12 : 8);
+  const isPlus = level === 0 ? true : (level === 1 ? false : randChoice([true, false]));
+  const k = a * c;                                  // numerator value after clearing the denominator
+  const b = randInt(1, Math.max(1, Math.min(big ? 30 : 12, k - 1)));
+  const ans = isPlus ? k - b : k + b;
+  if (ans <= 0) return genTwoStepDenom(level);
+  const num = isPlus ? plus(V(v), b) : minus(V(v), b);
+  const lhs = frac(num, a);
+  const body = (level >= 2 && Math.random() < 0.5) ? eq(String(c), lhs) : eq(lhs, String(c));
+  const steps = [
+    `Remove the denominator first: multiply both sides by ${a}.`,
+    `${num} = ${c} ${TIMES} ${a} = ${k}`,
+    isPlus ? `Now subtract ${b} from both sides.` : `Now add ${b} to both sides.`,
+    isPlus ? `${V(v)} = ${k} ${MINUS} ${b} = ${ans}` : `${V(v)} = ${k} + ${b} = ${ans}`,
+  ];
+  const wrong = isPlus
+    ? [c - b, k + b, Math.round(k / a) - b, c * a]
+    : [c + b, k - b, Math.round(k / a) + b, c * a];
+  return finishNumeric('Two-Step Equations (denominator first)', { v, answer: ans, prompt: `Solve for ${v}:`, body, steps, wrong });
+}
+
+// =========================================================================
+// 5. Formulas (substitute, then solve)
+// =========================================================================
+// Each template: given the chosen values it returns the question pieces.
+const FORMULAS = {
+  // ----- level 0: substitute into the formula, the subject is the unknown -----
+  area: () => { const l = randInt(2, 12), w = randInt(2, 9);
+    return { name: 'Area of a rectangle', formula: `<i>A</i> = <i>lw</i>`, find: 'A', given: `<i>l</i> = ${l} and <i>w</i> = ${w}`,
+      ans: l * w, steps: [`Substitute the values: <i>A</i> = ${l} ${TIMES} ${w}`, `<i>A</i> = ${l * w}`], wrong: [l + w, 2 * (l + w), l * w + l] }; },
+  perim: () => { const l = randInt(3, 15), w = randInt(2, 9);
+    return { name: 'Perimeter of a rectangle', formula: `<i>P</i> = 2<i>l</i> + 2<i>w</i>`, find: 'P', given: `<i>l</i> = ${l} and <i>w</i> = ${w}`,
+      ans: 2 * l + 2 * w, steps: [`Substitute the values: <i>P</i> = 2 ${TIMES} ${l} + 2 ${TIMES} ${w}`, `<i>P</i> = ${2 * l} + ${2 * w} = ${2 * l + 2 * w}`], wrong: [l + w, 2 * l * w, 2 * l + w] }; },
+  dist: () => { const s = randInt(2, 12), t = randInt(2, 9);
+    return { name: 'Distance, speed and time', formula: `<i>d</i> = <i>st</i>`, find: 'd', given: `<i>s</i> = ${s} and <i>t</i> = ${t}`,
+      ans: s * t, steps: [`Substitute the values: <i>d</i> = ${s} ${TIMES} ${t}`, `<i>d</i> = ${s * t}`], wrong: [s + t, s * t + s, s * t - t] }; },
+  vel0: () => { const u = randInt(2, 12), a = randInt(2, 6), t = randInt(2, 6);
+    return { name: 'Final velocity', formula: `<i>v</i> = <i>u</i> + <i>at</i>`, find: 'v', given: `<i>u</i> = ${u}, <i>a</i> = ${a} and <i>t</i> = ${t}`,
+      ans: u + a * t, steps: [`Substitute the values: <i>v</i> = ${u} + ${a} ${TIMES} ${t}`, `Multiply first: <i>v</i> = ${u} + ${a * t} = ${u + a * t}`], wrong: [(u + a) * t, u + a + t, a * t] }; },
+  // ----- level 1: one-step: find a variable that is multiplied -----
+  areaL: () => { const l = randInt(2, 12), w = randInt(2, 9);
+    return { name: 'Area of a rectangle', formula: `<i>A</i> = <i>lw</i>`, find: 'l', given: `<i>A</i> = ${l * w} and <i>w</i> = ${w}`,
+      ans: l, steps: [`Substitute the values: ${l * w} = <i>l</i> ${TIMES} ${w}`, `Divide both sides by ${w}.`, `<i>l</i> = ${l * w} ${DIV} ${w} = ${l}`], wrong: [l * w - w, l * w + w, w] }; },
+  distT: () => { const s = randInt(2, 12), t = randInt(2, 9);
+    return { name: 'Distance, speed and time', formula: `<i>d</i> = <i>st</i>`, find: 't', given: `<i>d</i> = ${s * t} and <i>s</i> = ${s}`,
+      ans: t, steps: [`Substitute the values: ${s * t} = ${s} ${TIMES} <i>t</i>`, `Divide both sides by ${s}.`, `<i>t</i> = ${s * t} ${DIV} ${s} = ${t}`], wrong: [s * t - s, s * t + s, s] }; },
+  vol: () => { const l = randInt(2, 6), w = randInt(2, 5), h = randInt(2, 6);
+    return { name: 'Volume of a box', formula: `<i>V</i> = <i>lwh</i>`, find: 'h', given: `<i>V</i> = ${l * w * h}, <i>l</i> = ${l} and <i>w</i> = ${w}`,
+      ans: h, steps: [`Substitute the values: ${l * w * h} = ${l} ${TIMES} ${w} ${TIMES} <i>h</i>`, `${l} ${TIMES} ${w} = ${l * w}, so ${l * w * h} = ${l * w}<i>h</i>`, `Divide both sides by ${l * w}.`, `<i>h</i> = ${l * w * h} ${DIV} ${l * w} = ${h}`], wrong: [l * w * h - l * w, l + w, l * w] }; },
+  sqP: () => { const s = randInt(2, 15);
+    return { name: 'Perimeter of a square', formula: `<i>P</i> = 4<i>s</i>`, find: 's', given: `<i>P</i> = ${4 * s}`,
+      ans: s, steps: [`Substitute the value: ${4 * s} = 4<i>s</i>`, `Divide both sides by 4.`, `<i>s</i> = ${4 * s} ${DIV} 4 = ${s}`], wrong: [4 * s - 4, s + 4, 4 * s] }; },
+  // ----- level 2: two-step -----
+  perimW: () => { const l = randInt(3, 12), w = randInt(2, l - 1 > 2 ? l - 1 : 3);
+    const P = 2 * l + 2 * w;
+    return { name: 'Perimeter of a rectangle', formula: `<i>P</i> = 2<i>l</i> + 2<i>w</i>`, find: 'w', given: `<i>P</i> = ${P} and <i>l</i> = ${l}`,
+      ans: w, steps: [`Substitute the values: ${P} = 2 ${TIMES} ${l} + 2<i>w</i>`, `${P} = ${2 * l} + 2<i>w</i>`, `Subtract ${2 * l} from both sides: 2<i>w</i> = ${P - 2 * l}`, `Divide both sides by 2: <i>w</i> = ${w}`], wrong: [P - l, (P - l) / 2, P / 2 - l - 1, (P + 2 * l) / 2] }; },
+  velA: () => { const u = randInt(2, 12), a = randInt(2, 6), t = randInt(2, 6);
+    return { name: 'Final velocity', formula: `<i>v</i> = <i>u</i> + <i>at</i>`, find: 'a', given: `<i>v</i> = ${u + a * t}, <i>u</i> = ${u} and <i>t</i> = ${t}`,
+      ans: a, steps: [`Substitute the values: ${u + a * t} = ${u} + <i>a</i> ${TIMES} ${t}`, `Subtract ${u} from both sides: ${a * t} = ${t}<i>a</i>`, `Divide both sides by ${t}: <i>a</i> = ${a * t} ${DIV} ${t} = ${a}`], wrong: [Math.round((u + a * t) / t), a * t, (u + a * t + u) / t] }; },
+  velT: () => { const u = randInt(2, 12), a = randInt(2, 6), t = randInt(2, 7);
+    return { name: 'Final velocity', formula: `<i>v</i> = <i>u</i> + <i>at</i>`, find: 't', given: `<i>v</i> = ${u + a * t}, <i>u</i> = ${u} and <i>a</i> = ${a}`,
+      ans: t, steps: [`Substitute the values: ${u + a * t} = ${u} + ${a}<i>t</i>`, `Subtract ${u} from both sides: ${a * t} = ${a}<i>t</i>`, `Divide both sides by ${a}: <i>t</i> = ${a * t} ${DIV} ${a} = ${t}`], wrong: [Math.round((u + a * t) / a), a * t, (u + a * t + u) / a] }; },
+  line: () => { const m = randInt(2, 6), x = randInt(2, 8), c = randInt(1, 10);
+    return { name: 'Equation of a line', formula: `<i>y</i> = <i>mx</i> + <i>c</i>`, find: 'x', given: `<i>y</i> = ${m * x + c}, <i>m</i> = ${m} and <i>c</i> = ${c}`,
+      ans: x, steps: [`Substitute the values: ${m * x + c} = ${m}<i>x</i> + ${c}`, `Subtract ${c} from both sides: ${m * x} = ${m}<i>x</i>`, `Divide both sides by ${m}: <i>x</i> = ${m * x} ${DIV} ${m} = ${x}`], wrong: [Math.round((m * x + c) / m), m * x, (m * x + 2 * c) / m] }; },
+  // ----- level 3: formulas with a fraction in them -----
+  triH: () => { const b = randInt(2, 10) * 2, h = randInt(2, 9);
+    return { name: 'Area of a triangle', formula: `<i>A</i> = ${frac('1', '2')}<i>bh</i>`, find: 'h', given: `<i>A</i> = ${b * h / 2} and <i>b</i> = ${b}`,
+      ans: h, steps: [`Substitute the values: ${b * h / 2} = ${frac('1', '2')} ${TIMES} ${b} ${TIMES} <i>h</i>`, `${frac('1', '2')} ${TIMES} ${b} = ${b / 2}, so ${b * h / 2} = ${b / 2}<i>h</i>`, `Divide both sides by ${b / 2}: <i>h</i> = ${b * h / 2} ${DIV} ${b / 2} = ${h}`], wrong: [b * h / 2 - b / 2, b * h, Math.round(b * h / 2 / b) || 1] }; },
+  triB: () => { const b = randInt(2, 9), h = randInt(2, 5) * 2;
+    return { name: 'Area of a triangle', formula: `<i>A</i> = ${frac('1', '2')}<i>bh</i>`, find: 'b', given: `<i>A</i> = ${b * h / 2} and <i>h</i> = ${h}`,
+      ans: b, steps: [`Substitute the values: ${b * h / 2} = ${frac('1', '2')} ${TIMES} <i>b</i> ${TIMES} ${h}`, `${frac('1', '2')} ${TIMES} ${h} = ${h / 2}, so ${b * h / 2} = ${h / 2}<i>b</i>`, `Divide both sides by ${h / 2}: <i>b</i> = ${b * h / 2} ${DIV} ${h / 2} = ${b}`], wrong: [b * h / 2 - h / 2, b * h, Math.round(b * h / 2 / h) || 1] }; },
+  trap: () => { const a = randInt(2, 8), b = a + 2 * randInt(1, 3), h = randInt(2, 6);
+    // A = 1/2 (a + b) h with a + b even so that A is a whole number
+    const A = (a + b) * h / 2;
+    return { name: 'Area of a trapezium', formula: `<i>A</i> = ${frac('1', '2')}(<i>a</i> + <i>b</i>)<i>h</i>`, find: 'h', given: `<i>A</i> = ${A}, <i>a</i> = ${a} and <i>b</i> = ${b}`,
+      ans: h, steps: [`Substitute the values: ${A} = ${frac('1', '2')}(${a} + ${b}) ${TIMES} <i>h</i>`, `${frac('1', '2')} ${TIMES} ${a + b} = ${(a + b) / 2}, so ${A} = ${(a + b) / 2}<i>h</i>`, `Divide both sides by ${(a + b) / 2}: <i>h</i> = ${A} ${DIV} ${(a + b) / 2} = ${h}`], wrong: [A - (a + b) / 2, Math.round(A / (a + b)) || 1, A / b] }; },
+  velT3: () => { const u = randInt(5, 20), a = randInt(3, 9), t = randInt(4, 12);
+    return { name: 'Final velocity', formula: `<i>v</i> = <i>u</i> + <i>at</i>`, find: 't', given: `<i>v</i> = ${u + a * t}, <i>u</i> = ${u} and <i>a</i> = ${a}`,
+      ans: t, steps: [`Substitute the values: ${u + a * t} = ${u} + ${a}<i>t</i>`, `Subtract ${u} from both sides: ${a * t} = ${a}<i>t</i>`, `Divide both sides by ${a}: <i>t</i> = ${a * t} ${DIV} ${a} = ${t}`], wrong: [Math.round((u + a * t) / a), a * t, (u + a * t + u) / a] }; },
+};
+const FORMULA_POOLS = {
+  0: ['area', 'perim', 'dist', 'vel0'],
+  1: ['areaL', 'distT', 'vol', 'sqP'],
+  2: ['perimW', 'velA', 'velT', 'line'],
+  3: ['triH', 'triB', 'trap', 'velT3'],
+};
+
+function genFormula(level) {
+  const f = FORMULAS[randChoice(FORMULA_POOLS[level])]();
+  const steps = [`Write the formula: ${f.formula}`].concat(f.steps);
+  return finishNumeric('Formulas', {
+    v: f.find, answer: f.ans, prompt: `Find ${f.find} when ${f.given.replace(/<[^>]+>/g, '')}.`,
+    context: f.name, formula: f.formula, steps, wrong: f.wrong.map(n => Math.round(n)),
+  });
+}
+
+// =========================================================================
+// 6. Simple quadratics (answers come in a +/- pair)
+// =========================================================================
+function quadDisplay(v, n) { return `${V(v)} = &plusmn;${n}`; }
+
+function genQuadratic(level) {
+  const v = randChoice(VAR_POOL);
+  const n = randInt(2, level === 3 ? 10 : 12);        // the root
+  let body, steps, wrong;
+  if (level === 0) {                                 // x^2 = k
+    const k = n * n;
+    body = eq(sq(v), String(k));
+    steps = [`Take the square root of both sides.`, `${V(v)} = &plusmn;&radic;${k}`,
+      `${n} ${TIMES} ${n} = ${k}, so the square root of ${k} is ${n}.`, `Remember there are two solutions: ${V(v)} = ${n} or ${V(v)} = ${MINUS}${n}.`];
+    wrong = [k, Math.round(k / 2), n + 1, n - 1];
+  } else if (level === 1) {                          // x^2 + a = k  or  x^2 - a = k
+    const a = randInt(1, 20); const isPlus = Math.random() < 0.5;
+    const k = isPlus ? n * n + a : n * n - a;
+    if (k <= 0) return genQuadratic(level);
+    body = eq(isPlus ? plus(sq(v), a) : minus(sq(v), a), String(k));
+    steps = isPlus
+      ? [`Subtract ${a} from both sides.`, `${sq(v)} = ${k} ${MINUS} ${a} = ${n * n}`]
+      : [`Add ${a} to both sides.`, `${sq(v)} = ${k} + ${a} = ${n * n}`];
+    steps.push(`Take the square root of both sides.`, `${V(v)} = &plusmn;&radic;${n * n} = &plusmn;${n}`);
+    wrong = isPlus ? [k + a, Math.round(Math.sqrt(k)) || 1, n * n, n + 1] : [k - a, Math.round(Math.sqrt(k)) || 1, n * n, n - 1];
+  } else if (level === 2) {                          // a x^2 = k
+    const a = randInt(2, 5); const k = a * n * n;
+    body = eq(`${a}${sq(v)}`, String(k));
+    steps = [`Divide both sides by ${a}.`, `${sq(v)} = ${k} ${DIV} ${a} = ${n * n}`, `Take the square root of both sides.`,
+      `${V(v)} = &plusmn;&radic;${n * n} = &plusmn;${n}`];
+    wrong = [n * n, Math.round(Math.sqrt(k)) || 1, n * a, n + 1];
+  } else {                                           // a x^2 + b = c  or  a x^2 - b = c
+    const a = randInt(2, 5), b = randInt(1, 30), isPlus = Math.random() < 0.5;
+    const k = a * n * n; const c = isPlus ? k + b : k - b;
+    if (c <= 0) return genQuadratic(level);
+    body = eq(isPlus ? plus(`${a}${sq(v)}`, b) : minus(`${a}${sq(v)}`, b), String(c));
+    steps = [isPlus ? `Subtract ${b} from both sides.` : `Add ${b} to both sides.`,
+      isPlus ? `${a}${sq(v)} = ${c} ${MINUS} ${b} = ${k}` : `${a}${sq(v)} = ${c} + ${b} = ${k}`,
+      `Divide both sides by ${a}.`, `${sq(v)} = ${k} ${DIV} ${a} = ${n * n}`, `Take the square root of both sides.`,
+      `${V(v)} = &plusmn;&radic;${n * n} = &plusmn;${n}`];
+    wrong = [n * n, n + 1, n - 1, Math.round(Math.sqrt(c)) || 1, n * a];
+  }
+  const roots = [n];
+  const cands = [];
+  // The "forgot the negative" slip is always offered: x = n instead of +/- n.
+  const wrongs = shuffle(wrong.filter(w => Number.isInteger(w) && w > 1 && w !== n && (w <= 2 * n + 3 || w === n * n)));
+  const used = new Set([n]);
+  const distractors = [`${V(v)} = ${n}`];
+  wrongs.forEach(w => { if (distractors.length < 3 && !used.has(w)) { used.add(w); distractors.push(quadDisplay(v, w)); } });
+  let pad = n + 2;
+  while (distractors.length < 3) { if (!used.has(pad) && pad > 1) { used.add(pad); distractors.push(quadDisplay(v, pad)); } pad++; }
+  return {
+    topicLabel: 'Simple Quadratics', promptText: `Solve for ${v} (give both answers):`, bodyHtml: body,
+    context: '', formula: '', answerKind: 'pair',
+    correct: { display: quadDisplay(v, n), checkStr: String(n), numeric: n },
+    distractorsHtml: distractors, steps: steps,
+  };
+}
+
+// =========================================================================
+// Topic registry + public API (same shape the quiz UI already uses)
+// =========================================================================
+const TOPIC_CONFIG = {
+  oneStep:      { label: 'One-Step Equations', blurb: 'Undo one operation', build: genOneStep },
+  twoStepConst: { label: 'Two-Step Equations (constant first)', blurb: 'Remove the constant, then divide', build: genTwoStepConst },
+  bothSides:    { label: 'Pronumerals on Both Sides', blurb: 'Collect the unknowns on one side', build: genBothSides },
+  twoStepDenom: { label: 'Two-Step Equations (denominator first)', blurb: 'Remove the denominator, then the constant', build: genTwoStepDenom },
+  formulas:     { label: 'Formulas', blurb: 'Substitute into a formula and solve', build: genFormula },
+  quadratics:   { label: 'Simple Quadratics', blurb: 'Solve using square roots', build: genQuadratic },
+};
+const TOPIC_ORDER = ['oneStep', 'twoStepConst', 'bothSides', 'twoStepDenom', 'formulas', 'quadratics'];
+
+function generateQuestion(topicKey, level) {
+  const q = TOPIC_CONFIG[topicKey].build(clampLevel(level));
+  const choiceObjs = [{ html: q.correct.display, correct: true }]
+    .concat(q.distractorsHtml.slice(0, 3).map(h => ({ html: h, correct: false })));
+  return Object.assign({}, q, { choices: shuffle(choiceObjs) });
+}
+
+// ---------- typed answers ----------
+function normaliseTyped(s) {
+  return String(s || '').toLowerCase().replace(/[−–—]/g, '-').replace(/±/g, '+-')
+    .replace(/\+\/-/g, '+-').replace(/\s+/g, ' ').trim();
+}
+function checkTypedAnswer(userInput, q) {
+  let s = normaliseTyped(userInput);
+  if (!s) return false;
+  if (q.answerKind === 'numeric') {
+    s = s.replace(/^[a-z]\s*=\s*/, '').replace(/\s+/g, '');
+    if (!/^-?\d+(\.\d+)?$/.test(s)) return false;
+    return Math.abs(parseFloat(s) - q.correct.numeric) < 1e-9;
+  }
+  // pair answer: +/-n, "n, -n", "n or -n", "x = n or x = -n" ...
+  s = s.replace(/\b(or|and)\b/g, ',').replace(/[a-z]\s*=/g, '');
+  s = s.replace(/\+-\s*(\d+(?:\.\d+)?)/g, '$1,-$1');
+  const nums = s.split(/[,;\s]+/).filter(Boolean);
+  if (!nums.length || nums.some(t => !/^[+-]?\d+(\.\d+)?$/.test(t))) return false;
+  const set = new Set(nums.map(t => parseFloat(t)));
+  const n = q.correct.numeric;
+  return set.size === 2 && set.has(n) && set.has(-n);
+}
+
+</script>
+<script>
+// =========================================================================
+// UI GLUE
+// =========================================================================
+
+const TOPIC_ORDER_UI = TOPIC_ORDER;
+
+let setup = { topic: ['oneStep'], answer: 'mc', timer: 'none' };
+
+const STEP_ORDER = ['topic', 'answer', 'timer'];
+const STEP_META = {
+  topic: {
+    title: 'Choose Topics', multi: true,
+    options: TOPIC_ORDER_UI.map(k => ({ key: k, title: TOPIC_CONFIG[k].label, desc: TOPIC_CONFIG[k].blurb })),
+  },
+  answer: {
+    title: 'Answer Method', multi: false,
+    options: [
+      { key: 'mc', title: 'Multiple Choice', desc: 'Pick from 4 options' },
+      { key: 'type', title: 'Typed Answer', desc: 'Type your own answer' },
+    ],
+  },
+  timer: {
+    title: 'Timer', multi: false,
+    options: [
+      { key: 'none', title: 'No Timer', desc: 'Untimed practice' },
+      { key: 'm2', title: '2 Minutes', desc: 'Quick sprint' },
+      { key: 'm5', title: '5 Minutes', desc: 'Standard round' },
+      { key: 'm10', title: '10 Minutes', desc: 'Longer session' },
+    ],
+  },
+};
+const TIMER_SECONDS = { none: null, m2: 120, m5: 300, m10: 600 };
+
+let stepIndex = 0;
+
+function activeSteps() { return STEP_ORDER; }
+
+function isStepValid(stepName) {
+  const meta = STEP_META[stepName];
+  if (meta.multi) return setup[stepName].length >= 1;
+  return !!setup[stepName];
+}
+
+function selectOption(stepName, key) {
+  const meta = STEP_META[stepName];
+  if (meta.multi) {
+    const arr = setup[stepName];
+    const idx = arr.indexOf(key);
+    if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+    if (stepName === 'topic') arr.sort((a, b) => TOPIC_ORDER.indexOf(a) - TOPIC_ORDER.indexOf(b));
+  } else {
+    setup[stepName] = key;
+  }
+  renderWizard();
+}
+
+function stepContinue() {
+  const steps = activeSteps();
+  const stepName = steps[stepIndex];
+  if (!isStepValid(stepName)) return;
+  stepIndex++; // may reach steps.length, which renderWizard treats as the review screen
+  renderWizard();
+}
+function stepBack() {
+  if (stepIndex > 0) { stepIndex--; renderWizard(); }
+}
+
+function optLabel(stepName, key) {
+  if (stepName === 'topic') return TOPIC_CONFIG[key].label;
+  const opt = STEP_META[stepName].options.find(o => o.key === key);
+  return opt ? opt.title : key;
+}
+
+function renderWizard() {
+  const steps = activeSteps();
+  const body = document.getElementById('wiz-body');
+  const dotsEl = document.getElementById('wiz-dots');
+  const crumbEl = document.getElementById('wiz-crumb');
+  const backBtn = document.getElementById('wiz-back');
+  const continueBtn = document.getElementById('wiz-continue');
+  const reviewBlock = document.getElementById('review-block');
+
+  const atReview = stepIndex >= steps.length;
+
+  dotsEl.innerHTML = steps.map((s, i) => {
+    let cls = 'wiz-dot';
+    if (i < stepIndex || atReview) cls += ' done';
+    else if (i === stepIndex) cls += ' current';
+    return `<span class="${cls}"></span>`;
+  }).join('') + `<span class="wiz-dot${atReview ? ' current' : ''}"></span>`;
+
+  if (atReview) {
+    crumbEl.textContent = 'Review your setup';
+    body.innerHTML = '';
+    backBtn.classList.remove('hidden');
+    continueBtn.classList.add('hidden');
+    reviewBlock.classList.remove('hidden');
+    const rows = [
+      ['Topics', setup.topic.map(k => `${TOPIC_ORDER.indexOf(k) + 1}. ${optLabel('topic', k)}`).join('<br>')],
+      ['Answer Method', optLabel('answer', setup.answer)],
+      ['Timer', optLabel('timer', setup.timer)],
+    ];
+    document.getElementById('wiz-review').innerHTML = rows.map(([label, value]) =>
+      `<div class="review-row"><span class="rlabel">${label}</span><span class="rvalue">${value}</span></div>`
+    ).join('');
+    return;
+  }
+
+  reviewBlock.classList.add('hidden');
+  const stepName = steps[stepIndex];
+  const meta = STEP_META[stepName];
+  crumbEl.textContent = `Step ${stepIndex + 1} of ${steps.length}: ${meta.title}`;
+
+  const isSel = (key) => meta.multi ? setup[stepName].includes(key) : setup[stepName] === key;
+  const gridClass = meta.options.length <= 2 || stepName === 'answer' || stepName === 'topic' ? 'opt-grid single' : 'opt-grid';
+  body.innerHTML = `
+    <div class="setup-sec">
+      <div class="setup-label"><span class="step-num">${stepIndex + 1}</span>${meta.title}</div>
+      <div class="${gridClass}">
+        ${stepName === 'topic' ? meta.options.map(o => {
+          const on = isSel(o.key);
+          const n = TOPIC_ORDER.indexOf(o.key) + 1;
+          return `
+          <div class="tog-row${on ? ' on' : ''}" role="switch" aria-checked="${on}" tabindex="0" onclick="selectOption('topic','${o.key}')" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();selectOption('topic','${o.key}')}">
+            <span class="tog-num">${n}.</span>
+            <div class="tog-text"><div class="opt-title">${o.title}</div></div>
+          </div>`;
+        }).join('') : meta.options.map(o => {
+          const selected = isSel(o.key);
+          const orderNum = (stepName === 'topic' && selected) ? setup.topic.indexOf(o.key) + 1 : null;
+          return `
+          <div class="opt-card${selected ? ' sel' : ''}" onclick="selectOption('${stepName}','${o.key}')">
+            ${orderNum ? `<span class="opt-badge">${orderNum}</span>` : ''}
+            <div class="opt-title">${orderNum ? `<span class="opt-num">${orderNum}.</span> ` : ''}${o.title}</div>
+            <div class="opt-desc">${o.desc}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="setup-note">${meta.multi ? 'Select one or more. Questions go through your chosen topics in number order.' : ''}</div>
+    </div>
+  `;
+
+  backBtn.classList.toggle('hidden', stepIndex === 0);
+  continueBtn.classList.remove('hidden');
+  continueBtn.disabled = !isStepValid(stepName);
+}
+
+// ---------------- Quiz state & flow ----------------
+let sessionStats = { total: 0, correct: 0, bestStreak: 0, streak: 0 };
+let timerHandle = null;
+let timeRemaining = 0;
+let currentQ = null;
+let answered = false;
+let frozenSetup = null;
+
+function clearTimerIfRunning() {
+  if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+}
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
+function tickTimer() {
+  timeRemaining--;
+  document.getElementById('stat-timer').textContent = formatTime(Math.max(0, timeRemaining));
+  if (timeRemaining <= 0) { clearTimerIfRunning(); endQuiz(true); }
+}
+
+function setupSummaryText() {
+  const topicNames = frozenSetup.topic.map(k => `${TOPIC_ORDER.indexOf(k) + 1}. ${TOPIC_CONFIG[k].label}`).join(', ');
+  return `${topicNames}<br>${optLabel('answer', frozenSetup.answer)}`;
+}
+
+// ---- Adaptive difficulty ----
+// Every topic has its own level, 0 (easiest) to 3 (hardest), following the
+// worksheet's order. Three correct answers in a row on a topic move it up one
+// level; a wrong answer moves it back down one, so a student who keeps
+// missing easier questions stays at the easier level.
+const MAX_LEVEL = 3;
+const LEVEL_UP_STREAK = 3;
+let topicLevels = {};
+let topicStreaks = {};
+let currentTopicKey = null;
+let currentLevel = 0;   // level of the topic just asked
+function levelFor(topicKey) { return topicLevels[topicKey] || 0; }
+function adjustLevelAfterAnswer(ok) {
+  const k = currentTopicKey;
+  if (!k) return;
+  let lvl = levelFor(k), st = topicStreaks[k] || 0;
+  if (ok) {
+    st++;
+    if (st >= LEVEL_UP_STREAK) { lvl = Math.min(lvl + 1, MAX_LEVEL); st = 0; }
+  } else {
+    lvl = Math.max(lvl - 1, 0); st = 0;
+  }
+  topicLevels[k] = lvl; topicStreaks[k] = st; currentLevel = lvl;
+}
+
+// ---- Topic rotation ----
+// Questions cycle through the selected topics in the order they were
+// selected (topic "1" asked first), looping back to the start.
+let topicRotationIndex = 0;
+function nextTopicForQuestion() {
+  const t = frozenSetup.topic;
+  const topic = t[topicRotationIndex % t.length];
+  topicRotationIndex++;
+  return topic;
+}
+
+function startQuiz() {
+  cancelAutoAdvance();
+  frozenSetup = JSON.parse(JSON.stringify(setup));
+  sessionStats = { total: 0, correct: 0, bestStreak: 0, streak: 0 };
+  currentLevel = 0;
+  topicLevels = {}; topicStreaks = {}; currentTopicKey = null;
+  topicRotationIndex = 0;
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('quiz-screen').classList.remove('hidden');
+  document.getElementById('setup-summary').innerHTML = setupSummaryText();
+
+  const timerStatWrap = document.getElementById('stat-timer-wrap');
+  clearTimerIfRunning();
+  const secs = TIMER_SECONDS[frozenSetup.timer];
+  if (secs) {
+    timeRemaining = secs;
+    timerStatWrap.classList.remove('hidden');
+    document.getElementById('stat-timer').textContent = formatTime(timeRemaining);
+    timerHandle = setInterval(tickTimer, 1000);
+  } else {
+    timerStatWrap.classList.add('hidden');
+  }
+  document.getElementById('stat-streak-wrap').classList.remove('hidden');
+  document.getElementById('stat-streak').textContent = '0';
+
+  nextQuestion();
+}
+
+function nextQuestion() {
+  cancelAutoAdvance();
+  answered = false;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+
+  const topicKey = nextTopicForQuestion();
+  currentTopicKey = topicKey;
+  currentLevel = levelFor(topicKey);
+  currentQ = generateQuestion(topicKey, currentLevel);
+
+  document.getElementById('q-topic-label').textContent = currentQ.topicLabel;
+
+  const contextEl = document.getElementById('q-context');
+  if (currentQ.context) { contextEl.innerHTML = currentQ.context; contextEl.classList.remove('hidden'); }
+  else contextEl.classList.add('hidden');
+
+  const formulaEl = document.getElementById('q-formula');
+  if (currentQ.formula) { formulaEl.innerHTML = currentQ.formula; formulaEl.classList.remove('hidden'); }
+  else formulaEl.classList.add('hidden');
+
+  document.getElementById('q-prompt').textContent = currentQ.promptText;
+
+  const exprEl = document.getElementById('q-expr');
+  const wordsEl = document.getElementById('q-words');
+  if (currentQ.topicLabel === 'Words to Expressions') {
+    wordsEl.innerHTML = currentQ.bodyHtml;
+    wordsEl.classList.remove('hidden');
+    exprEl.classList.add('hidden');
+  } else if (currentQ.bodyHtml) {
+    exprEl.innerHTML = currentQ.bodyHtml;
+    exprEl.classList.remove('hidden');
+    wordsEl.classList.add('hidden');
+  } else {
+    exprEl.classList.add('hidden');
+    wordsEl.classList.add('hidden');
+  }
+
+  renderAnswerArea();
+}
+
+function renderAnswerArea() {
+  const choiceGrid = document.getElementById('choice-grid');
+  const typeRow = document.getElementById('type-row');
+  const typeHint = document.getElementById('type-hint');
+  const typeInput = document.getElementById('type-input');
+
+  if (frozenSetup.answer === 'mc') {
+    typeRow.classList.add('hidden');
+    typeHint.classList.add('hidden');
+    choiceGrid.classList.remove('hidden');
+    choiceGrid.innerHTML = currentQ.choices.map((c, i) =>
+      `<button class="choice-btn" id="choice-${i}" onclick="submitChoice(${i})">${c.html}</button>`
+    ).join('');
+  } else {
+    choiceGrid.classList.add('hidden');
+    choiceGrid.innerHTML = '';
+    typeRow.classList.remove('hidden');
+    typeHint.classList.remove('hidden');
+    typeInput.value = '';
+    typeInput.disabled = false;
+    document.getElementById('type-submit').disabled = false;
+    setTimeout(() => typeInput.focus(), 0);
+  }
+}
+
+function registerResult(ok) {
+  sessionStats.total++;
+  if (ok) {
+    sessionStats.correct++;
+    sessionStats.streak++;
+    sessionStats.bestStreak = Math.max(sessionStats.bestStreak, sessionStats.streak);
+  } else {
+    sessionStats.streak = 0;
+  }
+  document.getElementById('stat-streak').textContent = String(sessionStats.streak);
+  adjustLevelAfterAnswer(ok);
+}
+
+// A correct answer moves straight on to the next question after a short pause
+// (so the green "Correct!" can be seen); a wrong answer waits for the student
+// to read the worked solution and press Next.
+const AUTO_ADVANCE_MS = 800;
+let autoAdvanceHandle = null;
+function cancelAutoAdvance() { if (autoAdvanceHandle) { clearTimeout(autoAdvanceHandle); autoAdvanceHandle = null; } }
+
+function showFeedback(ok) {
+  const fb = document.getElementById('feedback');
+  const banner = document.getElementById('fb-banner');
+  const answerEl = document.getElementById('fb-answer');
+  const stepsEl = document.getElementById('fb-steps');
+  fb.style.display = 'block';
+  banner.className = 'fb-banner ' + (ok ? 'ok' : 'err');
+  banner.textContent = ok ? 'Correct!' : 'Not quite.';
+  answerEl.innerHTML = 'Correct answer: ' + currentQ.correct.display;
+  if (!ok && currentQ.steps && currentQ.steps.length) {
+    stepsEl.innerHTML = '<div class="fb-steps-title">Worked solution:</div>' +
+      '<ol class="fb-steps-list">' + currentQ.steps.map(s => `<li>${s}</li>`).join('') + '</ol>';
+    stepsEl.classList.remove('hidden');
+  } else {
+    stepsEl.classList.add('hidden');
+    stepsEl.innerHTML = '';
+  }
+  if (ok) {
+    document.getElementById('next-btn').style.display = 'none';
+    answerEl.innerHTML = '';
+    cancelAutoAdvance();
+    autoAdvanceHandle = setTimeout(() => {
+      autoAdvanceHandle = null;
+      if (answered && !document.getElementById('quiz-screen').classList.contains('hidden')) nextQuestion();
+    }, AUTO_ADVANCE_MS);
+  } else {
+    document.getElementById('next-btn').style.display = 'block';
+  }
+}
+
+function submitChoice(i) {
+  if (answered) return;
+  answered = true;
+  const ok = currentQ.choices[i].correct;
+  currentQ.choices.forEach((c, idx) => {
+    const btn = document.getElementById('choice-' + idx);
+    btn.disabled = true;
+    if (c.correct) btn.classList.add('ok');
+    else if (idx === i) btn.classList.add('bad');
+  });
+  registerResult(ok);
+  showFeedback(ok);
+}
+
+function submitTyped() {
+  if (answered) return;
+  const input = document.getElementById('type-input');
+  const val = input.value;
+  if (!val.trim()) return;
+  answered = true;
+  input.disabled = true;
+  document.getElementById('type-submit').disabled = true;
+  const ok = checkTypedAnswer(val, currentQ);
+  registerResult(ok);
+  showFeedback(ok);
+}
+
+document.getElementById('type-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') submitTyped();
+});
+
+function endQuiz(timeUp) {
+  cancelAutoAdvance();
+  clearTimerIfRunning();
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('results-screen').classList.remove('hidden');
+  document.getElementById('results-title').textContent = timeUp ? "Time's Up!" : 'Quiz Complete!';
+  document.getElementById('results-sub').innerHTML = setupSummaryText().replace(/<br>/g, ' &middot; ');
+  const total = sessionStats.total;
+  const correct = sessionStats.correct;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('res-score').textContent = `${correct} / ${total} (${accuracy}%)`;
+  document.getElementById('res-beststreak').textContent = String(sessionStats.bestStreak);
+}
+
+function restartSameSetup() {
+  startQuiz();
+}
+
+function goToSetupFromResults() {
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  stepIndex = 0;
+  renderWizard();
+}
+function goToSetupFromQuiz() {
+  cancelAutoAdvance();
+  clearTimerIfRunning();
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  stepIndex = 0;
+  renderWizard();
+}
+
+// Introspection helper (used by the automated test harness; harmless to ship).
+function __testState() {
+  return { setup, stepIndex, frozenSetup, sessionStats, timeRemaining, timerHandle, currentQ, answered, currentLevel, topicLevels, topicRotationIndex };
+}
+
+renderWizard();
+</script>
+</body>
+</html>
