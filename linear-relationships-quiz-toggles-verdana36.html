@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linear Relationships Quiz</title>
+<style>
+:root{
+  --bg:#f7f6fa;--card:#ffffff;--card2:#f7f5fb;--border:#e4e1ec;
+  --accent:#6d5ef5;--accent-hover:#5a4bdc;--accent-soft:#efecfd;
+  --green:#2e9e5e;--green-bg:#edfaf3;--green-border:#a8e4c0;
+  --red:#d94f4f;--red-bg:#fdf0f0;--red-border:#f0b0b0;
+  --text:#1c1a22;--muted:#8a8594;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Verdana,Geneva,sans-serif;
+  min-height:100vh;display:flex;justify-content:center;padding:16px 12px 60px;}
+.app{width:100%;max-width:1100px;}
+.hidden{display:none !important;}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:14px 0 12px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.hdr h1{font-size:1rem;font-weight:700;letter-spacing:-0.01em;}
+.stats{display:flex;gap:10px;font-size:1rem;color:var(--muted);}
+.stat strong{color:var(--text);font-weight:700;}
+
+/* ── SETUP WIZARD ─────────────────────────── */
+.wiz-dots{display:flex;justify-content:center;gap:6px;margin-bottom:14px;}
+.wiz-dot{width:7px;height:7px;border-radius:50%;background:#e4e1ec;transition:background .15s;}
+.wiz-dot.done{background:var(--accent);}
+.wiz-dot.current{background:var(--accent);width:18px;border-radius:4px;}
+.wiz-crumb{font-size:1rem;color:var(--muted);text-align:center;margin-bottom:18px;line-height:1.5;min-height:1.1em;}
+.setup-sec{margin-bottom:20px;}
+.setup-label{font-size:1rem;font-weight:700;color:#999;letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.step-num{display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;background:#ece9f3;color:#7a7488;
+  font-size:1rem;font-weight:700;letter-spacing:0;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.opt-grid.single{grid-template-columns:1fr;}
+.opt-card{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:11px 12px;cursor:pointer;transition:border-color .12s,background .12s;user-select:none;
+  position:relative;}
+.opt-card:hover{border-color:#cfc9df;}
+.opt-card.sel{border-color:var(--accent);background:var(--accent-soft);}
+.opt-badge{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:1rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.opt-title{font-size:1rem;font-weight:700;margin-bottom:2px;}
+.opt-card.sel .opt-title{color:var(--accent-hover);}
+
+.tog-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;user-select:none;}
+.tog-row.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent) inset;}
+.tog-num{width:1.4em;font-weight:800;color:var(--accent);font-size:1rem;text-align:right;flex:none;}
+.tog-text{flex:1;min-width:0;}
+.tog-switch{flex:none;width:40px;height:24px;border-radius:12px;background:#cfc9df;position:relative;transition:background .15s;}
+.tog-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s;}
+.tog-row.on .tog-switch{background:var(--accent);}
+.tog-row.on .tog-knob{transform:translateX(16px);}
+.opt-num{color:var(--accent);font-weight:800;}
+.opt-desc{font-size:1rem;color:var(--muted);line-height:1.35;}
+.setup-note{font-size:1rem;color:var(--muted);font-style:italic;margin-top:6px;min-height:1px;}
+.wiz-foot{display:flex;flex-direction:column;gap:10px;}
+.wiz-nav-row{display:flex;gap:8px;align-items:center;}
+.back-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);
+  font-size:1rem;font-weight:700;padding:12px 16px;cursor:pointer;}
+.back-btn:hover{border-color:#cfc9df;color:var(--text);}
+.continue-btn{flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px;font-size:1rem;font-weight:700;cursor:pointer;}
+.continue-btn:hover{background:var(--accent-hover);}
+.continue-btn:disabled{background:#cfc9df;cursor:default;}
+.wiz-review{margin-bottom:4px;}
+.review-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border);font-size:1rem;}
+.review-row:last-child{border-bottom:none;}
+.review-row .rlabel{color:var(--muted);font-size:1rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.review-row .rvalue{font-weight:700;text-align:right;}
+.start-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:1rem;font-weight:700;cursor:pointer;}
+.start-btn:hover{background:var(--accent-hover);}
+
+/* ── QUIZ SCREEN ──────────────────────────── */
+.quiz-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;}
+.quiz-bar-btns{display:flex;gap:6px;}
+.setup-summary{font-size:1rem;color:var(--muted);line-height:1.4;}
+.change-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);
+  font-size:1rem;font-weight:700;padding:6px 10px;cursor:pointer;white-space:nowrap;}
+.change-btn:hover{border-color:#cfc9df;color:var(--text);}
+
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:18px 16px;margin-bottom:14px;}
+.topic-label{font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:.05em;
+  text-transform:uppercase;margin-bottom:10px;}
+.context-wrap{background:var(--card2);border-left:3px solid var(--accent);border-radius:6px;
+  padding:10px 12px;margin-bottom:10px;font-size:1rem;line-height:1.5;color:var(--text);}
+.formula-wrap{font-size:1rem;font-weight:700;margin-bottom:10px;text-align:center;}
+.prompt{font-size:1rem;font-weight:600;text-align:center;line-height:1.4;margin-bottom:12px;}
+.expr-display{font-size:1rem;font-weight:700;text-align:center;line-height:1.6;
+  font-family:Verdana,Geneva,sans-serif;letter-spacing:.01em;padding:6px 4px;word-break:break-word;}
+.expr-display i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.words-display{font-size:1rem;font-weight:600;text-align:center;line-height:1.5;font-style:italic;}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  margin:0 .18em;font-size:.82em;line-height:1.15;position:relative;top:.08em;}
+.frac .fnum{border-bottom:1.6px solid currentColor;padding:0 .3em .1em;}
+.frac .fden{padding:.1em .3em 0;}
+.sqin{border-top:1.6px solid currentColor;padding:1px .15em 0;display:inline-block;}
+
+#answer-area{margin-bottom:14px;}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.choice-btn{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:13px 8px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;
+  font-family:Verdana,Geneva,sans-serif;}
+.choice-btn i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.choice-btn:hover{border-color:#cfc9df;}
+.choice-btn:disabled{cursor:default;}
+.choice-btn.ok{border-color:var(--green-border);background:var(--green-bg);color:var(--green);}
+.choice-btn.bad{border-color:var(--red-border);background:var(--red-bg);color:var(--red);}
+
+.type-row{display:flex;gap:8px;}
+.type-row input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:12px;
+  font-size:1rem;font-family:Verdana,Geneva,sans-serif;}
+.type-row input:focus{outline:none;border-color:var(--accent);}
+.type-hint{font-size:1rem;color:var(--muted);margin-top:6px;}
+.submit-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px 18px;font-size:1rem;font-weight:700;cursor:pointer;}
+.submit-btn:disabled{background:#cfc9df;cursor:default;}
+
+.feedback{display:none;background:var(--card2);border:1px solid var(--border);
+  border-radius:12px;padding:14px;margin-bottom:14px;}
+.fb-banner{font-size:1rem;font-weight:700;margin-bottom:6px;}
+.fb-banner.ok{color:var(--green);}
+.fb-banner.err{color:var(--red);}
+.fb-answer{font-size:1rem;font-weight:600;font-family:Verdana,Geneva,sans-serif;}
+.fb-answer i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.fb-steps-title{font-size:1rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:6px;}
+.fb-steps-list{padding-left:1.2em;}
+.fb-steps-list li{font-size:1rem;line-height:1.55;margin-bottom:4px;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps-list li i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps-list li b{font-weight:700;}
+.next-btn{display:none;width:100%;background:var(--text);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:1rem;font-weight:700;cursor:pointer;}
+.next-btn:hover{opacity:.9;}
+
+/* ── RESULTS SCREEN ───────────────────────── */
+.results-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:22px 18px;text-align:center;}
+.results-title{font-size:1rem;font-weight:800;margin-bottom:4px;}
+.results-sub{font-size:1rem;color:var(--muted);margin-bottom:18px;}
+.results-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:11px 0;border-bottom:1px solid var(--border);font-size:1rem;text-align:left;}
+.results-row:last-child{border-bottom:none;}
+.results-btns{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+.results-btns .start-btn{margin:0;}
+.results-secondary{background:none;border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:1rem;font-weight:700;padding:13px;cursor:pointer;}
+.results-secondary:hover{border-color:#cfc9df;}
+
+/* ---- Verdana 36pt version (36pt = 48px) ---- */
+html{font-size:36pt;}
+body,button,input,textarea{font-family:Verdana,Geneva,sans-serif;font-size:36pt;}
+.expr-display,.choice-btn,.fb-answer,.fb-steps-list li{font-family:Verdana,Geneva,sans-serif;}
+.expr-display i,.choice-btn i,.fb-answer i,.fb-steps-list li i{font-family:Verdana,Geneva,sans-serif;}
+.app{max-width:1600px;}
+body{padding:24px 28px 80px;}
+.step-num{width:1.5em;height:1.5em;font-size:.6em;}
+.opt-badge{width:1.4em;height:1.4em;top:-.35em;right:-.35em;font-size:.6em;}
+.wiz-dot{width:18px;height:18px;}.wiz-dot.current{width:48px;}
+.tog-switch{width:110px;height:64px;border-radius:32px;}
+.tog-knob{width:54px;height:54px;top:5px;left:5px;}
+.tog-row.on .tog-knob{transform:translateX(46px);}
+.tog-row{gap:24px;padding:20px 26px;}
+.tog-num{width:1.6em;color:#9a96a6;}
+.tog-row.on .tog-num{color:var(--accent);}
+.opt-card{padding:20px 24px;}
+.opt-grid{gap:18px;}
+.fb-steps-list li{line-height:1.5;}
+.choice-btn{padding:20px 28px;min-width:340px;}
+/* keep the answer buttons close together: shrink the grid to the buttons and centre it */
+.choice-grid{width:max-content;max-width:100%;margin:0 auto;gap:14px;}
+input[type=text],#type-input{padding:16px 20px;}
+.next-btn,#next-btn,#wiz-continue,#wiz-back{padding:18px 26px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <h1>Linear Relationships</h1>
+    <div class="stats">
+      <span class="stat hidden" id="stat-timer-wrap">&#9201;&nbsp;<strong id="stat-timer">0:00</strong></span>
+      <span class="stat hidden" id="stat-streak-wrap">&#9733;&nbsp;<strong id="stat-streak">0</strong></span>
+    </div>
+  </div>
+
+  <!-- ===================== SETUP SCREEN ===================== -->
+  <div id="setup-screen">
+    <div class="wiz-dots" id="wiz-dots"></div>
+    <div class="wiz-crumb" id="wiz-crumb"></div>
+
+    <div id="wiz-body"></div>
+
+    <div class="wiz-foot">
+      <div class="wiz-nav-row">
+        <button class="back-btn hidden" id="wiz-back" onclick="stepBack()">&larr; Back</button>
+        <button class="continue-btn hidden" id="wiz-continue" onclick="stepContinue()">Continue &rarr;</button>
+      </div>
+      <div id="review-block" class="hidden">
+        <div class="wiz-review" id="wiz-review"></div>
+        <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== QUIZ SCREEN ===================== -->
+  <div id="quiz-screen" class="hidden">
+    <div class="quiz-bar">
+      <div class="setup-summary" id="setup-summary"></div>
+      <div class="quiz-bar-btns">
+        <button class="change-btn" onclick="goToSetupFromQuiz()">Change</button>
+        <button class="change-btn" onclick="endQuiz(false)">Finish</button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="topic-label" id="q-topic-label"></div>
+      <div class="context-wrap hidden" id="q-context"></div>
+      <div class="formula-wrap hidden" id="q-formula"></div>
+      <div class="prompt" id="q-prompt"></div>
+      <div class="expr-display hidden" id="q-expr"></div>
+      <div class="words-display hidden" id="q-words"></div>
+    </div>
+
+    <div id="answer-area">
+      <div class="choice-grid hidden" id="choice-grid"></div>
+      <div class="type-row hidden" id="type-row">
+        <input type="text" id="type-input" placeholder="Type your answer" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="submit-btn" id="type-submit" onclick="submitTyped()">Check</button>
+      </div>
+      <div class="type-hint hidden" id="type-hint">e.g. 5, (3, 4), y = 2x + 1, x > 4, or B</div>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <div class="fb-banner" id="fb-banner"></div>
+      <div class="fb-answer" id="fb-answer"></div>
+      <div class="fb-steps hidden" id="fb-steps"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question &rarr;</button>
+  </div>
+
+  <!-- ===================== RESULTS SCREEN ===================== -->
+  <div id="results-screen" class="hidden">
+    <div class="results-card">
+      <div class="results-title" id="results-title">Quiz Complete!</div>
+      <div class="results-sub" id="results-sub"></div>
+      <div class="results-row"><span class="rlabel">Score</span><span class="rvalue" id="res-score"></span></div>
+      <div class="results-row"><span class="rlabel">Best Streak</span><span class="rvalue" id="res-beststreak"></span></div>
+      <div class="results-btns">
+        <button class="start-btn" onclick="restartSameSetup()">Play Again</button>
+        <button class="results-secondary" onclick="goToSetupFromResults()">Change Setup</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =========================================================================
+// PURE LOGIC (expression engine, term builders, topic generators,
+// distractor generation) — tested independently via node before being
+// embedded here. See merged_logic.js / test_*.js in the build workspace.
+// =========================================================================
+</script>
+<script>
+// =========================================================================
+// Linear Relationships quiz logic (Year 7-8): 10 topics x 4 levels.
+// Every question is built from chosen whole numbers, so the answer, the
+// drawn graph / table and the worked steps all come from the same values.
+// =========================================================================
+
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randChoice(arr) { return arr[randInt(0, arr.length - 1)]; }
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = randInt(0, i); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const MAX_APP_LEVEL = 3;
+function clampLevel(level) { return Math.max(0, Math.min(MAX_APP_LEVEL, Math.floor(level) || 0)); }
+
+const MINUS = '−', TIMES = '&times;', DIV = '&divide;';
+const sgn = (n) => (n < 0 ? `${MINUS}${-n}` : String(n));            // negative numbers with a proper minus
+const V = (v) => `<i>${v}</i>`;
+const key = (a) => Array.isArray(a) ? a.join(',') : String(a);
+
+// ---------- rule / equation display ----------
+// y = m x + c, written the way a textbook would (y = x + 2, y = 3x, y = 2x - 5, y = 10 - 2x)
+function ruleHtml(m, c, yv, xv) {
+  yv = yv || 'y'; xv = xv || 'x';
+  const mx = (k) => (k === 1 ? V(xv) : `${k}${V(xv)}`);
+  let rhs;
+  if (m === 0) rhs = String(c);
+  else if (c === 0) rhs = m < 0 ? `${MINUS}${mx(-m)}` : mx(m);
+  else if (m < 0) rhs = c > 0 ? `${c} ${MINUS} ${mx(-m)}` : `${MINUS}${mx(-m)} ${MINUS} ${-c}`;
+  else rhs = c > 0 ? `${mx(m)} + ${c}` : `${mx(m)} ${MINUS} ${-c}`;
+  return `${V(yv)} = ${rhs}`;
+}
+
+// ---------- distractors ----------
+function numericWrongs(ans, candidates, allowNeg) {
+  const out = [];
+  const ok = (n) => Number.isInteger(n) && (allowNeg || n > 0) && n !== ans && !out.includes(n);
+  shuffle(candidates || []).forEach(n => { if (out.length < 3 && ok(n)) out.push(n); });
+  shuffle([ans + 1, ans - 1, ans + 2, ans - 2, ans * 2, ans + 3, ans - 3, ans + 5, ans + 10]).forEach(n => { if (out.length < 3 && ok(n)) out.push(n); });
+  let extra = ans + 4;
+  while (out.length < 3) { if (ok(extra)) out.push(extra); extra++; }
+  return out;
+}
+// distinct pairs / rules, by value
+function uniqueByKey(list, keyFn, ansKey, need) {
+  const used = new Set([ansKey]); const out = [];
+  list.forEach(x => { const k = keyFn(x); if (out.length < need && !used.has(k)) { used.add(k); out.push(x); } });
+  return out;
+}
+
+// ---------- question shells ----------
+function base(label, g) {
+  return { topicLabel: label, promptText: g.prompt, bodyHtml: g.body || '', context: g.context || '', formula: '', steps: g.steps, meta: g.meta || {} };
+}
+function buildNumeric(label, g) {
+  const fmt = g.fmt || String;
+  return Object.assign(base(label, g), {
+    answerKind: 'numeric', correct: { display: fmt(g.answer), checkStr: String(g.answer), numeric: g.answer },
+    distractorsHtml: numericWrongs(g.answer, g.wrong, g.allowNeg).map(fmt),
+  });
+}
+const ptHtml = (p) => `(${sgn(p[0])}, ${sgn(p[1])})`;
+function buildPoint(label, g) {
+  const ans = g.answer;
+  const cands = (g.wrong || []).concat([[ans[1], ans[0]], [ans[0] + 1, ans[1]], [ans[0], ans[1] + 1], [ans[0] - 1, ans[1]], [ans[0], ans[1] - 1]])
+    .filter(p => p.every(Number.isInteger) && (g.allowNeg || p.every(n => n >= 0)));
+  const wr = uniqueByKey(shuffle(cands), key, key(ans), 3);
+  let k = 2; while (wr.length < 3) { const p = [ans[0] + k, ans[1]]; if (!wr.some(q => key(q) === key(p)) && key(p) !== key(ans)) wr.push(p); k++; }
+  return Object.assign(base(label, g), {
+    answerKind: 'point', correct: { display: ptHtml(ans), checkStr: ans.join(','), values: ans }, distractorsHtml: wr.map(ptHtml),
+  });
+}
+function buildRule(label, g) {      // answer {m,c}; g.yv/g.xv name the variables
+  const { m, c } = g.answer; const yv = g.yv || 'y', xv = g.xv || 'x';
+  const cands = (g.wrong || []).concat([
+    { m: c, c: m }, { m: m + 1, c }, { m: Math.max(1, m - 1), c }, { m, c: -c }, { m, c: c + 1 }, { m, c: c - 1 }, { m: -m, c }, { m: m + 2, c: c + 1 },
+  ]);
+  const wr = uniqueByKey(shuffle(cands.filter(r => r.m !== 0)), (r) => `${r.m},${r.c}`, `${m},${c}`, 3);
+  return Object.assign(base(label, g), {
+    answerKind: 'rule', correct: { display: ruleHtml(m, c, yv, xv), checkStr: `${m},${c}`, values: [m, c], yv, xv },
+    distractorsHtml: wr.map(r => ruleHtml(r.m, r.c, yv, xv)),
+  });
+}
+function buildChoice(label, g) {    // g.options: [{html}] in A, B, C... order
+  const L = 'ABCDE';
+  return Object.assign(base(label, g), {
+    answerKind: 'choice', correct: { display: g.options[L.indexOf(g.answer)].html, checkStr: g.answer, values: [g.answer] },
+    fixedChoices: g.options.map((o, i) => ({ html: o.html, correct: L[i] === g.answer })), distractorsHtml: [],
+  });
+}
+const IN = { '>': '&gt;', '<': '&lt;', '>=': '≥', '<=': '≤' };
+const ineqHtml = (v, op, n) => `${V(v)} ${IN[op]} ${sgn(n)}`;
+function buildIneq(label, g) {
+  const { op, n } = g.answer; const v = g.v || 'x';
+  const flip = { '>': '<', '<': '>', '>=': '<=', '<=': '>=' };
+  const loose = { '>': '>=', '<': '<=', '>=': '>', '<=': '<' };
+  const cands = [{ op: flip[op], n }, { op: loose[op], n }, { op, n: n + 1 }, { op, n: n - 1 }, { op: flip[op], n: n + 1 }, { op: loose[op], n: n + 1 }, { op, n: n + 2 }]
+    .concat(g.wrong || []);
+  const wr = uniqueByKey(shuffle(cands), (r) => `${r.op}${r.n}`, `${op}${n}`, 3);
+  return Object.assign(base(label, g), {
+    answerKind: 'ineq', correct: { display: ineqHtml(v, op, n), checkStr: `${op}${n}`, values: [op, n] },
+    distractorsHtml: wr.map(r => ineqHtml(v, r.op, r.n)),
+  });
+}
+
+// =========================================================================
+// SVG drawing
+// =========================================================================
+function plot(o) {
+  const xr = o.xmax - o.xmin, yr = o.ymax - o.ymin;
+  const W = 900, LM = o.leftMargin || 70, RM = 40, TM = 30, BM = o.bottomMargin || 70;
+  const pw = W - LM - RM, ph = Math.min(560, pw * yr / xr);
+  const H = ph + TM + BM;
+  const X = (x) => LM + pw * (x - o.xmin) / xr, Y = (y) => TM + ph * (o.ymax - y) / yr;
+  const xs = o.xs || 1, ys = o.ys || 1;
+  const axisY = (o.ymin <= 0 && o.ymax >= 0) ? 0 : o.ymin, axisX = (o.xmin <= 0 && o.xmax >= 0) ? 0 : o.xmin;
+  const fs = 24;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Graph" style="width:100%;max-width:880px;display:block;margin:0 auto;font-family:Verdana,sans-serif" data-plot="${JSON.stringify({ xmin: o.xmin, xmax: o.xmax, ymin: o.ymin, ymax: o.ymax, lines: o.lines || [], dots: (o.dots || []).map(d => [d.x, d.y, d.label || '']) }).replace(/"/g, '&quot;')}">`;
+  for (let x = Math.ceil(o.xmin / xs) * xs; x <= o.xmax; x += xs) s += `<line x1="${X(x)}" y1="${TM}" x2="${X(x)}" y2="${TM + ph}" stroke="#c9c7d6" stroke-width="1.5"/>`;
+  for (let y = Math.ceil(o.ymin / ys) * ys; y <= o.ymax; y += ys) s += `<line x1="${LM}" y1="${Y(y)}" x2="${LM + pw}" y2="${Y(y)}" stroke="#c9c7d6" stroke-width="1.5"/>`;
+  s += `<line x1="${LM}" y1="${Y(axisY)}" x2="${LM + pw}" y2="${Y(axisY)}" stroke="currentColor" stroke-width="3"/><line x1="${X(axisX)}" y1="${TM}" x2="${X(axisX)}" y2="${TM + ph}" stroke="currentColor" stroke-width="3"/>`;
+  const lab = (n) => (n < 0 ? `${MINUS}${-n}` : String(n));
+  for (let x = Math.ceil(o.xmin / xs) * xs; x <= o.xmax; x += xs) {
+    if (x === 0 && axisX === 0 && axisY === 0) continue;
+    const below = axisY === o.ymin || true;
+    s += `<text x="${X(x)}" y="${Y(axisY) + 30}" text-anchor="middle" font-size="${fs}" fill="currentColor">${lab(x)}</text>`;
+  }
+  for (let y = Math.ceil(o.ymin / ys) * ys; y <= o.ymax; y += ys) {
+    if (y === 0 && axisX === 0 && axisY === 0) continue;
+    s += `<text x="${X(axisX) - 12}" y="${Y(y) + 8}" text-anchor="end" font-size="${fs}" fill="currentColor">${lab(y)}</text>`;
+  }
+  if (axisX === 0 && axisY === 0) s += `<text x="${X(0) - 12}" y="${Y(0) + 30}" text-anchor="end" font-size="${fs}" fill="currentColor">0</text>`;
+  if (o.xTitle || o.yTitle) {
+    s += `<text x="${LM + pw / 2}" y="${H - 14}" text-anchor="middle" font-size="${fs}" fill="currentColor">${o.xTitle || ''}</text>`;
+    s += `<text x="24" y="${TM + ph / 2}" text-anchor="middle" font-size="${fs}" fill="currentColor" transform="rotate(-90 24 ${TM + ph / 2})">${o.yTitle || ''}</text>`;
+  } else {
+    s += `<text x="${LM + pw + 4}" y="${Y(axisY) - 10}" text-anchor="end" font-size="${fs + 2}" font-style="italic" font-weight="bold" fill="currentColor">x</text>`;
+    s += `<text x="${X(axisX) + 14}" y="${TM + 18}" font-size="${fs + 2}" font-style="italic" font-weight="bold" fill="currentColor">y</text>`;
+  }
+  (o.lines || []).forEach(l => { s += `<polyline fill="none" stroke="#6c5ce7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" points="${l.map(p => `${X(p[0])},${Y(p[1])}`).join(' ')}"/>`; });
+  (o.dots || []).forEach(d => {
+    s += `<circle cx="${X(d.x)}" cy="${Y(d.y)}" r="${d.label ? 10 : 8}" fill="${d.color || '#6c5ce7'}"/>`;
+    if (d.label) s += `<text x="${X(d.x) + (d.dx === undefined ? 16 : d.dx)}" y="${Y(d.y) + (d.dy === undefined ? -14 : d.dy)}" font-size="${fs + 4}" font-weight="bold" fill="currentColor">${d.label}</text>`;
+  });
+  return s + '</svg>';
+}
+function numberLine(min, max, n, op) {
+  const W = 900, H = 170, LM = 50, pw = W - 2 * LM, X = (v) => LM + pw * (v - min) / (max - min), y = 85;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Number line" style="width:100%;max-width:880px;display:block;margin:0 auto;font-family:Verdana,sans-serif" data-nl="${op}${n}">`;
+  s += `<line x1="${LM - 20}" y1="${y}" x2="${W - LM + 20}" y2="${y}" stroke="currentColor" stroke-width="4"/>`;
+  for (let v = min; v <= max; v++) s += `<line x1="${X(v)}" y1="${y - 12}" x2="${X(v)}" y2="${y + 12}" stroke="currentColor" stroke-width="3"/><text x="${X(v)}" y="${y + 50}" text-anchor="middle" font-size="26" fill="currentColor">${v}</text>`;
+  const right = op === '>' || op === '>=';
+  const x2 = right ? W - LM + 20 : LM - 20;
+  s += `<line x1="${X(n)}" y1="${y}" x2="${x2}" y2="${y}" stroke="#6c5ce7" stroke-width="9"/>`;
+  s += `<polygon points="${right ? `${x2},${y} ${x2 - 22},${y - 14} ${x2 - 22},${y + 14}` : `${x2},${y} ${x2 + 22},${y - 14} ${x2 + 22},${y + 14}`}" fill="#6c5ce7"/>`;
+  const filled = op === '>=' || op === '<=';
+  s += `<circle cx="${X(n)}" cy="${y}" r="13" fill="${filled ? '#6c5ce7' : '#ffffff'}" stroke="#6c5ce7" stroke-width="5"/>`;
+  return s + '</svg>';
+}
+function tableHtml(xv, xs, yv, ys, caption) {
+  const cell = 'border:2px solid #c9c7d6;padding:2px 16px;text-align:center;min-width:2.2em';
+  const hdr = 'border:2px solid #c9c7d6;padding:2px 16px;text-align:center;background:rgba(108,92,231,0.12)';
+  const c = (v) => (v === '?' ? `<td style="${cell};font-weight:bold;color:#6c5ce7">?</td>` : `<td style="${cell}">${sgn(v)}</td>`);
+  return `<table data-xs="${xs.join(',')}" data-ys="${ys.map(v => (v === '?' ? '?' : v)).join(',')}" style="margin:0 auto;border-collapse:collapse"><tr><th style="${hdr}">${V(xv)}</th>${xs.map(c).join('')}</tr><tr><th style="${hdr}">${V(yv)}</th>${ys.map(c).join('')}</tr></table>`;
+}
+
+// =========================================================================
+// 1. The Cartesian plane
+// =========================================================================
+function genCartesian(level) {
+  const T = 'The Cartesian Plane';
+  const range = level >= 2 ? 6 : 8, lo = level >= 2 ? -6 : 0;
+  const mk = (extra) => Object.assign({ xmin: lo, xmax: range, ymin: lo, ymax: range, xTitle: '', yTitle: '' }, extra);
+  const randPt = (nz) => { let p; do { p = [randInt(lo, range), randInt(lo, range)]; } while (nz && (p[0] === 0 || p[1] === 0)); return p; };
+  if (level === 0 || level === 2) {
+    const p = level === 0 ? [randInt(1, 8), randInt(1, 8)] : randPt(true);
+    const steps = [`Start at the origin (0, 0).`, `Move ${p[0] >= 0 ? 'right' : 'left'} ${Math.abs(p[0])} along the x-axis.`, `Then move ${p[1] >= 0 ? 'up' : 'down'} ${Math.abs(p[1])} parallel to the y-axis.`, `Answer: ${ptHtml(p)}`];
+    return buildPoint(T, { prompt: 'What are the coordinates of point A?', body: plot(mk({ dots: [{ x: p[0], y: p[1], label: 'A' }] })), answer: p, allowNeg: level === 2,
+      wrong: [[p[1], p[0]]].concat(level === 2 ? [[-p[0], p[1]], [p[0], -p[1]]] : []), steps, meta: { p } });
+  }
+  let pts, ask, answer, prompt, steps;
+  if (level === 1) {
+    const used = new Set(); pts = [];
+    while (pts.length < 4) { const p = [randInt(1, 8), randInt(1, 8)]; if (!used.has(key(p)) && !pts.some(q => q[0] === p[0] || q[1] === p[1])) { used.add(key(p)); pts.push(p); } }
+    const idx = randInt(0, 3); answer = 'ABCD'[idx];
+    prompt = `Which point is at (${pts[idx][0]}, ${pts[idx][1]})?`;
+    steps = [`Go along the x-axis to ${pts[idx][0]}, then up to ${pts[idx][1]}.`, `That is point ${answer}.`, `Answer: Point ${answer}`];
+  } else {
+    const quads = [[1, 1], [-1, 1], [-1, -1], [1, -1]];
+    const mode = randChoice(['quad', 'xaxis', 'yaxis']);
+    if (mode === 'quad') {
+      const order = shuffle([0, 1, 2, 3]);
+      pts = order.map(q => [quads[q][0] * randInt(1, 6), quads[q][1] * randInt(1, 6)]);
+      const qi = randInt(0, 3); const qIdx = order[qi]; answer = 'ABCD'[qi];
+      const names = ['first', 'second', 'third', 'fourth'], where = ['positive x and positive y', 'negative x and positive y', 'negative x and negative y', 'positive x and negative y'];
+      prompt = `Which point is in the ${names[qIdx]} quadrant?`;
+      steps = [`The ${names[qIdx]} quadrant has ${where[qIdx]}.`, `Point ${answer} is at ${ptHtml(pts[qi])}.`, `Answer: Point ${answer}`];
+    } else {
+      const special = mode === 'xaxis' ? [randChoice([-1, 1]) * randInt(1, 6), 0] : [0, randChoice([-1, 1]) * randInt(1, 6)];
+      const other = mode === 'xaxis' ? [0, randChoice([-1, 1]) * randInt(1, 6)] : [randChoice([-1, 1]) * randInt(1, 6), 0];
+      do { pts = [special, other, randPt(true), randPt(true)]; } while (new Set(pts.map(key)).size < 4);
+      const order = shuffle([0, 1, 2, 3]); pts = order.map(i => pts[i]); answer = 'ABCD'[order.indexOf(0)];
+      prompt = `Which point is on the ${mode === 'xaxis' ? 'x' : 'y'}-axis?`;
+      steps = [mode === 'xaxis' ? `A point on the x-axis has a y-coordinate of 0.` : `A point on the y-axis has an x-coordinate of 0.`, `Point ${answer} is at ${ptHtml(pts[order.indexOf(0)])}.`, `Answer: Point ${answer}`];
+    }
+  }
+  return buildChoice(T, { prompt, body: plot(mk({ dots: pts.map((p, i) => ({ x: p[0], y: p[1], label: 'ABCD'[i] })) })),
+    options: 'ABCD'.split('').map(l => ({ html: `Point ${l}` })), answer, steps, meta: { pts, answer, prompt } });
+}
+
+// =========================================================================
+// 2. Tables of values
+// =========================================================================
+function genTableValues(level) {
+  const T = 'Tables of Values';
+  let m, c, xs;
+  if (level === 0) { if (Math.random() < 0.5) { m = 1; c = randInt(1, 9); } else { m = randInt(2, 5); c = 0; } xs = [0, 1, 2, 3, 4]; if (c === 0) xs = [1, 2, 3, 4, 5]; }
+  else if (level === 1) { m = randInt(2, 5); c = randInt(1, 9); xs = [0, 1, 2, 3, 4]; }
+  else if (level === 2) { m = randInt(2, 5); c = -randInt(1, 2 * m); xs = [2, 3, 4, 5, 6]; }
+  else { m = -randInt(1, 4); c = randInt(4, 6) * -m; xs = [0, 1, 2, 3, 4]; }
+  const ys = xs.map(x => m * x + c);
+  const idx = randInt(0, 4);
+  const askX = level === 3 && Math.random() < 0.4;
+  const rule = ruleHtml(m, c);
+  const shownXs = xs.slice(), shownYs = ys.slice();
+  let answer, steps, wrong;
+  if (askX) { shownXs[idx] = '?'; answer = xs[idx]; wrong = [ys[idx], c - ys[idx], Math.round(ys[idx] / -m)];
+    steps = [`The rule is ${rule}, and y = ${ys[idx]} in the missing column.`, `${ys[idx]} = ${c} ${MINUS} ${-m}${V('x')}, so ${-m}${V('x')} = ${c} ${MINUS} ${ys[idx]} = ${c - ys[idx]}.`, `${V('x')} = ${c - ys[idx]} ${DIV} ${-m} = ${answer}`, `Answer: ${answer}`]; }
+  else { shownYs[idx] = '?'; answer = ys[idx]; const x = xs[idx];
+    const sub = m === 1 && c > 0 ? `${x} + ${c}` : c === 0 ? `${m} ${TIMES} ${x}` : m < 0 ? `${c} ${MINUS} ${-m} ${TIMES} ${x}` : c > 0 ? `${m} ${TIMES} ${x} + ${c}` : `${m} ${TIMES} ${x} ${MINUS} ${-c}`;
+    wrong = [m * x, m + x + c, c > 0 ? m * x - c : m * x + (-c), (m > 0 ? m * x : -m * x) + Math.abs(c)];
+    steps = [`Substitute ${V('x')} = ${x} into the rule ${rule}.`, `${V('y')} = ${sub}`, `${V('y')} = ${answer}`, `Answer: ${answer}`]; }
+  return buildNumeric(T, { prompt: `Complete the table for the rule above. What is the missing value?`, context: `Rule: ${rule}`, body: tableHtml('x', shownXs, 'y', shownYs), answer, wrong, allowNeg: false, steps, meta: { m, c, xs: shownXs, ys: shownYs, askX } });
+}
+
+// =========================================================================
+// 3. Finding the rule
+// =========================================================================
+function genFindRule(level) {
+  const T = 'Finding the Rule';
+  let m, c, xs = [1, 2, 3, 4, 5].slice(0, 4);
+  if (level === 0) { m = 1; c = randInt(1, 9); }
+  else if (level === 1) { m = randInt(2, 6); c = 0; }
+  else if (level === 2) { m = randInt(2, 5); c = randInt(1, 9); xs = Math.random() < 0.5 ? [0, 1, 2, 3] : [1, 2, 3, 4]; }
+  else { if (Math.random() < 0.5) { m = randInt(2, 5); c = -randInt(1, m); xs = [2, 3, 4, 5]; } else { m = -randInt(1, 4); c = randInt(4, 6) * -m; xs = [0, 1, 2, 3]; } if (Math.random() < 0.3 && m > 0) xs = [2, 4, 6, 8]; }
+  const ys = xs.map(x => m * x + c);
+  const step = xs[1] - xs[0];
+  const steps = [];
+  if (m === 1 && level === 0) steps.push(`${V('y')} is always ${c} more than ${V('x')}.`);
+  else {
+    steps.push(`Look at how ${V('y')} changes: it ${m > 0 ? 'goes up' : 'goes down'} by ${Math.abs(m * step)} each time ${V('x')} goes up by ${step}.`);
+    steps.push(`So the number in front of ${V('x')} is ${sgn(m)}${step === 1 ? '' : ` (${Math.abs(m * step)} ${DIV} ${step})`}.`);
+  }
+  if (c !== 0 && !(m === 1 && level === 0)) steps.push(`Check ${V('x')} = ${xs[0]}: ${sgn(m)} ${TIMES} ${xs[0]} = ${sgn(m * xs[0])}, but ${V('y')} = ${ys[0]}, so ${c > 0 ? 'add' : 'subtract'} ${Math.abs(c)}.`);
+  steps.push(`Answer: ${ruleHtml(m, c)}`);
+  return buildRule(T, { prompt: 'Find the rule for this table:', body: tableHtml('x', xs, 'y', ys), answer: { m, c }, steps, meta: { xs, ys, m, c } });
+}
+
+// =========================================================================
+// 4. Finding x when given y on a graph
+// =========================================================================
+function genReadX(level) {
+  const T = 'Finding x from a Graph';
+  for (let guard = 0; guard < 500; guard++) {
+    let a, b, xmax, ys;
+    if (level === 0) { a = randInt(1, 3); b = 0; xmax = 6; ys = a; }
+    else if (level === 1) { a = randInt(1, 3); b = randInt(1, 4); xmax = 6; ys = a >= 3 ? 2 : 1; }
+    else if (level === 2) { a = randChoice([5, 10]); b = 0; xmax = 6; ys = a; }
+    else { a = randChoice([2, 3, 4, 5, 6]); b = randChoice([5, 10, 15]); xmax = 6; ys = 5; }
+    const ymaxRaw = a * xmax + b; const ymax = Math.ceil(ymaxRaw / ys) * ys;
+    if (ymax / ys > 12) continue;
+    const x = randInt(2, xmax - 1), y = a * x + b;
+    if (y % ys !== 0) continue;
+    const g = plot({ xmin: 0, xmax, ymin: 0, ymax, xs: 1, ys, lines: [[[0, b], [xmax, a * xmax + b]]] });
+    const steps = [`Find ${V('y')} = ${y} on the vertical axis.`, `Go across to the line, then straight down to the x-axis.`, `Answer: ${V('x')} = ${x}`];
+    return buildNumeric(T, { prompt: `Use the graph to find x when y = ${y}.`, body: g, answer: x, fmt: (n) => `${V('x')} = ${n}`, wrong: [y, y / a, x + 1, x - 1, a * x, x * 2], steps, meta: { a, b, x, y } });
+  }
+  return genReadX(0);
+}
+
+// =========================================================================
+// 5. x- and y-intercepts
+// =========================================================================
+function genIntercepts(level) {
+  const T = 'x- and y-Intercepts';
+  const ptAns = (p) => ({ answer: p, wrong: [[p[1], p[0]], [p[0], p[0]], [p[1], p[1]]] });
+  if (level <= 1) {
+    if (level === 0) {                                    // y-intercept of an increasing line
+      for (let g = 0; g < 200; g++) {
+        const a = randInt(1, 2), b = randInt(1, 6), xmax = 6, top = a * xmax + b, ys = top > 10 ? 2 : 1;
+        if (b % ys) continue;
+        const ymax = Math.ceil(top / ys) * ys;
+        const gr = plot({ xmin: 0, xmax, ymin: 0, ymax, xs: 1, ys, lines: [[[0, b], [xmax, top]]] });
+        return buildPoint(T, Object.assign(ptAns([0, b]), { prompt: 'What are the coordinates of the y-intercept?', body: gr, steps: [`The y-intercept is where the line crosses the y-axis.`, `It crosses at ${V('y')} = ${b}, and ${V('x')} is 0 on the y-axis.`, `Answer: (0, ${b})`], meta: { kind: 'y', p: [0, b] } }));
+      }
+    }
+    for (let g = 0; g < 200; g++) {
+      const sl = randInt(1, 3), xi = randInt(2, 5), b = sl * xi, ys = b > 10 ? 2 : 1;
+      if (b > 12 || b % ys) continue;
+      const which = randChoice(['x', 'y']);
+      const gr = plot({ xmin: 0, xmax: xi + 2, ymin: 0, ymax: b + ys, xs: 1, ys, lines: [[[0, b], [xi, 0]]] });
+      const p = which === 'x' ? [xi, 0] : [0, b];
+      return buildPoint(T, Object.assign(ptAns(p), { prompt: `What are the coordinates of the ${which}-intercept?`, body: gr,
+        steps: [`The ${which}-intercept is where the line crosses the ${which}-axis.`, which === 'x' ? `It crosses at ${V('x')} = ${xi}, and ${V('y')} is 0 on the x-axis.` : `It crosses at ${V('y')} = ${b}, and ${V('x')} is 0 on the y-axis.`, `Answer: ${ptHtml(p)}`], meta: { kind: which, p } }));
+    }
+  }
+  if (level === 2) {
+    const which = randChoice(['x', 'y']);
+    if (which === 'y') { const a = randInt(1, 6), b = randInt(1, 12); return buildPoint(T, Object.assign(ptAns([0, b]), { prompt: 'Find the y-intercept.', context: ruleHtml(a, b), body: '', steps: [`The y-intercept is where ${V('x')} = 0.`, `${V('y')} = ${a} ${TIMES} 0 + ${b} = ${b}`, `Answer: (0, ${b})`], meta: { kind: 'y', p: [0, b], a, b } })); }
+    const a = randInt(1, 4), xi = randInt(2, 6), b = a * xi;
+    return buildPoint(T, Object.assign(ptAns([xi, 0]), { prompt: 'Find the x-intercept.', context: ruleHtml(-a, b), body: '', steps: [`The x-intercept is where ${V('y')} = 0.`, `0 = ${b} ${MINUS} ${a}${V('x')}`, `${a}${V('x')} = ${b}, so ${V('x')} = ${b} ${DIV} ${a} = ${xi}`, `Answer: (${xi}, 0)`], meta: { kind: 'x', p: [xi, 0], a, b } }));
+  }
+  const A = randInt(1, 5), B = randInt(1, 5); let k = randInt(1, 4); const L = (function lcm(p, q) { let g = p, h = q; while (h) { [g, h] = [h, g % h]; } return p * q / g; })(A, B);
+  const C = L * k, xi = C / A, yi = C / B, which = randChoice(['x', 'y']);
+  const eqn = `${A === 1 ? '' : A}${V('x')} + ${B === 1 ? '' : B}${V('y')} = ${C}`;
+  const p = which === 'x' ? [xi, 0] : [0, yi];
+  return buildPoint(T, Object.assign(ptAns(p), { prompt: `Find the ${which}-intercept.`, context: eqn, body: '',
+    steps: which === 'x' ? [`The x-intercept is where ${V('y')} = 0.`, A === 1 ? `${V('x')} = ${C}` : `${A}${V('x')} = ${C}, so ${V('x')} = ${C} ${DIV} ${A} = ${xi}`, `Answer: (${xi}, 0)`] : [`The y-intercept is where ${V('x')} = 0.`, B === 1 ? `${V('y')} = ${C}` : `${B}${V('y')} = ${C}, so ${V('y')} = ${C} ${DIV} ${B} = ${yi}`, `Answer: (0, ${yi})`], meta: { kind: which, p, A, B, C } }));
+}
+
+// =========================================================================
+// 6. Applications
+// =========================================================================
+const APPS = [
+  { who: (f, r) => `A taxi charges a $${f} flag-fall plus $${r} for every kilometre.`, x: 'd', y: 'C', unitX: 'kilometres', unit1: 'km', yWord: 'cost', xWord: 'distance', money: true, rate: 'per kilometre', fixed: 'flag-fall', xTitle: 'Distance (km)', yTitle: 'Cost ($)', perQ: 'How much does each kilometre cost?' },
+  { who: (f, r) => `A plumber charges a $${f} call-out fee plus $${r} for each hour of work.`, x: 'h', y: 'C', unitX: 'hours', unit1: 'h', yWord: 'cost', xWord: 'hours', money: true, rate: 'per hour', fixed: 'call-out fee', xTitle: 'Time (hours)', yTitle: 'Cost ($)', perQ: 'How much does each hour of work cost?' },
+  { who: (f, r) => `A phone plan costs $${f} a month plus $${r} for each gigabyte of data used.`, x: 'g', y: 'C', unitX: 'gigabytes', unit1: 'GB', yWord: 'monthly cost', xWord: 'data', money: true, rate: 'per gigabyte', fixed: 'monthly fee', xTitle: 'Data (GB)', yTitle: 'Cost ($)', perQ: 'How much does each gigabyte cost?' },
+  { who: (f, r) => `Mia has $${f} saved and adds $${r} to her savings every week.`, x: 'w', y: 'S', unitX: 'weeks', unit1: 'wk', yWord: 'savings', xWord: 'weeks', money: true, rate: 'per week', fixed: 'starting amount', xTitle: 'Time (weeks)', yTitle: 'Savings ($)', perQ: 'How much is added each week?' },
+];
+function genApplication(level) {
+  const T = 'Applications';
+  const s = randChoice(APPS);
+  const fmtM = (n) => `$${n}`;
+  if (level === 3) {
+    for (let g = 0; g < 500; g++) {
+      const ystep = randChoice([2, 5, 10]), f = ystep * randInt(1, 3), r = ystep * randInt(1, 2), xmax = randInt(3, 4), ymaxRaw = f + r * xmax;
+      if (ymaxRaw / ystep > 10) continue;
+      const ask = randChoice(['fixed', 'rate']);
+      const graph = plot({ xmin: 0, xmax, ymin: 0, ymax: ymaxRaw, xs: 1, ys: ystep, lines: [[[0, f], [xmax, ymaxRaw]]], dots: Array.from({ length: xmax + 1 }, (_, i) => ({ x: i, y: f + r * i })), xTitle: s.xTitle, yTitle: s.yTitle, leftMargin: 90 });
+      const prompt = ask === 'fixed' ? `What is the ${s.fixed}?` : s.perQ;
+      const answer = ask === 'fixed' ? f : r;
+      const steps = ask === 'fixed' ? [`The ${s.fixed} is the value when ${s.xWord} is 0, where the line meets the vertical axis.`, `Answer: $${f}`]
+        : [`Read two points on the line: (0, ${f}) and (1, ${f + r}).`, `The ${s.yWord} goes up by $${r} for each extra ${s.unitX.replace(/s$/, '')}.`, `Answer: $${r}`];
+      return buildNumeric(T, { context: `The graph shows the ${s.yWord} against the ${s.xWord}.`, prompt, body: graph, answer, fmt: fmtM, wrong: [f + r, ymaxRaw, r, f, f + 2 * r], steps, meta: { f, r, ask } });
+    }
+  }
+  const f = randInt(2, level === 0 ? 10 : 12) * (level === 0 ? 1 : 1), r = randInt(2, 9), n = randInt(2, 9);
+  const ruleTxt = `${V(s.y)} = ${r}${V(s.x)} + ${f}`;
+  if (level === 0) {
+    const ans = f + r * n;
+    return buildNumeric(T, { context: s.who(f, r), prompt: `What is the ${s.yWord} for ${n} ${n === 1 ? s.unitX.replace(/s$/, '') : s.unitX}?`, answer: ans, fmt: fmtM, wrong: [f * n + r, (f + r) * n, r * n, ans + f],
+      steps: [`${n} ${s.unitX} at $${r} each: ${r} ${TIMES} ${n} = ${r * n}.`, `Add the ${s.fixed}: ${r * n} + ${f} = ${ans}.`, `Answer: $${ans}`], meta: { f, r, n, ans } });
+  }
+  if (level === 1) {
+    const total = f + r * n;
+    return buildNumeric(T, { context: s.who(f, r), prompt: `The ${s.yWord} is $${total}. How many ${s.unitX} is that?`, answer: n, fmt: (v) => `${v} ${s.unitX}`, wrong: [Math.round(total / r) || 1, total - f, n + 1, n - 1, f],
+      steps: [`Take off the ${s.fixed}: ${total} ${MINUS} ${f} = ${total - f}.`, `Divide by the $${r} ${s.rate}: ${total - f} ${DIV} ${r} = ${n}.`, `Answer: ${n} ${s.unitX}`], meta: { f, r, n, total } });
+  }
+  return buildRule(T, { context: s.who(f, r), prompt: `Write a rule for the ${s.yWord} ${V(s.y)} in terms of the ${s.xWord} ${V(s.x)}.`, answer: { m: r, c: f }, yv: s.y, xv: s.x,
+    steps: [`The rate is $${r} ${s.rate}, so the part that depends on ${V(s.x)} is ${r}${V(s.x)}.`, `Add the ${s.fixed} of $${f}.`, `Answer: ${ruleTxt}`], meta: { f, r } });
+}
+
+// =========================================================================
+// 7. Gradient
+// =========================================================================
+function genGradient(level) {
+  const T = 'Gradient';
+  if (level <= 1) {
+    for (let g = 0; g < 300; g++) {
+      const a = randInt(1, 4), b = level === 0 ? 0 : randInt(1, 3), x1 = randInt(0, 2), x2 = x1 + randInt(2, 3);
+      const xmax = 6, ymax = a * xmax + b; if (x2 > xmax) continue; const ys = ymax > 12 ? 2 : 1; if (ys === 2 && (b % 2 || a % 2)) continue;
+      const P = [x1, a * x1 + b], Q = [x2, a * x2 + b];
+      const gr = plot({ xmin: 0, xmax, ymin: 0, ymax: Math.ceil(ymax / ys) * ys, xs: 1, ys, lines: [[[0, b], [xmax, ymax]]], dots: [{ x: P[0], y: P[1], label: 'P', dx: 14, dy: 30 }, { x: Q[0], y: Q[1], label: 'Q', dx: 14, dy: 30 }] });
+      const rise = Q[1] - P[1], run = Q[0] - P[0];
+      return buildNumeric(T, { prompt: 'What is the gradient of the line?', body: gr, answer: a, wrong: [rise, run, rise + run, a + 1],
+        steps: [`Choose two points: P ${ptHtml(P)} and Q ${ptHtml(Q)}.`, `Rise = ${Q[1]} ${MINUS} ${P[1]} = ${rise}, run = ${Q[0]} ${MINUS} ${P[0]} = ${run}.`, `Gradient = rise ${DIV} run = ${rise} ${DIV} ${run} = ${a}`, `Answer: ${a}`], meta: { a, b, P, Q } });
+    }
+  }
+  if (level === 2) {
+    const a = randInt(2, 6), x1 = randInt(1, 4), x2 = x1 + randInt(2, 4), y1 = randInt(1, 8), y2 = y1 + a * (x2 - x1);
+    return buildNumeric(T, { prompt: `Find the gradient of the line through (${x1}, ${y1}) and (${x2}, ${y2}).`, answer: a, wrong: [y2 - y1, x2 - x1, (y2 - y1) + (x2 - x1), a + 1],
+      steps: [`Rise = ${y2} ${MINUS} ${y1} = ${y2 - y1}`, `Run = ${x2} ${MINUS} ${x1} = ${x2 - x1}`, `Gradient = ${y2 - y1} ${DIV} ${x2 - x1} = ${a}`, `Answer: ${a}`], meta: { a, p1: [x1, y1], p2: [x2, y2] } });
+  }
+  const a = randInt(2, 5), x1 = randInt(1, 3), x2 = x1 + randInt(2, 4), y1 = randInt(2, 8), k = y1 + a * (x2 - x1);
+  return buildNumeric(T, { context: `A line passes through (${x1}, ${y1}) and (${x2}, k). Its gradient is ${a}.`, prompt: 'Find the value of k.', answer: k, wrong: [a * (x2 - x1), y1 + a, k - y1, y1 + a * x2],
+    steps: [`The run is ${x2} ${MINUS} ${x1} = ${x2 - x1}.`, `Rise = gradient ${TIMES} run = ${a} ${TIMES} ${x2 - x1} = ${a * (x2 - x1)}.`, `${V('k')} = ${y1} + ${a * (x2 - x1)} = ${k}`, `Answer: ${k}`], meta: { a, p1: [x1, y1], x2, k } });
+}
+
+// =========================================================================
+// 8. Gradient-intercept form
+// =========================================================================
+function genGradInt(level) {
+  const T = 'Gradient–Intercept Form';
+  if (level <= 1) {
+    const m = randInt(2, 9), c = randInt(1, 9), form = level === 1 && Math.random() < 0.5 ? 'cfirst' : 'std';
+    const eq = form === 'cfirst' ? `${V('y')} = ${c} + ${m}${V('x')}` : ruleHtml(m, c);
+    const askM = level === 0 ? true : Math.random() < 0.5;
+    return buildNumeric(T, { context: eq, prompt: askM ? 'What is the gradient?' : 'What is the y-intercept?', answer: askM ? m : c, wrong: askM ? [c, m + c, m + 1, m - 1] : [m, m + c, c + 1, c - 1],
+      steps: [`In ${V('y')} = ${V('m')}${V('x')} + ${V('c')}, the gradient is ${V('m')} (the number multiplying ${V('x')}) and the y-intercept is ${V('c')} (the number on its own).`, `For ${eq}: ${V('m')} = ${m} and ${V('c')} = ${c}.`, `Answer: ${askM ? m : c}`], meta: { m, c, askM } });
+  }
+  const m = randInt(2, 6), c = randInt(1, 9);
+  if (level === 2) {
+    return buildRule(T, { prompt: `A line has a gradient of ${m} and a y-intercept of ${c}. Write its equation.`, answer: { m, c },
+      steps: [`Use ${V('y')} = ${V('m')}${V('x')} + ${V('c')}.`, `Put in ${V('m')} = ${m} and ${V('c')} = ${c}.`, `Answer: ${ruleHtml(m, c)}`], meta: { m, c } });
+  }
+  const run = randInt(1, 2), a = randInt(1, 3), b = randInt(1, 4);        // graph with the y-intercept and a second dot
+  const xmax = 6, ymaxRaw = a * xmax + b, ys = ymaxRaw > 12 ? 2 : 1;
+  if (ys === 2 && (a % 2 || b % 2)) return genGradInt(3);
+  const P = [0, b], Q = [2, 2 * a + b];
+  const gr = plot({ xmin: 0, xmax, ymin: 0, ymax: Math.ceil(ymaxRaw / ys) * ys, xs: 1, ys, lines: [[[0, b], [xmax, ymaxRaw]]], dots: [{ x: P[0], y: P[1], label: 'P', dx: 14, dy: 30 }, { x: Q[0], y: Q[1], label: 'Q', dx: 14, dy: 30 }] });
+  return buildRule(T, { prompt: 'Write the equation of the line.', body: gr, answer: { m: a, c: b },
+    steps: [`The line crosses the y-axis at P ${ptHtml(P)}, so the y-intercept is ${b}.`, `From P to Q ${ptHtml(Q)}: rise = ${Q[1] - P[1]}, run = ${Q[0] - P[0]}, so the gradient is ${Q[1] - P[1]} ${DIV} ${Q[0] - P[0]} = ${a}.`, `Answer: ${ruleHtml(a, b)}`], meta: { a, b, P, Q } });
+}
+
+// =========================================================================
+// 9. Inequalities
+// =========================================================================
+function genInequality(level) {
+  const T = 'Inequalities';
+  const v = 'x';
+  if (level === 0) {
+    const n = randInt(2, 12);
+    const kinds = [['greater than', '>'], ['less than', '<'], ['at least', '>='], ['at most', '<=']];
+    const [w, op] = randChoice(level === 0 ? kinds.slice(0, 2) : kinds);
+    return buildIneq(T, { prompt: 'Write this using inequality symbols:', body: `${V(v)} is ${w} ${n}`, answer: { op, n }, steps: [`"${w}" means ${IN[op]}.`, `Answer: ${ineqHtml(v, op, n)}`], meta: { op, n } });
+  }
+  if (level === 1) {
+    const n = randInt(2, 8), op = randChoice(['>', '<', '>=', '<=']);
+    const hasText = { '>': 'an open circle (the number itself is not included) and the line goes to the right', '<': 'an open circle (the number itself is not included) and the line goes to the left', '>=': 'a filled circle (the number itself is included) and the line goes to the right', '<=': 'a filled circle (the number itself is included) and the line goes to the left' }[op];
+    return buildIneq(T, { prompt: 'Which inequality does the number line show?', body: numberLine(0, 10, n, op), answer: { op, n }, steps: [`The circle is at ${n}: ${hasText}.`, `Answer: ${ineqHtml(v, op, n)}`], meta: { op, n } });
+  }
+  if (level === 2) {
+    const op = randChoice(['>', '<', '>=', '<=']), form = randChoice(['add', 'sub', 'mul']);
+    const n = randInt(2, 9);
+    if (form === 'mul') { const a = randInt(2, 5); return buildIneq(T, { prompt: 'Solve the inequality:', body: `${a}${V(v)} ${IN[op]} ${a * n}`, answer: { op, n }, steps: [`Divide both sides by ${a}.`, `${V(v)} ${IN[op]} ${a * n} ${DIV} ${a}`, `Answer: ${ineqHtml(v, op, n)}`], meta: { op, n, a, form } }); }
+    const b = randInt(1, 9);
+    if (form === 'add') return buildIneq(T, { prompt: 'Solve the inequality:', body: `${V(v)} + ${b} ${IN[op]} ${n + b}`, answer: { op, n }, steps: [`Subtract ${b} from both sides.`, `${V(v)} ${IN[op]} ${n + b} ${MINUS} ${b}`, `Answer: ${ineqHtml(v, op, n)}`], meta: { op, n, b, form } });
+    { const r = randInt(1, 9), nn = r + b; return buildIneq(T, { prompt: 'Solve the inequality:', body: `${V(v)} ${MINUS} ${b} ${IN[op]} ${r}`, answer: { op, n: nn }, steps: [`Add ${b} to both sides.`, `${V(v)} ${IN[op]} ${r} + ${b}`, `Answer: ${ineqHtml(v, op, nn)}`], meta: { op, n: nn, b, form } }); }
+  }
+  const op = randChoice(['>', '<', '>=', '<=']), a = randInt(2, 5), b = randInt(1, 9), n = randInt(2, 8), plus = Math.random() < 0.5;
+  const rhs = plus ? a * n + b : a * n - b;
+  if (rhs <= 0) return genInequality(3);
+  return buildIneq(T, { prompt: 'Solve the inequality:', body: plus ? `${a}${V(v)} + ${b} ${IN[op]} ${rhs}` : `${a}${V(v)} ${MINUS} ${b} ${IN[op]} ${rhs}`, answer: { op, n },
+    steps: [plus ? `Subtract ${b} from both sides: ${a}${V(v)} ${IN[op]} ${rhs - b}.` : `Add ${b} to both sides: ${a}${V(v)} ${IN[op]} ${rhs + b}.`, `Divide both sides by ${a}: ${V(v)} ${IN[op]} ${n}.`, `Answer: ${ineqHtml(v, op, n)}`], meta: { op, n, a, b, plus, rhs } });
+}
+
+// =========================================================================
+// 10. Non-linear graphs
+// =========================================================================
+function panelSvg(kind, ox, oy, letter) {
+  const w = 410, h = 340, L = 50, B = 40, bw = w - L - 20, bh = h - B - 24;
+  const P = (u, v) => `${ox + L + bw * u},${oy + 24 + bh * (1 - v)}`;
+  let pts = [];
+  const N = 40;
+  for (let i = 0; i <= N; i++) {
+    const u = 0.04 + 0.92 * i / N; let v;
+    if (kind.t === 'line') v = kind.v0 + (kind.v1 - kind.v0) * (u - 0.04) / 0.92;
+    else if (kind.t === 'parab') v = 4 * (u - 0.5) * (u - 0.5) * 0.9 + 0.05;
+    else if (kind.t === 'parabd') v = 0.95 - 4 * (u - 0.5) * (u - 0.5) * 0.9;
+    else if (kind.t === 'exp') v = 0.04 + 0.92 * (Math.exp(3.2 * (u - 0.04) / 0.92) - 1) / (Math.exp(3.2) - 1);
+    else v = 0.04 + 0.92 * Math.sqrt((u - 0.04) / 0.92);
+    pts.push(P(u, v));
+  }
+  let s = `<rect x="${ox + 4}" y="${oy + 4}" width="${w - 8}" height="${h - 8}" rx="14" fill="none" stroke="#c9c7d6" stroke-width="2"/>`;
+  s += `<line x1="${ox + L}" y1="${oy + 24}" x2="${ox + L}" y2="${oy + 24 + bh}" stroke="currentColor" stroke-width="3"/><line x1="${ox + L}" y1="${oy + 24 + bh}" x2="${ox + L + bw}" y2="${oy + 24 + bh}" stroke="currentColor" stroke-width="3"/>`;
+  s += `<polyline fill="none" stroke="#6c5ce7" stroke-width="6" stroke-linecap="round" points="${pts.join(' ')}"/>`;
+  s += `<text x="${ox + 20}" y="${oy + 32}" font-size="30" font-weight="bold" fill="currentColor">${letter}</text>`;
+  return s;
+}
+function genNonlinear(level) {
+  const T = 'Non-Linear Graphs';
+  const L = 'ABCD';
+  const lines = () => { const pairs = shuffle([[0.1, 0.9], [0.9, 0.1], [0.3, 0.7], [0.1, 0.5], [0.5, 0.95], [0.9, 0.5], [0.05, 0.4]]); return pairs.map(p => ({ t: 'line', v0: p[0], v1: p[1] })); };
+  const curves = () => shuffle([{ t: 'parab' }, { t: 'parabd' }, { t: 'exp' }, { t: 'sqrt' }]);
+  if (level <= 1) {
+    const wantLinear = level === 0;
+    const odd = wantLinear ? lines()[0] : curves()[0];
+    const others = (wantLinear ? curves() : lines()).slice(0, 3);
+    const order = shuffle([0, 1, 2, 3]); const all = [odd, ...others]; const kinds = order.map(i => all[i]);
+    const answer = L[order.indexOf(0)];
+    let svg = `<svg viewBox="0 0 900 740" role="img" aria-label="Four graphs" style="width:100%;max-width:880px;display:block;margin:0 auto;font-family:Verdana,sans-serif" data-kinds="${kinds.map(k => k.t).join(',')}">`;
+    [[20, 20], [470, 20], [20, 380], [470, 380]].forEach((o, i) => { svg += panelSvg(kinds[i], o[0], o[1], L[i]); });
+    svg += '</svg>';
+    return buildChoice(T, { prompt: wantLinear ? 'Which graph shows a linear relationship (a straight line)?' : 'Which graph is non-linear?', body: svg, options: L.split('').map(l => ({ html: `Graph ${l}` })), answer,
+      steps: [wantLinear ? `A linear relationship makes a straight line.` : `A non-linear relationship makes a curve, not a straight line.`, `Graph ${answer} is the ${wantLinear ? 'straight line' : 'curve'}.`, `Answer: Graph ${answer}`], meta: { kinds: kinds.map(k => k.t), answer, wantLinear } });
+  }
+  if (level === 2) {
+    const wantLinear = Math.random() < 0.5;
+    const xs = [0, 1, 2, 3, 4];
+    const linearTable = () => { const m = randInt(2, 5), c = randInt(0, 6); return xs.map(x => m * x + c); };
+    const nonlin = () => { const t = randChoice(['sq', 'sqc', 'dbl', 'tri', 'cube']); return t === 'sq' ? xs.map(x => x * x) : t === 'sqc' ? (() => { const c = randInt(1, 5); return xs.map(x => x * x + c); })() : t === 'dbl' ? (() => { const c = randInt(1, 3); return xs.map(x => c * Math.pow(2, x)); })() : t === 'tri' ? xs.map(x => x * (x + 1) / 2) : xs.map(x => x * x * x); };
+    const odd = wantLinear ? linearTable() : nonlin();
+    const others = wantLinear ? [nonlin(), nonlin()] : [linearTable(), linearTable()];
+    // all three must be distinct
+    const sig = (t) => t.join(',');
+    const tabs = [odd, ...others]; if (new Set(tabs.map(sig)).size < 3) return genNonlinear(2);
+    const order = shuffle([0, 1, 2]); const arranged = order.map(i => tabs[i]); const answer = 'ABC'[order.indexOf(0)];
+    const body = arranged.map((t, i) => `<div style="margin:8px 0"><b>${'ABC'[i]}</b>${tableHtml('x', xs, 'y', t)}</div>`).join('');
+    const diffs = (t) => t.slice(1).map((v, i) => v - t[i]);
+    return buildChoice(T, { prompt: wantLinear ? 'Which table shows a linear relationship?' : 'Which table shows a non-linear relationship?', body, options: [{ html: 'Table A' }, { html: 'Table B' }, { html: 'Table C' }], answer,
+      steps: [`In a linear relationship, y changes by the same amount each time x goes up by 1.`, `Table ${answer}: the changes are ${diffs(odd).join(', ')}, which ${wantLinear ? 'are all the same' : 'are not all the same'}.`, `Answer: Table ${answer}`], meta: { tabs: arranged, answer, wantLinear } });
+  }
+  if (Math.random() < 0.5) {
+    const eqs = shuffle([[`${V('y')} = ${randInt(2, 5)}${V('x')} + ${randInt(1, 6)}`, true], [`${V('y')} = ${randInt(2, 6)}${V('x')}`, true], [`${V('y')} = ${randInt(10, 20)} ${MINUS} ${randInt(2, 4)}${V('x')}`, true],
+      [`${V('y')} = ${V('x')}<sup>2</sup>`, false], [`${V('y')} = ${V('x')}<sup>2</sup> + ${randInt(1, 5)}`, false], [`${V('y')} = ${randInt(2, 4)}${V('x')}<sup>2</sup>`, false], [`${V('y')} = ${V('x')}<sup>3</sup>`, false]]);
+    const lin = eqs.filter(e => e[1]).slice(0, 3), non = eqs.filter(e => !e[1])[0];
+    const order = shuffle([0, 1, 2, 3]); const all = [non, ...lin]; const arr = order.map(i => all[i]); const answer = 'ABCD'[order.indexOf(0)];
+    const body = arr.map((e, i) => `<div style="margin:6px 0"><b>${'ABCD'[i]}</b> &nbsp; ${e[0]}</div>`).join('');
+    return buildChoice(T, { prompt: 'Which equation gives a non-linear graph?', body, options: 'ABCD'.split('').map(l => ({ html: `Equation ${l}` })), answer,
+      steps: [`A linear equation has ${V('x')} to the power of 1 only (no ${V('x')}<sup>2</sup> or ${V('x')}<sup>3</sup>).`, `Equation ${answer} has ${V('x')} squared or cubed, so its graph is a curve.`, `Answer: Equation ${answer}`], meta: { eqs: arr.map(e => e[1]), answer } });
+  }
+  const xs = [0, 1, 2, 3, 4, 5], a = randChoice([1, 1, 2, 3]), c = randChoice([0, 0, 1, 2, 3, 5]);
+  const ys = xs.map(x => a * x * x + c), idx = randInt(2, 5);
+  const shown = ys.slice(); shown[idx] = '?';
+  const rule = `${V('y')} = ${a === 1 ? '' : a}${V('x')}<sup>2</sup>${c ? ` + ${c}` : ''}`;
+  return buildNumeric(T, { context: `Rule: ${rule}`, prompt: 'Complete the table. What is the missing value?', body: tableHtml('x', xs, 'y', shown), answer: ys[idx], wrong: [a * 2 * idx + c, a * idx + c, ys[idx] + a, (a * idx * idx) * 2 + c],
+    steps: [`Substitute ${V('x')} = ${idx}: ${V('x')}<sup>2</sup> = ${idx} ${TIMES} ${idx} = ${idx * idx}.`, `${a === 1 ? '' : `${a} ${TIMES} ${idx * idx} = ${a * idx * idx}. `}${c ? `Then add ${c}: ${a * idx * idx + c}.` : ''}`.trim(), `Answer: ${ys[idx]}`].filter(Boolean), meta: { a, c, idx, xs, shown } });
+}
+
+// =========================================================================
+// Registry + API
+// =========================================================================
+const TOPIC_CONFIG = {
+  cartesian:    { label: 'The Cartesian Plane', blurb: 'Plot and read coordinates', build: genCartesian },
+  tableValues:  { label: 'Tables of Values', blurb: 'Complete a table from a rule', build: genTableValues },
+  findRule:     { label: 'Finding the Rule', blurb: 'Write the rule from a table', build: genFindRule },
+  readX:        { label: 'Finding x from a Graph', blurb: 'Read x when y is given', build: genReadX },
+  intercepts:   { label: 'x- and y-Intercepts', blurb: 'Where a line crosses the axes', build: genIntercepts },
+  application:  { label: 'Applications', blurb: 'Linear rules in real life', build: genApplication },
+  gradient:     { label: 'Gradient', blurb: 'Rise over run', build: genGradient },
+  gradInt:      { label: 'Gradient–Intercept Form', blurb: 'y = mx + c', build: genGradInt },
+  inequalities: { label: 'Inequalities', blurb: 'Symbols, number lines and solving', build: genInequality },
+  nonlinear:    { label: 'Non-Linear Graphs', blurb: 'Straight lines or curves?', build: genNonlinear },
+};
+const TOPIC_ORDER = ['cartesian', 'tableValues', 'findRule', 'readX', 'intercepts', 'application', 'gradient', 'gradInt', 'inequalities', 'nonlinear'];
+
+function generateQuestion(topicKey, level) {
+  const q = TOPIC_CONFIG[topicKey].build(clampLevel(level));
+  if (q.fixedChoices) return Object.assign({}, q, { choices: q.fixedChoices });
+  const objs = [{ html: q.correct.display, correct: true }].concat(q.distractorsHtml.slice(0, 3).map(h => ({ html: h, correct: false })));
+  return Object.assign({}, q, { choices: shuffle(objs) });
+}
+
+// ---------- typed answers ----------
+function parseRuleInput(s, yv, xv) {
+  s = String(s || '').toLowerCase().replace(/[−–]/g, '-').replace(/\s+/g, '').replace(/×/g, '*');
+  const yl = yv.toLowerCase(), xl = xv.toLowerCase();
+  if (s.startsWith(yl + '=')) s = s.slice(yl.length + 1);
+  else if (s.includes('=')) return null;
+  if (!s) return null;
+  s = s.split(xl).join('v');
+  if (!/^[0-9v+\-*/().]+$/.test(s)) return null;
+  s = s.replace(/(\d|\))(?=v|\()/g, '$1*').replace(/v(?=[0-9v(])/g, 'v*');
+  try { const f = new Function('v', `return (${s});`); return f; } catch (e) { return null; }
+}
+function checkTypedAnswer(userInput, q) {
+  const raw = String(userInput || '').trim();
+  if (!raw) return false;
+  const s = raw.toLowerCase().replace(/[−–]/g, '-').replace(/\s+/g, ' ');
+  const k = q.answerKind;
+  if (k === 'numeric') {
+    const m = s.replace(/,/g, '').replace(/^[a-z]\s*=\s*/, '').match(/^\$?\s*(-?\d+(?:\.\d+)?)\s*[a-z ]*$/);
+    return !!m && Math.abs(parseFloat(m[1]) - q.correct.numeric) < 1e-9;
+  }
+  if (k === 'point') {
+    if (!/^[\s()\d,.\-]+$/.test(s)) return false;
+    const nums = (s.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+    return nums.length === 2 && nums[0] === q.correct.values[0] && nums[1] === q.correct.values[1];
+  }
+  if (k === 'rule') {
+    const f = parseRuleInput(raw, q.correct.yv, q.correct.xv);
+    if (!f) return false;
+    const [m, c] = q.correct.values;
+    try { return [0, 1, 2, 3, 7].every(x => Math.abs(f(x) - (m * x + c)) < 1e-9); } catch (e) { return false; }
+  }
+  if (k === 'choice') {
+    const mm = s.match(/^(?:(?:option|point|graph|table|equation)\s*)?([a-e])$/);
+    return !!mm && mm[1].toUpperCase() === q.correct.checkStr;
+  }
+  if (k === 'ineq') {
+    const t = s.replace(/\s+/g, '').replace(/≥|=>/g, '>=').replace(/≤|=</g, '<=');
+    const [op, n] = q.correct.values;
+    const flip = { '>': '<', '<': '>', '>=': '<=', '<=': '>=' };
+    let m = t.match(/^[a-z](>=|<=|>|<)(-?\d+)$/);
+    if (m) return m[1] === op && +m[2] === n;
+    m = t.match(/^(-?\d+)(>=|<=|>|<)[a-z]$/);
+    if (m) return flip[m[2]] === op && +m[1] === n;
+    return false;
+  }
+  return false;
+}
+
+</script>
+<script>
+// =========================================================================
+// UI GLUE
+// =========================================================================
+
+const TOPIC_ORDER_UI = TOPIC_ORDER;
+
+let setup = { topic: ['cartesian'], answer: 'mc', timer: 'none' };
+
+const STEP_ORDER = ['topic', 'answer', 'timer'];
+const STEP_META = {
+  topic: {
+    title: 'Choose Topics', multi: true,
+    options: TOPIC_ORDER_UI.map(k => ({ key: k, title: TOPIC_CONFIG[k].label, desc: TOPIC_CONFIG[k].blurb })),
+  },
+  answer: {
+    title: 'Answer Method', multi: false,
+    options: [
+      { key: 'mc', title: 'Multiple Choice', desc: 'Pick from 4 options' },
+      { key: 'type', title: 'Typed Answer', desc: 'Type your own answer' },
+    ],
+  },
+  timer: {
+    title: 'Timer', multi: false,
+    options: [
+      { key: 'none', title: 'No Timer', desc: 'Untimed practice' },
+      { key: 'm2', title: '2 Minutes', desc: 'Quick sprint' },
+      { key: 'm5', title: '5 Minutes', desc: 'Standard round' },
+      { key: 'm10', title: '10 Minutes', desc: 'Longer session' },
+    ],
+  },
+};
+const TIMER_SECONDS = { none: null, m2: 120, m5: 300, m10: 600 };
+
+let stepIndex = 0;
+
+function activeSteps() { return STEP_ORDER; }
+
+function isStepValid(stepName) {
+  const meta = STEP_META[stepName];
+  if (meta.multi) return setup[stepName].length >= 1;
+  return !!setup[stepName];
+}
+
+function selectOption(stepName, key) {
+  const meta = STEP_META[stepName];
+  if (meta.multi) {
+    const arr = setup[stepName];
+    const idx = arr.indexOf(key);
+    if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+    if (stepName === 'topic') arr.sort((a, b) => TOPIC_ORDER.indexOf(a) - TOPIC_ORDER.indexOf(b));
+  } else {
+    setup[stepName] = key;
+  }
+  renderWizard();
+}
+
+function stepContinue() {
+  const steps = activeSteps();
+  const stepName = steps[stepIndex];
+  if (!isStepValid(stepName)) return;
+  stepIndex++; // may reach steps.length, which renderWizard treats as the review screen
+  renderWizard();
+}
+function stepBack() {
+  if (stepIndex > 0) { stepIndex--; renderWizard(); }
+}
+
+function optLabel(stepName, key) {
+  if (stepName === 'topic') return TOPIC_CONFIG[key].label;
+  const opt = STEP_META[stepName].options.find(o => o.key === key);
+  return opt ? opt.title : key;
+}
+
+function renderWizard() {
+  const steps = activeSteps();
+  const body = document.getElementById('wiz-body');
+  const dotsEl = document.getElementById('wiz-dots');
+  const crumbEl = document.getElementById('wiz-crumb');
+  const backBtn = document.getElementById('wiz-back');
+  const continueBtn = document.getElementById('wiz-continue');
+  const reviewBlock = document.getElementById('review-block');
+
+  const atReview = stepIndex >= steps.length;
+
+  dotsEl.innerHTML = steps.map((s, i) => {
+    let cls = 'wiz-dot';
+    if (i < stepIndex || atReview) cls += ' done';
+    else if (i === stepIndex) cls += ' current';
+    return `<span class="${cls}"></span>`;
+  }).join('') + `<span class="wiz-dot${atReview ? ' current' : ''}"></span>`;
+
+  if (atReview) {
+    crumbEl.textContent = 'Review your setup';
+    body.innerHTML = '';
+    backBtn.classList.remove('hidden');
+    continueBtn.classList.add('hidden');
+    reviewBlock.classList.remove('hidden');
+    const rows = [
+      ['Topics', setup.topic.map(k => `${TOPIC_ORDER.indexOf(k) + 1}. ${optLabel('topic', k)}`).join('<br>')],
+      ['Answer Method', optLabel('answer', setup.answer)],
+      ['Timer', optLabel('timer', setup.timer)],
+    ];
+    document.getElementById('wiz-review').innerHTML = rows.map(([label, value]) =>
+      `<div class="review-row"><span class="rlabel">${label}</span><span class="rvalue">${value}</span></div>`
+    ).join('');
+    return;
+  }
+
+  reviewBlock.classList.add('hidden');
+  const stepName = steps[stepIndex];
+  const meta = STEP_META[stepName];
+  crumbEl.textContent = `Step ${stepIndex + 1} of ${steps.length}: ${meta.title}`;
+
+  const isSel = (key) => meta.multi ? setup[stepName].includes(key) : setup[stepName] === key;
+  const gridClass = meta.options.length <= 2 || stepName === 'answer' || stepName === 'topic' ? 'opt-grid single' : 'opt-grid';
+  body.innerHTML = `
+    <div class="setup-sec">
+      <div class="setup-label"><span class="step-num">${stepIndex + 1}</span>${meta.title}</div>
+      <div class="${gridClass}">
+        ${stepName === 'topic' ? meta.options.map(o => {
+          const on = isSel(o.key);
+          const n = TOPIC_ORDER.indexOf(o.key) + 1;
+          return `
+          <div class="tog-row${on ? ' on' : ''}" role="switch" aria-checked="${on}" tabindex="0" onclick="selectOption('topic','${o.key}')" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();selectOption('topic','${o.key}')}">
+            <span class="tog-num">${n}.</span>
+            <div class="tog-text"><div class="opt-title">${o.title}</div></div>
+          </div>`;
+        }).join('') : meta.options.map(o => {
+          const selected = isSel(o.key);
+          const orderNum = (stepName === 'topic' && selected) ? setup.topic.indexOf(o.key) + 1 : null;
+          return `
+          <div class="opt-card${selected ? ' sel' : ''}" onclick="selectOption('${stepName}','${o.key}')">
+            ${orderNum ? `<span class="opt-badge">${orderNum}</span>` : ''}
+            <div class="opt-title">${orderNum ? `<span class="opt-num">${orderNum}.</span> ` : ''}${o.title}</div>
+            <div class="opt-desc">${o.desc}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="setup-note">${meta.multi ? 'Select one or more. Questions go through your chosen topics in number order.' : ''}</div>
+    </div>
+  `;
+
+  backBtn.classList.toggle('hidden', stepIndex === 0);
+  continueBtn.classList.remove('hidden');
+  continueBtn.disabled = !isStepValid(stepName);
+}
+
+// ---------------- Quiz state & flow ----------------
+let sessionStats = { total: 0, correct: 0, bestStreak: 0, streak: 0 };
+let timerHandle = null;
+let timeRemaining = 0;
+let currentQ = null;
+let answered = false;
+let frozenSetup = null;
+
+function clearTimerIfRunning() {
+  if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+}
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
+function tickTimer() {
+  timeRemaining--;
+  document.getElementById('stat-timer').textContent = formatTime(Math.max(0, timeRemaining));
+  if (timeRemaining <= 0) { clearTimerIfRunning(); endQuiz(true); }
+}
+
+function setupSummaryText() {
+  const topicNames = frozenSetup.topic.map(k => `${TOPIC_ORDER.indexOf(k) + 1}. ${TOPIC_CONFIG[k].label}`).join(', ');
+  return `${topicNames}<br>${optLabel('answer', frozenSetup.answer)}`;
+}
+
+// ---- Adaptive difficulty ----
+// Every topic has its own level, 0 (easiest) to 3 (hardest), following the
+// worksheet's order. Three correct answers in a row on a topic move it up one
+// level; a wrong answer moves it back down one, so a student who keeps
+// missing easier questions stays at the easier level.
+const MAX_LEVEL = 3;
+const LEVEL_UP_STREAK = 3;
+let topicLevels = {};
+let topicStreaks = {};
+let currentTopicKey = null;
+let currentLevel = 0;   // level of the topic just asked
+function levelFor(topicKey) { return topicLevels[topicKey] || 0; }
+function adjustLevelAfterAnswer(ok) {
+  const k = currentTopicKey;
+  if (!k) return;
+  let lvl = levelFor(k), st = topicStreaks[k] || 0;
+  if (ok) {
+    st++;
+    if (st >= LEVEL_UP_STREAK) { lvl = Math.min(lvl + 1, MAX_LEVEL); st = 0; }
+  } else {
+    lvl = Math.max(lvl - 1, 0); st = 0;
+  }
+  topicLevels[k] = lvl; topicStreaks[k] = st; currentLevel = lvl;
+}
+
+// ---- Topic rotation ----
+// Questions cycle through the selected topics in the order they were
+// selected (topic "1" asked first), looping back to the start.
+let topicRotationIndex = 0;
+function nextTopicForQuestion() {
+  const t = frozenSetup.topic;
+  const topic = t[topicRotationIndex % t.length];
+  topicRotationIndex++;
+  return topic;
+}
+
+function startQuiz() {
+  cancelAutoAdvance();
+  frozenSetup = JSON.parse(JSON.stringify(setup));
+  sessionStats = { total: 0, correct: 0, bestStreak: 0, streak: 0 };
+  currentLevel = 0;
+  topicLevels = {}; topicStreaks = {}; currentTopicKey = null;
+  topicRotationIndex = 0;
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('quiz-screen').classList.remove('hidden');
+  document.getElementById('setup-summary').innerHTML = setupSummaryText();
+
+  const timerStatWrap = document.getElementById('stat-timer-wrap');
+  clearTimerIfRunning();
+  const secs = TIMER_SECONDS[frozenSetup.timer];
+  if (secs) {
+    timeRemaining = secs;
+    timerStatWrap.classList.remove('hidden');
+    document.getElementById('stat-timer').textContent = formatTime(timeRemaining);
+    timerHandle = setInterval(tickTimer, 1000);
+  } else {
+    timerStatWrap.classList.add('hidden');
+  }
+  document.getElementById('stat-streak-wrap').classList.remove('hidden');
+  document.getElementById('stat-streak').textContent = '0';
+
+  nextQuestion();
+}
+
+function nextQuestion() {
+  cancelAutoAdvance();
+  answered = false;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+
+  const topicKey = nextTopicForQuestion();
+  currentTopicKey = topicKey;
+  currentLevel = levelFor(topicKey);
+  currentQ = generateQuestion(topicKey, currentLevel);
+
+  document.getElementById('q-topic-label').textContent = currentQ.topicLabel;
+
+  const contextEl = document.getElementById('q-context');
+  if (currentQ.context) { contextEl.innerHTML = currentQ.context; contextEl.classList.remove('hidden'); }
+  else contextEl.classList.add('hidden');
+
+  const formulaEl = document.getElementById('q-formula');
+  if (currentQ.formula) { formulaEl.innerHTML = currentQ.formula; formulaEl.classList.remove('hidden'); }
+  else formulaEl.classList.add('hidden');
+
+  document.getElementById('q-prompt').textContent = currentQ.promptText;
+
+  const exprEl = document.getElementById('q-expr');
+  const wordsEl = document.getElementById('q-words');
+  if (currentQ.topicLabel === 'Words to Expressions') {
+    wordsEl.innerHTML = currentQ.bodyHtml;
+    wordsEl.classList.remove('hidden');
+    exprEl.classList.add('hidden');
+  } else if (currentQ.bodyHtml) {
+    exprEl.innerHTML = currentQ.bodyHtml;
+    exprEl.classList.remove('hidden');
+    wordsEl.classList.add('hidden');
+  } else {
+    exprEl.classList.add('hidden');
+    wordsEl.classList.add('hidden');
+  }
+
+  renderAnswerArea();
+}
+
+function renderAnswerArea() {
+  const choiceGrid = document.getElementById('choice-grid');
+  const typeRow = document.getElementById('type-row');
+  const typeHint = document.getElementById('type-hint');
+  const typeInput = document.getElementById('type-input');
+
+  if (frozenSetup.answer === 'mc') {
+    typeRow.classList.add('hidden');
+    typeHint.classList.add('hidden');
+    choiceGrid.classList.remove('hidden');
+    choiceGrid.innerHTML = currentQ.choices.map((c, i) =>
+      `<button class="choice-btn" id="choice-${i}" onclick="submitChoice(${i})">${c.html}</button>`
+    ).join('');
+  } else {
+    choiceGrid.classList.add('hidden');
+    choiceGrid.innerHTML = '';
+    typeRow.classList.remove('hidden');
+    typeHint.classList.remove('hidden');
+    typeInput.value = '';
+    typeInput.disabled = false;
+    document.getElementById('type-submit').disabled = false;
+    setTimeout(() => typeInput.focus(), 0);
+  }
+}
+
+function registerResult(ok) {
+  sessionStats.total++;
+  if (ok) {
+    sessionStats.correct++;
+    sessionStats.streak++;
+    sessionStats.bestStreak = Math.max(sessionStats.bestStreak, sessionStats.streak);
+  } else {
+    sessionStats.streak = 0;
+  }
+  document.getElementById('stat-streak').textContent = String(sessionStats.streak);
+  adjustLevelAfterAnswer(ok);
+}
+
+// A correct answer moves straight on to the next question after a short pause
+// (so the green "Correct!" can be seen); a wrong answer waits for the student
+// to read the worked solution and press Next.
+const AUTO_ADVANCE_MS = 800;
+let autoAdvanceHandle = null;
+function cancelAutoAdvance() { if (autoAdvanceHandle) { clearTimeout(autoAdvanceHandle); autoAdvanceHandle = null; } }
+
+function showFeedback(ok) {
+  const fb = document.getElementById('feedback');
+  const banner = document.getElementById('fb-banner');
+  const answerEl = document.getElementById('fb-answer');
+  const stepsEl = document.getElementById('fb-steps');
+  fb.style.display = 'block';
+  banner.className = 'fb-banner ' + (ok ? 'ok' : 'err');
+  banner.textContent = ok ? 'Correct!' : 'Not quite.';
+  answerEl.innerHTML = 'Correct answer: ' + currentQ.correct.display;
+  if (!ok && currentQ.steps && currentQ.steps.length) {
+    stepsEl.innerHTML = '<div class="fb-steps-title">Worked solution:</div>' +
+      '<ol class="fb-steps-list">' + currentQ.steps.map(s => `<li>${s}</li>`).join('') + '</ol>';
+    stepsEl.classList.remove('hidden');
+  } else {
+    stepsEl.classList.add('hidden');
+    stepsEl.innerHTML = '';
+  }
+  if (ok) {
+    document.getElementById('next-btn').style.display = 'none';
+    answerEl.innerHTML = '';
+    cancelAutoAdvance();
+    autoAdvanceHandle = setTimeout(() => {
+      autoAdvanceHandle = null;
+      if (answered && !document.getElementById('quiz-screen').classList.contains('hidden')) nextQuestion();
+    }, AUTO_ADVANCE_MS);
+  } else {
+    document.getElementById('next-btn').style.display = 'block';
+  }
+}
+
+function submitChoice(i) {
+  if (answered) return;
+  answered = true;
+  const ok = currentQ.choices[i].correct;
+  currentQ.choices.forEach((c, idx) => {
+    const btn = document.getElementById('choice-' + idx);
+    btn.disabled = true;
+    if (c.correct) btn.classList.add('ok');
+    else if (idx === i) btn.classList.add('bad');
+  });
+  registerResult(ok);
+  showFeedback(ok);
+}
+
+function submitTyped() {
+  if (answered) return;
+  const input = document.getElementById('type-input');
+  const val = input.value;
+  if (!val.trim()) return;
+  answered = true;
+  input.disabled = true;
+  document.getElementById('type-submit').disabled = true;
+  const ok = checkTypedAnswer(val, currentQ);
+  registerResult(ok);
+  showFeedback(ok);
+}
+
+document.getElementById('type-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') submitTyped();
+});
+
+function endQuiz(timeUp) {
+  cancelAutoAdvance();
+  clearTimerIfRunning();
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('results-screen').classList.remove('hidden');
+  document.getElementById('results-title').textContent = timeUp ? "Time's Up!" : 'Quiz Complete!';
+  document.getElementById('results-sub').innerHTML = setupSummaryText().replace(/<br>/g, ' &middot; ');
+  const total = sessionStats.total;
+  const correct = sessionStats.correct;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('res-score').textContent = `${correct} / ${total} (${accuracy}%)`;
+  document.getElementById('res-beststreak').textContent = String(sessionStats.bestStreak);
+}
+
+function restartSameSetup() {
+  startQuiz();
+}
+
+function goToSetupFromResults() {
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  stepIndex = 0;
+  renderWizard();
+}
+function goToSetupFromQuiz() {
+  cancelAutoAdvance();
+  clearTimerIfRunning();
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  stepIndex = 0;
+  renderWizard();
+}
+
+// Introspection helper (used by the automated test harness; harmless to ship).
+function __testState() {
+  return { setup, stepIndex, frozenSetup, sessionStats, timeRemaining, timerHandle, currentQ, answered, currentLevel, topicLevels, topicRotationIndex };
+}
+
+renderWizard();
+</script>
+</body>
+</html>

@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Angle Relationships Quiz</title>
+<style>
+:root{
+  --bg:#f7f6fa;--card:#ffffff;--card2:#f7f5fb;--border:#e4e1ec;
+  --accent:#6d5ef5;--accent-hover:#5a4bdc;--accent-soft:#efecfd;
+  --green:#2e9e5e;--green-bg:#edfaf3;--green-border:#a8e4c0;
+  --red:#d94f4f;--red-bg:#fdf0f0;--red-border:#f0b0b0;
+  --text:#1c1a22;--muted:#8a8594;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Verdana,Geneva,sans-serif;
+  min-height:100vh;display:flex;justify-content:center;padding:16px 12px 60px;}
+.app{width:100%;max-width:1100px;}
+.hidden{display:none !important;}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:14px 0 12px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.hdr h1{font-size:1rem;font-weight:700;letter-spacing:-0.01em;}
+.stats{display:flex;gap:10px;font-size:1rem;color:var(--muted);}
+.stat strong{color:var(--text);font-weight:700;}
+
+/* ── SETUP WIZARD ─────────────────────────── */
+.wiz-dots{display:flex;justify-content:center;gap:6px;margin-bottom:14px;}
+.wiz-dot{width:7px;height:7px;border-radius:50%;background:#e4e1ec;transition:background .15s;}
+.wiz-dot.done{background:var(--accent);}
+.wiz-dot.current{background:var(--accent);width:18px;border-radius:4px;}
+.wiz-crumb{font-size:1rem;color:var(--muted);text-align:center;margin-bottom:18px;line-height:1.5;min-height:1.1em;}
+.setup-sec{margin-bottom:20px;}
+.setup-label{font-size:1rem;font-weight:700;color:#999;letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.step-num{display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;background:#ece9f3;color:#7a7488;
+  font-size:1rem;font-weight:700;letter-spacing:0;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.opt-grid.single{grid-template-columns:1fr;}
+.opt-card{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:11px 12px;cursor:pointer;transition:border-color .12s,background .12s;user-select:none;
+  position:relative;}
+.opt-card:hover{border-color:#cfc9df;}
+.opt-card.sel{border-color:var(--accent);background:var(--accent-soft);}
+.opt-badge{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:1rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.opt-title{font-size:1rem;font-weight:700;margin-bottom:2px;}
+.opt-card.sel .opt-title{color:var(--accent-hover);}
+
+.tog-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;user-select:none;}
+.tog-row.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent) inset;}
+.tog-num{width:1.4em;font-weight:800;color:var(--accent);font-size:1rem;text-align:right;flex:none;}
+.tog-text{flex:1;min-width:0;}
+.tog-switch{flex:none;width:40px;height:24px;border-radius:12px;background:#cfc9df;position:relative;transition:background .15s;}
+.tog-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s;}
+.tog-row.on .tog-switch{background:var(--accent);}
+.tog-row.on .tog-knob{transform:translateX(16px);}
+.opt-num{color:var(--accent);font-weight:800;}
+.opt-desc{font-size:1rem;color:var(--muted);line-height:1.35;}
+.setup-note{font-size:1rem;color:var(--muted);font-style:italic;margin-top:6px;min-height:1px;}
+.wiz-foot{display:flex;flex-direction:column;gap:10px;}
+.wiz-nav-row{display:flex;gap:8px;align-items:center;}
+.back-btn{background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);
+  font-size:1rem;font-weight:700;padding:12px 16px;cursor:pointer;}
+.back-btn:hover{border-color:#cfc9df;color:var(--text);}
+.continue-btn{flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px;font-size:1rem;font-weight:700;cursor:pointer;}
+.continue-btn:hover{background:var(--accent-hover);}
+.continue-btn:disabled{background:#cfc9df;cursor:default;}
+.wiz-review{margin-bottom:4px;}
+.review-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border);font-size:1rem;}
+.review-row:last-child{border-bottom:none;}
+.review-row .rlabel{color:var(--muted);font-size:1rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.review-row .rvalue{font-weight:700;text-align:right;}
+.start-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:1rem;font-weight:700;cursor:pointer;}
+.start-btn:hover{background:var(--accent-hover);}
+
+/* ── QUIZ SCREEN ──────────────────────────── */
+.quiz-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;}
+.quiz-bar-btns{display:flex;gap:6px;}
+.setup-summary{font-size:1rem;color:var(--muted);line-height:1.4;}
+.change-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);
+  font-size:1rem;font-weight:700;padding:6px 10px;cursor:pointer;white-space:nowrap;}
+.change-btn:hover{border-color:#cfc9df;color:var(--text);}
+
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:18px 16px;margin-bottom:14px;}
+.topic-label{font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:.05em;
+  text-transform:uppercase;margin-bottom:10px;}
+.context-wrap{background:var(--card2);border-left:3px solid var(--accent);border-radius:6px;
+  padding:10px 12px;margin-bottom:10px;font-size:1rem;line-height:1.5;color:var(--text);}
+.formula-wrap{font-size:1rem;font-weight:700;margin-bottom:10px;text-align:center;}
+.prompt{font-size:1rem;font-weight:600;text-align:center;line-height:1.4;margin-bottom:12px;}
+.expr-display{font-size:1rem;font-weight:700;text-align:center;line-height:1.6;
+  font-family:Verdana,Geneva,sans-serif;letter-spacing:.01em;padding:6px 4px;word-break:break-word;}
+.expr-display i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.words-display{font-size:1rem;font-weight:600;text-align:center;line-height:1.5;font-style:italic;}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+  margin:0 .18em;font-size:.82em;line-height:1.15;position:relative;top:.08em;}
+.frac .fnum{border-bottom:1.6px solid currentColor;padding:0 .3em .1em;}
+.frac .fden{padding:.1em .3em 0;}
+.sqin{border-top:1.6px solid currentColor;padding:1px .15em 0;display:inline-block;}
+
+#answer-area{margin-bottom:14px;}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.choice-btn{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+  padding:13px 8px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;
+  font-family:Verdana,Geneva,sans-serif;}
+.choice-btn i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.choice-btn:hover{border-color:#cfc9df;}
+.choice-btn:disabled{cursor:default;}
+.choice-btn.ok{border-color:var(--green-border);background:var(--green-bg);color:var(--green);}
+.choice-btn.bad{border-color:var(--red-border);background:var(--red-bg);color:var(--red);}
+
+.type-row{display:flex;gap:8px;}
+.type-row input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:12px;
+  font-size:1rem;font-family:Verdana,Geneva,sans-serif;}
+.type-row input:focus{outline:none;border-color:var(--accent);}
+.type-hint{font-size:1rem;color:var(--muted);margin-top:6px;}
+.submit-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px 18px;font-size:1rem;font-weight:700;cursor:pointer;}
+.submit-btn:disabled{background:#cfc9df;cursor:default;}
+
+.feedback{display:none;background:var(--card2);border:1px solid var(--border);
+  border-radius:12px;padding:14px;margin-bottom:14px;}
+.fb-banner{font-size:1rem;font-weight:700;margin-bottom:6px;}
+.fb-banner.ok{color:var(--green);}
+.fb-banner.err{color:var(--red);}
+.fb-answer{font-size:1rem;font-weight:600;font-family:Verdana,Geneva,sans-serif;}
+.fb-answer i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.fb-steps-title{font-size:1rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:6px;}
+.fb-steps-list{padding-left:1.2em;}
+.fb-steps-list li{font-size:1rem;line-height:1.55;margin-bottom:4px;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps-list li i{font-style:italic;font-family:Verdana,Geneva,sans-serif;}
+.fb-steps-list li b{font-weight:700;}
+.next-btn{display:none;width:100%;background:var(--text);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:1rem;font-weight:700;cursor:pointer;}
+.next-btn:hover{opacity:.9;}
+
+/* ── RESULTS SCREEN ───────────────────────── */
+.results-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:22px 18px;text-align:center;}
+.results-title{font-size:1rem;font-weight:800;margin-bottom:4px;}
+.results-sub{font-size:1rem;color:var(--muted);margin-bottom:18px;}
+.results-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:11px 0;border-bottom:1px solid var(--border);font-size:1rem;text-align:left;}
+.results-row:last-child{border-bottom:none;}
+.results-btns{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+.results-btns .start-btn{margin:0;}
+.results-secondary{background:none;border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:1rem;font-weight:700;padding:13px;cursor:pointer;}
+.results-secondary:hover{border-color:#cfc9df;}
+
+/* ---- Verdana 36pt version (36pt = 48px) ---- */
+html{font-size:36pt;}
+body,button,input,textarea{font-family:Verdana,Geneva,sans-serif;font-size:36pt;}
+.expr-display,.choice-btn,.fb-answer,.fb-steps-list li{font-family:Verdana,Geneva,sans-serif;}
+.expr-display i,.choice-btn i,.fb-answer i,.fb-steps-list li i{font-family:Verdana,Geneva,sans-serif;}
+.app{max-width:1600px;}
+body{padding:24px 28px 80px;}
+.step-num{width:1.5em;height:1.5em;font-size:.6em;}
+.opt-badge{width:1.4em;height:1.4em;top:-.35em;right:-.35em;font-size:.6em;}
+.wiz-dot{width:18px;height:18px;}.wiz-dot.current{width:48px;}
+.tog-switch{width:110px;height:64px;border-radius:32px;}
+.tog-knob{width:54px;height:54px;top:5px;left:5px;}
+.tog-row.on .tog-knob{transform:translateX(46px);}
+.tog-row{gap:24px;padding:20px 26px;}
+.tog-num{width:1.6em;color:#9a96a6;}
+.tog-row.on .tog-num{color:var(--accent);}
+.opt-card{padding:20px 24px;}
+.opt-grid{gap:18px;}
+.fb-steps-list li{line-height:1.5;}
+.choice-btn{padding:20px 28px;min-width:340px;}
+/* keep the answer buttons close together: shrink the grid to the buttons and centre it */
+.choice-grid{width:max-content;max-width:100%;margin:0 auto;gap:14px;}
+input[type=text],#type-input{padding:16px 20px;}
+.next-btn,#next-btn,#wiz-continue,#wiz-back{padding:18px 26px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <h1>Angle Relationships</h1>
+    <div class="stats">
+      <span class="stat hidden" id="stat-timer-wrap">&#9201;&nbsp;<strong id="stat-timer">0:00</strong></span>
+      <span class="stat hidden" id="stat-streak-wrap">&#9733;&nbsp;<strong id="stat-streak">0</strong></span>
+    </div>
+  </div>
+
+  <!-- ===================== SETUP SCREEN ===================== -->
+  <div id="setup-screen">
+    <div class="wiz-dots" id="wiz-dots"></div>
+    <div class="wiz-crumb" id="wiz-crumb"></div>
+
+    <div id="wiz-body"></div>
+
+    <div class="wiz-foot">
+      <div class="wiz-nav-row">
+        <button class="back-btn hidden" id="wiz-back" onclick="stepBack()">&larr; Back</button>
+        <button class="continue-btn hidden" id="wiz-continue" onclick="stepContinue()">Continue &rarr;</button>
+      </div>
+      <div id="review-block" class="hidden">
+        <div class="wiz-review" id="wiz-review"></div>
+        <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== QUIZ SCREEN ===================== -->
+  <div id="quiz-screen" class="hidden">
+    <div class="quiz-bar">
+      <div class="setup-summary" id="setup-summary"></div>
+      <div class="quiz-bar-btns">
+        <button class="change-btn" onclick="goToSetupFromQuiz()">Change</button>
+        <button class="change-btn" onclick="endQuiz(false)">Finish</button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="topic-label" id="q-topic-label"></div>
+      <div class="context-wrap hidden" id="q-context"></div>
+      <div class="formula-wrap hidden" id="q-formula"></div>
+      <div class="prompt" id="q-prompt"></div>
+      <div class="expr-display hidden" id="q-expr"></div>
+      <div class="words-display hidden" id="q-words"></div>
+    </div>
+
+    <div id="answer-area">
+      <div class="choice-grid hidden" id="choice-grid"></div>
+      <div class="type-row hidden" id="type-row">
+        <input type="text" id="type-input" placeholder="Type your answer" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="submit-btn" id="type-submit" onclick="submitTyped()">Check</button>
+      </div>
+      <div class="type-hint hidden" id="type-hint">e.g. 5, (3, 4), y = 2x + 1, x > 4, or B</div>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <div class="fb-banner" id="fb-banner"></div>
+      <div class="fb-answer" id="fb-answer"></div>
+      <div class="fb-steps hidden" id="fb-steps"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question &rarr;</button>
+  </div>
+
+  <!-- ===================== RESULTS SCREEN ===================== -->
+  <div id="results-screen" class="hidden">
+    <div class="results-card">
+      <div class="results-title" id="results-title">Quiz Complete!</div>
+      <div class="results-sub" id="results-sub"></div>
+      <div class="results-row"><span class="rlabel">Score</span><span class="rvalue" id="res-score"></span></div>
+      <div class="results-row"><span class="rlabel">Best Streak</span><span class="rvalue" id="res-beststreak"></span></div>
+      <div class="results-btns">
+        <button class="start-btn" onclick="restartSameSetup()">Play Again</button>
+        <button class="results-secondary" onclick="goToSetupFromResults()">Change Setup</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =========================================================================
+// PURE LOGIC (expression engine, term builders, topic generators,
+// distractor generation) — tested independently via node before being
+// embedded here. See merged_logic.js / test_*.js in the build workspace.
+// =========================================================================
+</script>
+<script>
+// =========================================================================
+// Angle Relationships quiz logic (Year 7-8): 12 topics x 4 levels.
+// Every diagram is drawn from the same numbers that give the answer, and the
+// SVG carries a data-geo record so the tests can re-measure the drawing.
+// =========================================================================
+
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randChoice(arr) { return arr[randInt(0, arr.length - 1)]; }
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = randInt(0, i); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const MAX_APP_LEVEL = 3;
+function clampLevel(level) { return Math.max(0, Math.min(MAX_APP_LEVEL, Math.floor(level) || 0)); }
+
+const MINUS = '−', TIMES = '&times;';
+const V = (v) => `<i>${v}</i>`;
+const D = (n) => `${n}°`;
+const POOL = 'ABCDEFGHKLMNPQRSTUVWXYZ';
+function letters(n) { return shuffle(POOL.split('')).slice(0, n); }
+const plainText = (h) => String(h).replace(/<[^>]+>/g, '').replace(/&times;/g, '×').replace(/&divide;/g, '÷');
+
+// ---------- drawing ----------
+const DEG = Math.PI / 180;
+const PURPLE = '#6c5ce7', ORANGE = '#e17055';
+const vec = (d, r) => [r * Math.cos(d * DEG), -r * Math.sin(d * DEG)];
+const addv = (p, q) => [p[0] + q[0], p[1] + q[1]];
+const fx = (n) => Math.round(n * 10) / 10;
+const pstr = (p) => `${fx(p[0])},${fx(p[1])}`;
+
+function Scene(W, H) {
+  const parts = [], geo = { lines: [], angles: [], meta: {} };
+  const S = { W, H, geo };
+  S.add = (s) => parts.push(s);
+  S.meta = (o) => Object.assign(geo.meta, o);
+  S.text = (x, y, str, o = {}) => {
+    parts.push(`<text x="${fx(x)}" y="${fx(y)}" font-size="${o.size || 30}" text-anchor="${o.anchor || 'middle'}" dominant-baseline="central"${o.bold ? ' font-weight="bold"' : ''}${o.italic ? ' font-style="italic"' : ''} fill="${o.color || 'currentColor'}">${str}</text>`);
+  };
+  S.head = (p, q, color) => {
+    const a = Math.atan2(q[1] - p[1], q[0] - p[0]), L = 28, Wd = 14;
+    const bx = q[0] - L * Math.cos(a), by = q[1] - L * Math.sin(a);
+    parts.push(`<polygon points="${pstr(q)} ${pstr([bx - Wd * Math.sin(a), by + Wd * Math.cos(a)])} ${pstr([bx + Wd * Math.sin(a), by - Wd * Math.cos(a)])}" fill="${color || 'currentColor'}"/>`);
+  };
+  S.line = (p, q, o = {}) => {
+    parts.push(`<line x1="${fx(p[0])}" y1="${fx(p[1])}" x2="${fx(q[0])}" y2="${fx(q[1])}" stroke="${o.color || 'currentColor'}" stroke-width="${o.width || 5}" stroke-linecap="round"/>`);
+    if (o.arrow === 'end' || o.arrow === 'both') S.head(p, q, o.color);
+    if (o.arrow === 'start' || o.arrow === 'both') S.head(q, p, o.color);
+    if (!o.nogeo) geo.lines.push([fx(p[0]), fx(p[1]), fx(q[0]), fx(q[1])]);
+  };
+  S.dot = (p, o = {}) => parts.push(`<circle cx="${fx(p[0])}" cy="${fx(p[1])}" r="${o.r || 10}" fill="${o.fill || 'currentColor'}"/>`);
+  S.arc = (c, r, a1, a2, o = {}) => {
+    if (a2 - a1 >= 359.9) { parts.push(`<circle cx="${fx(c[0])}" cy="${fx(c[1])}" r="${r}" fill="none" stroke="${o.color || 'currentColor'}" stroke-width="${o.width || 4}"/>`); return; }
+    const p1 = addv(c, vec(a1, r)), p2 = addv(c, vec(a2, r)), large = (a2 - a1) > 180 ? 1 : 0;
+    parts.push(`<path d="M${pstr(p1)} A${r} ${r} 0 ${large} 0 ${pstr(p2)}" fill="none" stroke="${o.color || 'currentColor'}" stroke-width="${o.width || 4}" stroke-linecap="round"/>`);
+  };
+  S.wedge = (c, r, a1, a2, color) => {
+    if (a2 - a1 >= 359.9) { parts.push(`<circle cx="${fx(c[0])}" cy="${fx(c[1])}" r="${r}" fill="${color}"/>`); return; }
+    const p1 = addv(c, vec(a1, r)), p2 = addv(c, vec(a2, r)), large = (a2 - a1) > 180 ? 1 : 0;
+    parts.push(`<path d="M${pstr(c)} L${pstr(p1)} A${r} ${r} 0 ${large} 0 ${pstr(p2)} Z" fill="${color}"/>`);
+  };
+  // angle from a1 to a2 (counter-clockwise, degrees), optional label
+  S.angle = (c, a1, a2, label, o = {}) => {
+    const r = o.r || 56, ext = a2 - a1, m = (a1 + a2) / 2, col = o.color || 'currentColor';
+    if (o.fill) S.wedge(c, r, a1, a2, o.fill);
+    if (o.box) {
+      const s = o.boxSize || 38, p1 = addv(c, vec(a1, s)), p2 = addv(p1, vec(a1 + 90, s)), p3 = addv(c, vec(a1 + 90, s));
+      parts.push(`<polyline points="${pstr(p1)} ${pstr(p2)} ${pstr(p3)}" fill="none" stroke="${col}" stroke-width="4" stroke-linejoin="miter"/>`);
+    } else if (!o.noArc) {
+      S.arc(c, r, a1, a2, { color: col, width: o.width || 4 });
+      for (let k = 1; k < (o.ticks || 1); k++) S.arc(c, r + 10 * k, a1, a2, { color: col, width: o.width || 4 });
+    }
+    if (label !== '' && label != null) {
+      const tw = plainText(label).length * 21 + 14;
+      const sinHalf = Math.sin(Math.min(Math.max(ext, 20), 170) / 2 * DEG);
+      const lr = o.lr || Math.min(r + 130, Math.max(r + 28, tw / (2 * sinHalf)));
+      const p = addv(c, vec(m, lr));
+      S.text(p[0], p[1], label, { color: o.labelColor || col, bold: true, size: o.size || 30 });
+    }
+    geo.angles.push({ v: [fx(c[0]), fx(c[1])], a1: fx(a1), a2: fx(a2), label: o.g !== undefined ? o.g : plainText(label || ''), role: o.role || '' });
+  };
+  S.chev = (p, dirDeg, n) => {   // arrow marks showing parallel lines
+    for (let k = 0; k < n; k++) {
+      const tip = addv(p, vec(dirDeg, 12 + 22 * k));
+      parts.push(`<polyline points="${pstr(addv(tip, vec(dirDeg + 180 - 38, 24)))} ${pstr(tip)} ${pstr(addv(tip, vec(dirDeg + 180 + 38, 24)))}" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`);
+    }
+  };
+  S.tick = (p, dirDeg, n) => {   // equal-interval marks
+    for (let k = 0; k < n; k++) {
+      const c = addv(p, vec(dirDeg, (k - (n - 1) / 2) * 14));
+      parts.push(`<line x1="${fx(c[0] + vec(dirDeg + 90, 14)[0])}" y1="${fx(c[1] + vec(dirDeg + 90, 14)[1])}" x2="${fx(c[0] - vec(dirDeg + 90, 14)[0])}" y2="${fx(c[1] - vec(dirDeg + 90, 14)[1])}" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>`);
+    }
+  };
+  S.svg = (aria, maxw) => `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${aria || 'Diagram'}" style="width:100%;max-width:${maxw || 880}px;display:block;margin:0 auto;font-family:Verdana,sans-serif" data-geo="${JSON.stringify(geo).replace(/"/g, '&quot;')}">${parts.join('')}</svg>`;
+  return S;
+}
+
+const unknownLabel = `<tspan font-style="italic">x</tspan>`;
+const givenLabel = (n) => D(n);
+
+// ---------- distractors & shells ----------
+function angWrongs(ans, cands) {
+  const out = [];
+  const ok = (n) => Number.isInteger(n) && n > 0 && n < 360 && n !== ans && !out.includes(n);
+  shuffle(cands || []).forEach(n => { if (out.length < 3 && ok(n)) out.push(n); });
+  shuffle([ans + 10, ans - 10, ans + 20, ans - 20, ans + 5, ans - 5, ans + 15, ans - 15, ans + 30]).forEach(n => { if (out.length < 3 && ok(n)) out.push(n); });
+  return out;
+}
+function base(label, g) {
+  return { topicLabel: label, promptText: g.prompt, bodyHtml: g.body || '', context: g.context || '', formula: '', steps: g.steps, meta: g.meta || {} };
+}
+function buildNumeric(label, g) {
+  const fmt = g.fmt || D;
+  return Object.assign(base(label, g), {
+    answerKind: 'numeric', correct: { display: fmt(g.answer), checkStr: String(g.answer), numeric: g.answer },
+    distractorsHtml: angWrongs(g.answer, g.wrong).map(fmt),
+  });
+}
+function buildChoice(label, g) {    // diagram letters A, B, C, D
+  const L = 'ABCDE';
+  return Object.assign(base(label, g), {
+    answerKind: 'choice', correct: { display: g.options[L.indexOf(g.answer)].html, checkStr: g.answer, values: [g.answer] },
+    fixedChoices: g.options.map((o, i) => ({ html: o.html, correct: L[i] === g.answer })), distractorsHtml: [],
+  });
+}
+function mixChoices(answerHtml, wrongHtml) {
+  const wr = []; wrongHtml.forEach(h => { if (h !== answerHtml && !wr.includes(h)) wr.push(h); });
+  return shuffle([{ html: answerHtml, correct: true }].concat(wr.slice(0, 3).map(h => ({ html: h, correct: false }))));
+}
+// typed answer is compared in several ways, so builders choose the kind
+function buildName(label, g) {        // names: letters, angle names, pairs  (g.accept: normalised strings)
+  return Object.assign(base(label, g), {
+    answerKind: 'name', correct: { display: g.answerHtml, checkStr: g.accept[0], accept: g.accept },
+    fixedChoices: mixChoices(g.answerHtml, g.wrongHtml), distractorsHtml: [],
+  });
+}
+function buildRegex(label, g) {       // descriptive answers (types of angle, symbols, conventions)
+  return Object.assign(base(label, g), {
+    answerKind: 'regex', correct: { display: g.answerHtml, checkStr: g.rx, rx: g.rx, no: g.no || null },
+    fixedChoices: mixChoices(g.answerHtml, g.wrongHtml), distractorsHtml: [],
+  });
+}
+function buildRel(label, g) {         // AB ∥ CD  /  AB ⊥ CD
+  return Object.assign(base(label, g), {
+    answerKind: 'rel', correct: { display: g.answerHtml, checkStr: g.rel.join(' '), rel: g.rel },
+    fixedChoices: mixChoices(g.answerHtml, g.wrongHtml), distractorsHtml: [],
+  });
+}
+function buildVerdict(label, g) {
+  return Object.assign(base(label, g), {
+    answerKind: 'verdict', correct: { display: g.answerHtml, checkStr: g.verdict.join(' '), verdict: g.verdict },
+    fixedChoices: mixChoices(g.answerHtml, g.wrongHtml), distractorsHtml: [],
+  });
+}
+function buildReason(label, g) {      // g.keys: ordered list of reason keys
+  return Object.assign(base(label, g), {
+    answerKind: 'reason', correct: { display: g.answerHtml, checkStr: g.keys.join(','), keys: g.keys },
+    fixedChoices: mixChoices(g.answerHtml, g.wrongHtml), distractorsHtml: [],
+  });
+}
+
+// =========================================================================
+// 1. Points, lines and rays
+// =========================================================================
+function drawLineFig(S, type, a, b, flip, cy, fsz) {
+  const W = S.W, X = (f) => W * (flip ? 1 - f : f), size = fsz || 34, lab = (f, t) => S.text(X(f), cy - 38, t, { size, bold: true });
+  if (type === 'interval') {
+    S.line([X(0.2), cy], [X(0.8), cy], { nogeo: true }); S.dot([X(0.2), cy]); S.dot([X(0.8), cy]); lab(0.2, a); lab(0.8, b);
+  } else if (type === 'ray') {
+    S.line([X(0.12), cy], [X(0.96), cy], { arrow: 'end', nogeo: true }); S.dot([X(0.12), cy]); S.dot([X(0.52), cy]); lab(0.12, a); lab(0.52, b);
+  } else {
+    S.line([X(0.04), cy], [X(0.96), cy], { arrow: 'both', nogeo: true }); S.dot([X(0.3), cy]); S.dot([X(0.7), cy]); lab(0.3, a); lab(0.7, b);
+  }
+}
+const figName = (type, a, b) => (type === 'interval' ? `Interval ${a}${b}` : type === 'ray' ? `Ray ${a}${b}` : `Line ${a}${b}`);
+const nn = (s) => String(s).toLowerCase().replace(/line segment|segment/g, 'interval').replace(/\band\b/g, '').replace(/angle/g, '').replace(/[∠\s,.'"&°-]/g, '');
+function figAccept(type, a, b) { return type === 'ray' ? [nn(`ray ${a}${b}`)] : [nn(`${type} ${a}${b}`), nn(`${type} ${b}${a}`)]; }
+
+function genPoints(level) {
+  const T = 'Points, Lines and Rays';
+  if (level === 0) {
+    const [A, B] = letters(2), type = randChoice(['interval', 'ray', 'line']), flip = Math.random() < 0.5;
+    const S = Scene(900, 190); drawLineFig(S, type, A, B, flip, 105); S.meta({ fig: { type, start: A, other: B, flip } });
+    const ans = figName(type, A, B);
+    const opts = [`Interval ${A}${B}`, `Ray ${A}${B}`, `Ray ${B}${A}`, `Line ${A}${B}`];
+    const why = type === 'interval' ? [`The figure has two endpoints, ${A} and ${B}, and does not go on forever.`, `A piece of a line between two points is an interval, named by its endpoints.`]
+      : type === 'ray' ? [`The figure starts at ${A}, passes through ${B} and the arrow shows it goes on forever in one direction.`, `A ray is named with its starting point first.`]
+        : [`The arrows at both ends show the figure goes on forever in both directions.`, `A line is named using two points on it.`];
+    return buildName(T, { prompt: 'What is the name of this figure?', body: S.svg('Interval, ray or line'), answerHtml: ans, accept: figAccept(type, A, B), wrongHtml: opts.filter(o => o !== ans),
+      steps: why.concat([`Answer: ${ans}`]), meta: { type, A, B, flip } });
+  }
+  if (level === 1) {
+    const [P, Q] = letters(2);
+    const kinds = [['ray', P, Q, 'ray ' + P + Q], ['ray', Q, P, 'ray ' + Q + P], ['interval', P, Q, 'interval ' + P + Q], ['line', P, Q, 'line ' + P + Q]];
+    const target = randInt(0, 3), order = shuffle([0, 1, 2, 3]), L = 'ABCD';
+    let html = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:880px;margin:0 auto">`;
+    order.forEach((ki, i) => {
+      const k = kinds[ki], S = Scene(440, 190), flip = Math.random() < 0.5;
+      S.add(`<rect x="3" y="3" width="434" height="184" rx="14" fill="none" stroke="#c9c7d6" stroke-width="2"/>`);
+      drawLineFig(S, k[0], k[1], k[2], flip, 112, 30);
+      S.text(30, 30, L[i], { size: 28, bold: true });
+      S.meta({ fig: { type: k[0], start: k[1], other: k[2], flip }, letter: L[i] });
+      html += S.svg('Diagram ' + L[i], 440);
+    });
+    html += '</div>';
+    const answer = L[order.indexOf(target)], what = kinds[target][3];
+    const t = kinds[target];
+    const exp = t[0] === 'ray' ? `${what} starts at ${t[1]}, passes through ${t[2]} and goes on forever (it has an arrow at one end).` : t[0] === 'interval' ? `${what} is the piece between the endpoints ${P} and ${Q}, with no arrows.` : `${what} goes on forever in both directions (arrows at both ends) through ${P} and ${Q}.`;
+    return buildChoice(T, { prompt: `Which diagram shows ${what}?`, body: html, options: L.split('').map(l => ({ html: `Diagram ${l}` })), answer,
+      steps: [exp, `Diagram ${answer} matches.`, `Answer: Diagram ${answer}`], meta: { target: t, answer, order } });
+  }
+  if (level === 2) {
+    const pts = letters(4), xs = [0.13, 0.38, 0.63, 0.88], cy = 115;
+    const S = Scene(900, 200); S.line([40, cy], [860, cy], { arrow: 'both', nogeo: true });
+    pts.forEach((p, i) => { S.dot([900 * xs[i], cy]); S.text(900 * xs[i], cy - 38, p, { size: 34, bold: true }); });
+    const xi = randChoice([1, 2]), yi = randChoice(xi === 1 ? [0, 2, 3] : [0, 1, 3]);
+    const side = (i) => (i < xi ? -1 : 1), zc = [0, 1, 2, 3].filter(i => i !== xi && side(i) !== side(yi)), zi = randChoice(zc);
+    const X = pts[xi], Y = pts[yi], Z = pts[zi];
+    S.meta({ order: pts, xi, yi, zi });
+    const accept = [0, 1, 2, 3].filter(i => i !== xi && side(i) === side(yi)).map(i => nn(`ray ${X}${pts[i]}`));
+    const ans = `Ray ${X}${Y}`;
+    return buildName(T, { prompt: `Which ray starts at ${X} and passes through ${Y}?`, body: S.svg('Points on a line'), answerHtml: ans, accept,
+      wrongHtml: [`Ray ${Y}${X}`, `Ray ${X}${Z}`, `Interval ${X}${Y}`],
+      steps: [`A ray starts at one point and goes on forever in one direction.`, `It starts at ${X}, so ${X} is written first. It passes through ${Y}, so it goes towards ${Y}.`, `Answer: ${ans}`], meta: { pts, xi, yi, zi } });
+  }
+  if (Math.random() < 0.5) {
+    const n = randInt(3, 5), pts = letters(n), cy = 115;
+    const S = Scene(900, 200); S.line([40, cy], [860, cy], { arrow: 'both', nogeo: true });
+    pts.forEach((p, i) => { const x = 900 * (0.12 + 0.76 * i / (n - 1)); S.dot([x, cy]); S.text(x, cy - 38, p, { size: 34, bold: true }); });
+    const list = []; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) list.push(pts[i] + pts[j]);
+    S.meta({ n, pts });
+    return buildNumeric(T, { prompt: 'How many different intervals can you name using these points?', body: S.svg('Points on a line'), fmt: String, answer: list.length, wrong: [n, n - 1, 2 * n, n * (n - 1), list.length + 2],
+      steps: [`Each interval needs two points as its endpoints.`, `The intervals are: ${list.join(', ')}.`, `Count them: ${list.length}.`, `Answer: ${list.length}`], meta: { n, pts, count: list.length } });
+  }
+  const pts = letters(3), cy = 115, xs = [0.2, 0.5, 0.8];
+  const S = Scene(900, 200); S.line([40, cy], [860, cy], { arrow: 'both', nogeo: true });
+  pts.forEach((p, i) => { S.dot([900 * xs[i], cy]); S.text(900 * xs[i], cy - 38, p, { size: 34, bold: true }); });
+  const rays = []; pts.forEach(a => pts.forEach(b => { if (a !== b) rays.push(`Ray ${a}${b}`); }));
+  const rayAns = randChoice(rays), lines = [`Line ${pts[0]}${pts[1]}`, `Line ${pts[1]}${pts[2]}`, `Line ${pts[0]}${pts[2]}`];
+  S.meta({ pts });
+  return buildName(T, { prompt: 'Which of these is NOT a name for the line?', body: S.svg('Points on a line'), answerHtml: rayAns, accept: rays.map(r => nn(r)), wrongHtml: lines,
+    steps: [`A line can be named using any two points on it, so ${lines.join(', ')} are all names for the line.`, `${rayAns} is a ray: it starts at one point and goes in one direction only.`, `Answer: ${rayAns}`], meta: { pts } });
+}
+
+// =========================================================================
+// 2. Naming angles
+// =========================================================================
+function fanScene(names, dirs, markI, markJ, o = {}) {      // names = [vertex, arm1, arm2, arm3]
+  const S = Scene(900, 520), O = [230, 450];
+  S.meta({ vertex: names[0], arms: names.slice(1), dirs, mark: [markI, markJ] });
+  dirs.forEach((d, i) => {
+    const end = addv(O, vec(d, 380));
+    S.line(O, end); S.dot(end);
+    const lp = addv(O, vec(d, 380 + 38)); S.text(lp[0], lp[1], names[i + 1], { size: 34, bold: true });
+  });
+  S.dot(O); S.text(O[0] - 34, O[1] + 30, names[0], { size: 34, bold: true });
+  S.angle(O, dirs[markI], dirs[markJ], '', { r: 100, color: PURPLE, fill: 'rgba(108,92,231,0.15)', role: 'mark', g: '' });
+  return S;
+}
+function genNamingAngles(level) {
+  const T = 'Naming Angles';
+  if (level <= 1) {
+    const nm = letters(4);
+    const d1 = randInt(8, 22), d2 = d1 + randInt(26, 40), d3 = d2 + randInt(26, 45), dirs = [d1, d2, d3];
+    const pair = randChoice([[0, 1], [1, 2], [0, 2]]);
+    const S = fanScene(nm, dirs, pair[0], pair[1]);
+    const arms = nm.slice(1), a1 = arms[pair[0]], a2 = arms[pair[1]], third = arms[3 - pair[0] - pair[1]], V0 = nm[0];
+    if (level === 0) {
+      return buildName(T, { prompt: 'Which letter is the vertex of the marked angle?', body: S.svg('Marked angle'), answerHtml: V0, accept: [nn(V0)], wrongHtml: arms,
+        steps: [`The vertex is the point where the two arms of the angle meet.`, `The arms of the marked angle meet at ${V0}.`, `Answer: ${V0}`], meta: { nm, dirs, pair } });
+    }
+    const ans = `∠${a1}${V0}${a2}`;
+    return buildName(T, { prompt: 'What is the name of the marked angle?', body: S.svg('Marked angle'), answerHtml: ans, accept: [nn(`${a1}${V0}${a2}`), nn(`${a2}${V0}${a1}`)],
+      wrongHtml: [`∠${a1}${V0}${third}`, `∠${third}${V0}${a2}`, `∠${V0}${a1}${a2}`],
+      steps: [`An angle is named with three capital letters. The vertex ${V0} goes in the middle.`, `The arms of the marked angle go to ${a1} and ${a2}.`, `So the angle is ∠${a1}${V0}${a2} (or ∠${a2}${V0}${a1}).`, `Answer: ${ans}`], meta: { nm, dirs, pair, a1, a2, V0 } });
+  }
+  if (level === 2) {
+    const kind = randChoice(['right', 'eqang', 'eqint', 'par']);
+    const S = Scene(900, 420);
+    const texts = { right: 'It is a right angle (90°)', eqang: 'The two angles are equal', eqint: 'The two intervals are equal in length', par: 'The two lines are parallel' };
+    const prompts = { right: 'What does the small square tell us about the angle?', eqang: 'What do the matching arcs tell us?', eqint: 'What do the matching tick marks tell us?', par: 'What do the arrows on the lines tell us?' };
+    const rx = { right: '(right|90)', eqang: '(equal|same)', eqint: '(interval|length|segment)', par: 'parallel' }, no = { eqang: '(interval|length|segment)', eqint: '(angle)' };
+    if (kind === 'right') {
+      const O = [300, 340]; S.line(O, addv(O, vec(0, 400))); S.line(O, addv(O, vec(90, 250))); S.dot(O);
+      S.angle(O, 0, 90, '', { box: true, boxSize: 50, g: '90°', role: 'box' });
+    } else if (kind === 'eqang') {
+      const O = [250, 380], a = randInt(25, 45), b = randInt(25, 40);
+      [0, a, a + b].forEach(d => S.line(O, addv(O, vec(d, 300))));
+      S.dot(O); S.angle(O, 0, a, '', { r: 100, ticks: 2, g: String(a) }); S.angle(O, a, a + b, '', { r: 100, ticks: 2, g: String(b) });
+      S.meta({ equalArcs: true });
+    } else if (kind === 'eqint') {
+      const y = 210; S.line([100, y], [800, y]); [100, 450, 800].forEach(x => S.dot([x, y]));
+      S.tick([275, y], 0, 2); S.tick([625, y], 0, 2);
+    } else {
+      const o = 0; S.line([100, 140], [800, 140]); S.line([100, 290], [800, 290]); S.chev([420, 140], 0, 1); S.chev([420, 290], 0, 1);
+    }
+    return buildRegex(T, { prompt: prompts[kind], body: S.svg('Diagram conventions'), answerHtml: texts[kind], rx: rx[kind], no: no[kind], wrongHtml: Object.keys(texts).filter(k => k !== kind).map(k => texts[k]),
+      steps: [kind === 'right' ? `A small square in the corner marks a right angle, which is 90°.` : kind === 'eqang' ? `Matching arcs are drawn on angles that are equal in size.` : kind === 'eqint' ? `Matching tick marks are drawn on intervals that are equal in length.` : `Matching arrows are drawn on lines that are parallel.`, `Answer: ${texts[kind]}`], meta: { kind } });
+  }
+  const nm = letters(4), shape = [[210, 430], [660, 440], [710, 150], [260, 110]].map(p => [p[0] + randInt(-25, 25), p[1] + randInt(-20, 20)]);
+  const S = Scene(900, 540); S.add(`<polygon points="${shape.map(pstr).join(' ')}" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>`);
+  const cen = [shape.reduce((s, p) => s + p[0], 0) / 4, shape.reduce((s, p) => s + p[1], 0) / 4];
+  const k = randInt(0, 3), dirTo = (a, b) => { let d = Math.atan2(-(b[1] - a[1]), b[0] - a[0]) / DEG; return d < 0 ? d + 360 : d; };
+  shape.forEach((p, i) => { const dx = p[0] - cen[0], dy = p[1] - cen[1], L = Math.hypot(dx, dy); S.dot(p, { r: 8 }); S.text(p[0] + dx / L * 40, p[1] + dy / L * 40, nm[i], { size: 34, bold: true }); });
+  let a1 = dirTo(shape[k], shape[(k + 1) % 4]), a2 = dirTo(shape[k], shape[(k + 3) % 4]); if (a2 < a1) a2 += 360;
+  S.angle(shape[k], a1, a2, '', { r: 60, color: PURPLE, fill: 'rgba(108,92,231,0.18)', role: 'mark', g: '' });
+  S.meta({ nm, k, shape: shape.map(p => [fx(p[0]), fx(p[1])]) });
+  const nameAt = (i) => `∠${nm[(i + 3) % 4]}${nm[i]}${nm[(i + 1) % 4]}`;
+  const ans = nameAt(k), pa = nm[(k + 3) % 4], pb = nm[(k + 1) % 4];
+  return buildName(T, { prompt: 'What is the name of the marked angle?', body: S.svg('Marked angle in a shape'), answerHtml: ans, accept: [nn(`${pa}${nm[k]}${pb}`), nn(`${pb}${nm[k]}${pa}`)],
+    wrongHtml: [0, 1, 2, 3].filter(i => i !== k).map(nameAt),
+    steps: [`The marked angle is at the corner ${nm[k]}, so ${nm[k]} is the vertex and goes in the middle.`, `Its arms go to ${pa} and ${pb}.`, `Answer: ${ans}`], meta: { nm, k } });
+}
+
+// =========================================================================
+// 3. Types of angles
+// =========================================================================
+function sizeType(n) { return n < 90 ? 'acute' : n === 90 ? 'right' : n < 180 ? 'obtuse' : n === 180 ? 'straight' : n < 360 ? 'reflex' : 'revolution'; }
+const TYPE_NAME = { acute: 'Acute angle', right: 'Right angle', obtuse: 'Obtuse angle', straight: 'Straight angle', reflex: 'Reflex angle', revolution: 'Complete revolution' };
+const TYPE_RX = { acute: 'acute', right: 'right', obtuse: 'obtuse', straight: 'straight', reflex: 'reflex', revolution: '(revolution|complete|full)' };
+function singleAngle(size, label) {
+  const S = Scene(900, 480), O = [300, 240];
+  S.line(O, addv(O, vec(0, 225)));
+  if (size < 360) S.line(O, addv(O, vec(size, 225)));
+  S.dot(O);
+  const box = size === 90;
+  S.angle(O, 0, size, label || '', { r: size > 180 ? 80 : 70, color: PURPLE, box, boxSize: 52, fill: box ? undefined : 'rgba(108,92,231,0.12)', g: size >= 360 ? '360' : String(size), lr: size === 180 ? 125 : size >= 360 ? 0 : undefined });
+  return S;
+}
+function genAngleTypes(level) {
+  const T = 'Types of Angles';
+  if (level === 0) {
+    const t = randChoice(['right', 'straight', 'revolution', 'acute']);
+    const size = t === 'right' ? 90 : t === 'straight' ? 180 : t === 'revolution' ? 360 : randInt(25, 70);
+    const S = singleAngle(size, ''); S.meta({ shownType: t });
+    const names = ['acute', 'right', 'straight', 'revolution'];
+    const why = { right: `The small square in the corner shows a right angle (90°).`, straight: `The two arms make a straight line, so this is a straight angle (180°).`, revolution: `The arm has turned all the way round to where it started, a complete revolution (360°).`, acute: `The angle is smaller than a right angle, so it is acute.` };
+    return buildRegex(T, { prompt: 'What type of angle is marked?', body: S.svg('An angle'), answerHtml: TYPE_NAME[t], rx: TYPE_RX[t], wrongHtml: names.filter(n => n !== t).map(n => TYPE_NAME[n]), steps: [why[t], `Answer: ${TYPE_NAME[t]}`], meta: { t, size } });
+  }
+  if (level === 1) {
+    const t = randChoice(['right', 'straight', 'revolution']), v = { right: 90, straight: 180, revolution: 360 }[t];
+    const w = { right: 'a right angle', straight: 'a straight angle', revolution: 'a complete revolution' }[t];
+    return buildNumeric(T, { prompt: `How many degrees are in ${w}?`, answer: v, wrong: [90, 180, 360, 45, 270].filter(n => n !== v),
+      steps: [`A right angle is 90°, a straight angle is 180° and a complete revolution is 360°.`, `${w.replace(/^a /, 'A ')} is ${v}°.`, `Answer: ${v}°`], meta: { t } });
+  }
+  if (level === 2) {
+    const t = randChoice(['acute', 'right', 'obtuse', 'straight', 'reflex', 'revolution']);
+    const size = { acute: randInt(15, 80), right: 90, obtuse: randInt(100, 170), straight: 180, reflex: randInt(190, 340), revolution: 360 }[t];
+    const S = singleAngle(size, size >= 360 ? '' : D(size));
+    S.meta({ size, t });
+    const rule = { acute: `An acute angle is less than 90°.`, right: `A right angle is exactly 90°.`, obtuse: `An obtuse angle is between 90° and 180°.`, straight: `A straight angle is exactly 180°.`, reflex: `A reflex angle is between 180° and 360°.`, revolution: `A complete revolution is exactly 360°.` };
+    const others = shuffle(Object.keys(TYPE_NAME).filter(k => k !== t)).slice(0, 3);
+    return buildRegex(T, { prompt: `What type of angle is ${D(size)}?`, body: S.svg('An angle'), answerHtml: TYPE_NAME[t], rx: TYPE_RX[t], wrongHtml: others.map(k => TYPE_NAME[k]),
+      steps: [`${size}° is ${size < 90 ? 'less than 90°' : size === 90 ? 'equal to 90°' : size < 180 ? 'between 90° and 180°' : size === 180 ? 'equal to 180°' : size < 360 ? 'between 180° and 360°' : 'equal to 360°'}.`, rule[t], `Answer: ${TYPE_NAME[t]}`], meta: { size, t } });
+  }
+  const m = randInt(0, 3);
+  if (m === 0) {
+    const a = randInt(1, 10), k = randInt(1, 11 - 0), b = a + k > 12 ? a + k - 12 : a + k, n = (b - a + 12) % 12 || 12;
+    const from = a, to = b;
+    return buildNumeric(T, { prompt: `A clock hand turns from the ${from} to the ${to}. Through how many degrees does it turn?`, answer: n * 30, wrong: [(n + 1) * 30, (n - 1) * 30, n * 15, 360 - n * 30, n * 12],
+      steps: [`A clock face is a complete revolution of 360° with 12 numbers, so each number is 360° ${'&divide;'} 12 = 30° apart.`, `Going clockwise from the ${from} to the ${to} is ${n} step${n === 1 ? '' : 's'} of 30°.`, `${n} ${TIMES} 30° = ${n * 30}°`, `Answer: ${n * 30}°`], meta: { kind: 'clock', from, to, n } });
+  }
+  if (m === 1) {
+    const q = randChoice([['How many right angles make a complete revolution?', 4, `360° ÷ 90° = 4`], ['How many right angles make a straight angle?', 2, `180° ÷ 90° = 2`], ['How many straight angles make a complete revolution?', 2, `360° ÷ 180° = 2`]]);
+    return buildNumeric(T, { prompt: q[0], fmt: String, answer: q[1], wrong: [1, 2, 3, 4, 6, 8].filter(n => n !== q[1]),
+      steps: [`A right angle is 90°, a straight angle is 180° and a complete revolution is 360°.`, q[2], `Answer: ${q[1]}`], meta: { kind: 'count' } });
+  }
+  if (m === 2) {
+    const parts = randChoice([[3, 120], [4, 90], [5, 72], [6, 60], [8, 45], [9, 40], [10, 36], [12, 30]]);
+    return buildNumeric(T, { prompt: `A complete revolution is split into ${parts[0]} equal angles. What is the size of each angle?`, answer: parts[1], wrong: [360 / parts[0] * 2, parts[1] + 10, 180 / parts[0] * 2 + 10, parts[1] - 10, 180 / parts[0]],
+      steps: [`A complete revolution is 360°.`, `360° ${'&divide;'} ${parts[0]} = ${parts[1]}°`, `Answer: ${parts[1]}°`], meta: { kind: 'split', n: parts[0] } });
+  }
+  const parts = randChoice([[2, 90], [3, 60], [4, 45], [5, 36], [6, 30], [9, 20], [10, 18]]);
+  return buildNumeric(T, { prompt: `A straight angle is split into ${parts[0]} equal angles. What is the size of each angle?`, answer: parts[1], wrong: [parts[1] * 2, parts[1] + 10, parts[1] - 10, 360 / parts[0], parts[1] + 5],
+    steps: [`A straight angle is 180°.`, `180° ${'&divide;'} ${parts[0]} = ${parts[1]}°`, `Answer: ${parts[1]}°`], meta: { kind: 'splitStraight', n: parts[0] } });
+}
+
+// =========================================================================
+// 4. Complementary and supplementary
+// =========================================================================
+function rightScene(psi, labels) {   // right angle split by a ray at psi: labels = [first, second]
+  const S = Scene(900, 520), O = [250, 450];
+  S.line(O, addv(O, vec(0, 460))); S.line(O, addv(O, vec(90, 380))); S.line(O, addv(O, vec(psi, 440))); S.dot(O);
+  S.angle(O, 0, 90, '', { box: true, boxSize: 36, g: '90°', role: 'box' });
+  S.angle(O, 0, psi, labels[0].t, { r: 130, color: labels[0].c, role: labels[0].role || '', g: labels[0].g });
+  S.angle(O, psi, 90, labels[1].t, { r: 130, color: labels[1].c, role: labels[1].role || '', g: labels[1].g });
+  return S;
+}
+function straightScene(psi, labels) {
+  const S = Scene(900, 480), O = [450, 400];
+  S.line(addv(O, vec(180, 400)), addv(O, vec(0, 400)));
+  S.line(O, addv(O, vec(psi, 330))); S.dot(O);
+  S.angle(O, 0, psi, labels[0].t, { r: 90, color: labels[0].c, role: labels[0].role || '', g: labels[0].g });
+  S.angle(O, psi, 180, labels[1].t, { r: 90, color: labels[1].c, role: labels[1].role || '', g: labels[1].g });
+  return S;
+}
+const GIV = (n) => ({ t: D(n), c: 'currentColor', g: String(n), role: 'given' });
+const UNK = { t: unknownLabel, c: ORANGE, g: 'x', role: 'target' };
+function genCompSupp(level) {
+  const T = 'Complementary and Supplementary';
+  if (level === 0) {
+    const comp = Math.random() < 0.5, a = comp ? randInt(10, 80) : randInt(20, 160), b = (comp ? 90 : 180) - a;
+    if (a === b) return genCompSupp(0);
+    const ans = comp ? 'Complementary' : 'Supplementary';
+    return buildRegex(T, { prompt: `Two angles of ${D(a)} and ${D(b)} add to ${D(comp ? 90 : 180)}. What are they called?`, answerHtml: ans, rx: comp ? 'complement' : 'supplement', wrongHtml: [comp ? 'Supplementary' : 'Complementary', 'Vertically opposite', 'Alternate'],
+      steps: [`Angles that add to 90° are complementary. Angles that add to 180° are supplementary.`, `${a}° + ${b}° = ${a + b}°, so the angles are ${ans.toLowerCase()}.`, `Answer: ${ans}`], meta: { comp, a, b } });
+  }
+  if (level === 1) {
+    const a = randInt(10, 80), S = rightScene(a, [GIV(a), UNK]);
+    return buildNumeric(T, { prompt: 'The two angles are complementary. Find the size of angle x.', body: S.svg('Right angle split in two'), answer: 90 - a, wrong: [180 - a, a, 90 + a, 360 - a],
+      steps: [`Complementary angles add to 90° (together they make a right angle).`, `${V('x')} = 90° ${MINUS} ${a}° = ${90 - a}°`, `Answer: ${90 - a}°`], meta: { a, kind: 'comp' } });
+  }
+  if (level === 2) {
+    const a = randInt(20, 160), S = straightScene(a, [GIV(a), UNK]);
+    return buildNumeric(T, { prompt: 'The two angles are supplementary. Find the size of angle x.', body: S.svg('Straight line split in two'), answer: 180 - a, wrong: [90 - a > 0 ? 90 - a : 90 + a, a, 360 - a, 180 + a],
+      steps: [`Supplementary angles add to 180° (together they make a straight line).`, `${V('x')} = 180° ${MINUS} ${a}° = ${180 - a}°`, `Answer: ${180 - a}°`], meta: { a, kind: 'supp' } });
+  }
+  const m = randInt(0, 3);
+  if (m === 0) {
+    const c = randInt(10, 80), ang = 90 - c;
+    return buildNumeric(T, { prompt: `The complement of an angle is ${D(c)}. What is the supplement of the same angle?`, answer: 180 - ang, wrong: [ang, 180 - c, 90 - c, 90 + c],
+      steps: [`Complementary angles add to 90°, so the angle is 90° ${MINUS} ${c}° = ${ang}°.`, `Supplementary angles add to 180°, so its supplement is 180° ${MINUS} ${ang}° = ${180 - ang}°.`, `Answer: ${180 - ang}°`], meta: { kind: 'compThenSupp', c, ang } });
+  }
+  if (m === 1) {
+    const s = randInt(100, 170), ang = 180 - s, ok = ang < 90;
+    return buildNumeric(T, { prompt: `The supplement of an angle is ${D(s)}. What is the complement of the same angle?`, answer: 90 - ang, wrong: [ang, 90 - s > 0 ? 90 - s : 100, 180 - s + 10, 90 + ang],
+      steps: [`Supplementary angles add to 180°, so the angle is 180° ${MINUS} ${s}° = ${ang}°.`, `Complementary angles add to 90°, so its complement is 90° ${MINUS} ${ang}° = ${90 - ang}°.`, `Answer: ${90 - ang}°`], meta: { kind: 'suppThenComp', s, ang } });
+  }
+  const wantSupp = Math.random() < 0.5, tot = wantSupp ? 180 : 90, name = wantSupp ? 'supplementary' : 'complementary';
+  const mk = (sum) => { const a = randInt(10, Math.min(sum - 10, 170)); return [a, sum - a]; };
+  const right = mk(tot), pairs = [right], seenSums = new Set([tot]);
+  while (pairs.length < 4) { const s = randChoice([tot - 20, tot - 10, tot + 10, tot + 20, wantSupp ? 90 : 180, wantSupp ? 160 : 100, wantSupp ? 200 : 80].filter(x => x > 20 && x !== tot)); const p = mk(s); if (p[0] > 0 && p[1] > 0 && !pairs.some(q => q.join() === p.join() || q.slice().reverse().join() === p.join())) pairs.push(p); }
+  const fmtP = (p) => `${D(p[0])} and ${D(p[1])}`;
+  return buildName(T, { prompt: `Which pair of angles is ${name}?`, answerHtml: fmtP(right), accept: [nn(`${right[0]}${right[1]}`), nn(`${right[1]}${right[0]}`)], wrongHtml: pairs.slice(1).map(fmtP),
+    steps: [`${name.replace(/^./, c => c.toUpperCase())} angles add to ${tot}°.`, `${right[0]}° + ${right[1]}° = ${tot}°, so ${fmtP(right)} are ${name}.`, `Answer: ${fmtP(right)}`], meta: { tot, pairs } });
+}
+
+// =========================================================================
+// 5. Adjacent and vertically opposite
+// =========================================================================
+function crossScene(th, labels, o = {}) {      // two lines crossing, regions R0..R3 counter-clockwise from the right
+  const S = Scene(900, 560), O = [450, 280];
+  S.line(addv(O, vec(180, 300)), addv(O, vec(0, 300))); S.line(addv(O, vec(th + 180, 235)), addv(O, vec(th, 235))); S.dot(O, { r: 7 });
+  const regs = [[0, th], [th, 180], [180, 180 + th], [180 + th, 360]];
+  regs.forEach((r, i) => { const L = labels[i]; if (L) S.angle(O, r[0], r[1], L.t, { r: o.r || 60, color: L.c || 'currentColor', role: L.role || '', g: L.g, lr: L.lr, fill: L.fill }); });
+  S.meta({ th });
+  return S;
+}
+const reg4 = (th) => [th, 180 - th, th, 180 - th];
+function genAdjVO(level) {
+  const T = 'Adjacent and Vertically Opposite';
+  const lett = 'abcd';
+  if (level === 0) {
+    let b1 = randInt(25, 50), b2 = b1 + randInt(28, 45), b3 = b2 + randInt(28, 45);
+    const S = Scene(900, 470), O = [450, 400];
+    S.line(addv(O, vec(180, 400)), addv(O, vec(0, 400)));
+    [b1, b2, b3].forEach(d => S.line(O, addv(O, vec(d, 340)))); S.dot(O, { r: 7 });
+    const bounds = [0, b1, b2, b3, 180], names = 'abcd'.split('');
+    names.forEach((nm, i) => S.angle(O, bounds[i], bounds[i + 1], `<tspan font-style="italic">${nm}</tspan>`, { r: 90 + (i % 2) * 0, g: nm, lr: 150 }));
+    S.meta({ bounds });
+    const adj = ['ab', 'bc', 'cd'], non = ['ac', 'ad', 'bd'], pick = randChoice(adj);
+    const fmt = (p) => `${V(p[0])} and ${V(p[1])}`;
+    return buildName(T, { prompt: 'Which pair of angles are adjacent?', body: S.svg('Four angles on a line'), answerHtml: fmt(pick), accept: [nn(pick), nn(pick[1] + pick[0])], wrongHtml: non.map(fmt),
+      steps: [`Adjacent angles share a common arm and a common vertex, and they are side by side.`, `Angles ${pick[0]} and ${pick[1]} are next to each other and share an arm.`, `Answer: ${pick[0]} and ${pick[1]}`], meta: { adj: pick, bounds } });
+  }
+  const th = randChoice([randInt(35, 75), randInt(105, 145)]);
+  if (level === 1) {
+    const labs = lett.split('').map((l, i) => ({ t: `<tspan font-style="italic">${l}</tspan>`, g: l, lr: 98 }));
+    const S = crossScene(th, labs, { r: 60 }); S.meta({ th });
+    const vo = ['ac', 'bd'], adj = ['ab', 'bc', 'cd', 'da'], pick = randChoice(vo);
+    const fmt = (p) => `${V(p[0])} and ${V(p[1])}`;
+    return buildName(T, { prompt: 'Which pair of angles are vertically opposite?', body: S.svg('Two crossing lines'), answerHtml: fmt(pick), accept: [nn(pick), nn(pick[1] + pick[0])], wrongHtml: shuffle(adj).slice(0, 3).map(fmt),
+      steps: [`Vertically opposite angles are directly across from each other where two lines cross.`, `Angles ${pick[0]} and ${pick[1]} are opposite each other.`, `Answer: ${pick[0]} and ${pick[1]}`], meta: { pick, th } });
+  }
+  const given = randInt(0, 3), vals = reg4(th);
+  if (level === 2) {
+    const tgt = (given + 2) % 4, labs = [0, 1, 2, 3].map(i => i === given ? { t: D(vals[i]), g: String(vals[i]), role: 'given' } : i === tgt ? { t: unknownLabel, c: ORANGE, g: 'x', role: 'target', lr: 98 } : null);
+    const S = crossScene(th, labs); const ans = vals[tgt];
+    return buildNumeric(T, { prompt: 'Find the size of angle x.', body: S.svg('Two crossing lines'), answer: ans, wrong: [180 - ans, 90 - ans > 0 ? 90 - ans : ans + 90, 360 - ans, 180 - ans + 10],
+      steps: [`Angle ${V('x')} is vertically opposite the ${vals[given]}° angle.`, `Vertically opposite angles are equal.`, `${V('x')} = ${ans}°`, `Answer: ${ans}°`], meta: { th, given, tgt, vals, ans } });
+  }
+  const tgt = (given + randChoice([1, 2, 3])) % 4, rel = (tgt - given + 4) % 4;
+  const labs = [0, 1, 2, 3].map(i => i === given ? { t: D(vals[i]), g: String(vals[i]), role: 'given' } : i === tgt ? { t: unknownLabel, c: ORANGE, g: 'x', role: 'target', lr: 98 } : null);
+  const S = crossScene(th, labs); const ans = vals[tgt], g = vals[given];
+  const steps = rel === 2 ? [`Angle ${V('x')} is vertically opposite the ${g}° angle, so they are equal.`, `${V('x')} = ${ans}°`]
+    : [`Angle ${V('x')} is next to the ${g}° angle on a straight line.`, `Angles on a straight line add to 180°.`, `${V('x')} = 180° ${MINUS} ${g}° = ${ans}°`];
+  return buildNumeric(T, { prompt: 'Find the size of angle x.', body: S.svg('Two crossing lines'), answer: ans, wrong: [g, 180 - ans === ans ? ans + 10 : 180 - ans, 360 - g - ans > 0 ? 360 - g - ans : 90 + ans, 90 - g > 0 ? 90 - g : ans + 20],
+    steps: steps.concat([`Answer: ${ans}°`]), meta: { th, given, tgt, vals, ans, rel } });
+}
+
+// =========================================================================
+// 6. Angles at a point
+// =========================================================================
+function raysScene(dirs, labels, o = {}) {   // rays from the centre at the given directions; angle k runs from dirs[k] to dirs[k+1]
+  const S = Scene(900, o.H || 560), O = o.O || [450, 290];
+  if (o.line) S.line(addv(O, vec(180, 400)), addv(O, vec(0, 400)));
+  dirs.forEach(d => { if (!(o.line && (d === 0 || d === 180))) S.line(O, addv(O, vec(d, o.len || 240))); }); S.dot(O, { r: 7 });
+  const all = o.closed ? dirs.concat([dirs[0] + 360]) : dirs;
+  for (let k = 0; k < all.length - 1; k++) if (labels[k]) S.angle(O, all[k], all[k + 1], labels[k].t, { r: labels[k].r || 70, color: labels[k].c, role: labels[k].role || '', g: labels[k].g, box: labels[k].box, lr: labels[k].lr });
+  return S;
+}
+function splitInto(total, n, lo) {      // n whole-number parts, each >= lo, adding to total
+  const parts = []; let left = total;
+  for (let i = 0; i < n - 1; i++) { const maxv = left - lo * (n - 1 - i); parts.push(randInt(lo, Math.min(maxv, Math.max(lo, Math.floor(left / (n - i) * 1.7))))); left -= parts[i]; }
+  parts.push(left); return shuffle(parts);
+}
+function genAtPoint(level) {
+  const T = 'Angles at a Point';
+  if (level === 0) {
+    const a = randInt(25, 155), S = straightScene(a, [GIV(a), UNK]);
+    return buildNumeric(T, { prompt: 'Find the size of angle x.', body: S.svg('Angles on a straight line'), answer: 180 - a, wrong: [a, 90 - a > 0 ? 90 - a : 90 + a, 360 - a, 180 + a],
+      steps: [`The two angles make a straight line.`, `Angles on a straight line add to 180°.`, `${V('x')} = 180° ${MINUS} ${a}° = ${180 - a}°`, `Answer: ${180 - a}°`], meta: { a } });
+  }
+  if (level === 1) {
+    const a = randInt(15, 75), S = rightScene(a, [GIV(a), UNK]);
+    return buildNumeric(T, { prompt: 'Find the size of angle x.', body: S.svg('Angles in a right angle'), answer: 90 - a, wrong: [180 - a, a, 90 + a, 360 - a],
+      steps: [`The small square shows the whole angle is a right angle, 90°.`, `Angles in a right angle add to 90°.`, `${V('x')} = 90° ${MINUS} ${a}° = ${90 - a}°`, `Answer: ${90 - a}°`], meta: { a } });
+  }
+  const mode = level === 2 ? 'point3' : randChoice(['line3', 'point4', 'point4', 'right3']);
+  if (mode === 'point3' || mode === 'point4') {
+    const n = mode === 'point3' ? 3 : 4, parts = splitInto(360, n, 40), ui = randInt(0, n - 1);
+    let start = randInt(10, 80), dirs = [start]; for (let i = 0; i < n - 1; i++) dirs.push(dirs[i] + parts[i]);
+        const known = parts.filter((_, i) => i !== ui), ans = parts[ui], sum = known.reduce((s, v) => s + v, 0);
+    // arrange rays directions so that from < to when drawn: use unwrapped directions
+    return buildNumeric(T, { prompt: 'Find the size of angle x.', body: rebuildPoint(dirs, parts, ui), answer: ans, wrong: [180 - ans > 0 ? 180 - ans : ans + 20, 360 - sum + 10, sum, ans + 10, 360 - ans],
+      steps: [`The ${n} angles go all the way around a point.`, `Angles at a point add to 360°.`, `${known.join('° + ')}° = ${sum}°`, `${V('x')} = 360° ${MINUS} ${sum}° = ${ans}°`, `Answer: ${ans}°`], meta: { parts, ui, n } });
+  }
+  if (mode === 'line3') {
+    const parts = splitInto(180, 3, 30), ui = randInt(0, 2), b1 = parts[0], b2 = parts[0] + parts[1];
+    const S = Scene(900, 480), O = [450, 400];
+    S.line(addv(O, vec(180, 400)), addv(O, vec(0, 400))); [b1, b2].forEach(d => S.line(O, addv(O, vec(d, 340)))); S.dot(O, { r: 7 });
+    const bounds = [0, b1, b2, 180];
+    parts.forEach((p, i) => S.angle(O, bounds[i], bounds[i + 1], i === ui ? unknownLabel : D(p), { r: 80, color: i === ui ? ORANGE : 'currentColor', role: i === ui ? 'target' : 'given', g: i === ui ? 'x' : String(p), lr: 135 }));
+    const known = parts.filter((_, i) => i !== ui), sum = known[0] + known[1], ans = parts[ui];
+    return buildNumeric(T, { prompt: 'Find the size of angle x.', body: S.svg('Angles on a straight line'), answer: ans, wrong: [sum, 360 - sum > 0 && 360 - sum < 360 ? 360 - sum : ans + 20, 90 - sum > 0 ? 90 - sum : ans + 10, ans + 10],
+      steps: [`The three angles make a straight line.`, `Angles on a straight line add to 180°.`, `${known[0]}° + ${known[1]}° = ${sum}°`, `${V('x')} = 180° ${MINUS} ${sum}° = ${ans}°`, `Answer: ${ans}°`], meta: { parts, ui } });
+  }
+  const parts = splitInto(90, 3, 22), ui = randInt(0, 2);
+  const S = Scene(900, 520), O = [250, 450], b1 = parts[0], b2 = parts[0] + parts[1];
+  S.line(O, addv(O, vec(0, 460))); S.line(O, addv(O, vec(90, 380))); [b1, b2].forEach(d => S.line(O, addv(O, vec(d, 440)))); S.dot(O, { r: 7 });
+  S.angle(O, 0, 90, '', { box: true, boxSize: 36, g: '90°', role: 'box' });
+  const bounds = [0, b1, b2, 90];
+  parts.forEach((p, i) => S.angle(O, bounds[i], bounds[i + 1], i === ui ? unknownLabel : D(p), { r: 150, color: i === ui ? ORANGE : 'currentColor', role: i === ui ? 'target' : 'given', g: i === ui ? 'x' : String(p), lr: 195 }));
+  const known = parts.filter((_, i) => i !== ui), sum = known[0] + known[1], ans = parts[ui];
+  return buildNumeric(T, { prompt: 'Find the size of angle x.', body: S.svg('Angles in a right angle'), answer: ans, wrong: [sum, 180 - sum, 360 - sum > 0 && 360 - sum < 360 ? 360 - sum : ans + 20, ans + 10],
+    steps: [`The small square shows the three angles make a right angle, 90°.`, `Angles in a right angle add to 90°.`, `${known[0]}° + ${known[1]}° = ${sum}°`, `${V('x')} = 90° ${MINUS} ${sum}° = ${ans}°`, `Answer: ${ans}°`], meta: { parts, ui } });
+}
+function rebuildPoint(dirs, parts, ui) {   // angles around a point drawn with unwrapped directions
+  const S = Scene(900, 560), O = [450, 290], n = parts.length;
+  dirs.forEach(d => S.line(O, addv(O, vec(d, 240)))); S.dot(O, { r: 7 });
+  for (let k = 0; k < n; k++) {
+    const a1 = dirs[k], a2 = k < n - 1 ? dirs[k + 1] : dirs[0] + 360;
+    S.angle(O, a1, a2, k === ui ? unknownLabel : D(parts[k]), { r: 62, color: k === ui ? ORANGE : 'currentColor', role: k === ui ? 'target' : 'given', g: k === ui ? 'x' : String(parts[k]), lr: 105 });
+  }
+  S.meta({ parts, ui });
+  return S.svg('Angles around a point');
+}
+
+// =========================================================================
+// 7. Parallel and perpendicular lines
+// =========================================================================
+const PARA_EXT = [(v) => [0, v], (v) => [v, 180], (v) => [180, 180 + v], (v) => [v + 180, 360]];
+const paraVal = (vi, v) => (vi % 2 === 0 ? v : 180 - v);
+function paraScene(names, v, marks) {     // parallelogram PQRS, angle at P = v
+  const S = Scene(900, 520), P = [250, 450], Q = [650, 450], L = 260;
+  const Sv = addv(P, vec(v, L)), R = addv(Q, vec(v, L)), pts = [P, Q, R, Sv];
+  S.add(`<polygon points="${pts.map(pstr).join(' ')}" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>`);
+  S.chev(addv(P, [150, 0]), 0, 1); S.chev(addv(Sv, [150, 0]), 0, 1);
+  S.chev(addv(P, vec(v, L / 2 - 12)), v, 2); S.chev(addv(Q, vec(v, L / 2 - 12)), v, 2);
+  [[P, -36, 28], [Q, 36, 28], [R, 38, -24], [Sv, -38, -24]].forEach((x, i) => { S.dot(x[0], { r: 8 }); S.text(x[0][0] + x[1], x[0][1] + x[2], names[i], { size: 34, bold: true }); });
+  (marks || []).forEach(m => { const e = PARA_EXT[m.vi](v); S.angle(pts[m.vi], e[0], e[1], m.label, { r: 52, color: m.color || 'currentColor', role: m.role || '', g: m.g }); });
+  S.meta({ names, v });
+  return S;
+}
+const REL_SYM = { par: '∥', perp: '⊥' };
+const relHtml = (a, r, b) => `${a} ${REL_SYM[r]} ${b}`;
+function genParPerp(level) {
+  const T = 'Parallel and Perpendicular Lines';
+  if (level === 0) {
+    const q = randChoice(['sym1', 'sym2', 'sym3', 'sym4']);
+    const meanings = [['is parallel to', 'parallel'], ['is perpendicular to', 'perp'], ['is equal to', null], ['is congruent to', null]];
+    if (q === 'sym1' || q === 'sym2') {
+      const r = q === 'sym1' ? 'par' : 'perp', ans = r === 'par' ? 'is parallel to' : 'is perpendicular to';
+      return buildRegex(T, { prompt: `What does the symbol ${REL_SYM[r]} mean?`, answerHtml: ans, rx: r === 'par' ? 'parallel' : 'perp', wrongHtml: meanings.map(m => m[0]).filter(m => m !== ans),
+        steps: [`${REL_SYM.par} means "is parallel to" and ${REL_SYM.perp} means "is perpendicular to".`, `${REL_SYM[r]} means "${ans}".`, `Answer: ${ans}`], meta: { q } });
+    }
+    const r = q === 'sym3' ? 'perp' : 'par', word = r === 'par' ? 'parallel' : 'perpendicular';
+    return buildRegex(T, { prompt: `Which symbol means "is ${word} to"?`, answerHtml: REL_SYM[r], rx: r === 'par' ? '(parallel|∥|\\|\\||//)' : '(perp|⊥|⟂|_\\|_)', wrongHtml: [REL_SYM[r === 'par' ? 'perp' : 'par'], '=', '≠'],
+      steps: [`${REL_SYM.par} means "is parallel to" and ${REL_SYM.perp} means "is perpendicular to".`, `"Is ${word} to" is written ${REL_SYM[r]}.`, `Answer: ${REL_SYM[r]}`], meta: { q } });
+  }
+  if (level === 1) {
+    const [a, b, c, d] = letters(4), r = randChoice(['par', 'perp']), S = Scene(900, 460);
+    if (r === 'par') {
+      S.line([120, 140], [780, 140]); S.line([120, 320], [780, 320]); S.chev([450, 140], 0, 1); S.chev([450, 320], 0, 1);
+      S.text(90, 140, a, { size: 34, bold: true }); S.text(810, 140, b, { size: 34, bold: true }); S.text(90, 320, c, { size: 34, bold: true }); S.text(810, 320, d, { size: 34, bold: true });
+    } else {
+      S.line([120, 260], [780, 260]); S.line([450, 60], [450, 420]); S.angle([450, 260], 0, 90, '', { box: true, boxSize: 34, g: '90°', role: 'box' });
+      S.text(90, 260, a, { size: 34, bold: true }); S.text(810, 260, b, { size: 34, bold: true }); S.text(450, 36, c, { size: 34, bold: true }); S.text(450, 446, d, { size: 34, bold: true });
+    }
+    S.meta({ r, names: [a, b, c, d] });
+    const ab = a + b, cd = c + d, other = r === 'par' ? 'perp' : 'par';
+    return buildRel(T, { prompt: `Which statement is correct for lines ${ab} and ${cd}?`, body: S.svg('Two lines'), answerHtml: relHtml(ab, r, cd), rel: [r, ab, cd],
+      wrongHtml: [relHtml(ab, other, cd), `${ab} = ${cd}`, `${ab} ∠ ${cd}`],
+      steps: [r === 'par' ? `The matching arrows show the lines are parallel.` : `The small square shows the lines meet at a right angle, so they are perpendicular.`, `"${r === 'par' ? 'Parallel' : 'Perpendicular'}" is written with the symbol ${REL_SYM[r]}.`, `Answer: ${relHtml(ab, r, cd)}`], meta: { r, ab, cd } });
+  }
+  if (level === 2) {
+    const [a, b, c, d, e, f] = letters(6), S = Scene(900, 520);
+    S.line([100, 150], [800, 150]); S.line([100, 370], [800, 370]); S.line([450, 60], [450, 460]);
+    S.chev([210, 150], 0, 1); S.chev([210, 370], 0, 1);
+    S.angle([450, 150], 0, 90, '', { box: true, boxSize: 30, g: '90°', role: 'box' }); S.angle([450, 370], 0, 90, '', { box: true, boxSize: 30, g: '90°', role: 'box' });
+    S.text(70, 150, a, { size: 34, bold: true }); S.text(830, 150, b, { size: 34, bold: true }); S.text(70, 370, c, { size: 34, bold: true }); S.text(830, 370, d, { size: 34, bold: true }); S.text(450, 34, e, { size: 34, bold: true }); S.text(450, 490, f, { size: 34, bold: true });
+    const AB = a + b, CD = c + d, EF = e + f; S.meta({ names: [AB, CD, EF] });
+    const truths = [['par', AB, CD], ['perp', EF, AB], ['perp', EF, CD]], falses = [['perp', AB, CD], ['par', AB, EF], ['par', CD, EF]];
+    const t = randChoice(truths), flip = (x) => Math.random() < 0.5 ? [x[0], x[2], x[1]] : x;
+    const tt = flip(t);
+    const why = t[0] === 'par' ? `The matching arrows show ${AB} and ${CD} are parallel.` : `The small squares show ${EF} meets the other lines at right angles, so it is perpendicular to them.`;
+    return buildRel(T, { prompt: 'Which statement is true?', body: S.svg('Three lines'), answerHtml: relHtml(tt[1], tt[0], tt[2]), rel: tt, wrongHtml: falses.map(x => { const y = flip(x); return relHtml(y[1], y[0], y[2]); }),
+      steps: [why, `The other statements do not match the marks on the diagram.`, `Answer: ${relHtml(tt[1], tt[0], tt[2])}`], meta: { truths, falses, t: tt, names: [AB, CD, EF] } });
+  }
+  const [p, q, r, s] = letters(4), v = randChoice([randInt(52, 80), randInt(100, 128)]);
+  const S = paraScene([p, q, r, s], v, []);
+  const PQ = p + q, SR = s + r, QR = q + r, PS = p + s;
+  const truths = [['par', PQ, SR], ['par', QR, PS]], t = randChoice(truths);
+  const falses = [['par', PQ, QR], ['par', PS, SR], ['perp', PQ, SR], ['par', PQ, PS]];
+  const wr = shuffle(falses).slice(0, 3), flip = (x) => Math.random() < 0.5 ? [x[0], x[2], x[1]] : x, tt = flip(t);
+  return buildRel(T, { prompt: `${p}${q}${r}${s} is a parallelogram. Which statement is true?`, body: S.svg('Parallelogram'), answerHtml: relHtml(tt[1], tt[0], tt[2]), rel: tt, wrongHtml: wr.map(x => { const y = flip(x); return relHtml(y[1], y[0], y[2]); }),
+    steps: [`The single arrows are on ${PQ} and ${SR}, so ${PQ} ${REL_SYM.par} ${SR}.`, `The double arrows are on ${QR} and ${PS}, so ${QR} ${REL_SYM.par} ${PS}.`, `Lines that meet at a corner, such as ${PQ} and ${QR}, are not parallel.`, `Answer: ${relHtml(tt[1], tt[0], tt[2])}`], meta: { truths, falses: wr, t: tt, names: [PQ, SR, QR, PS] } });
+}
+
+// =========================================================================
+// Two lines cut by a transversal
+// =========================================================================
+const REGS = ['UR', 'UL', 'LL', 'LR'], OPP = { UR: 'LL', LL: 'UR', UL: 'LR', LR: 'UL' };
+const regVal = (r, th) => (r === 'UR' || r === 'LL' ? th : 180 - th);
+function relKey(i1, r1, i2, r2) {
+  if (i1 === i2) { if (r1 === r2) return null; return OPP[r1] === r2 ? 'vo' : 'straight'; }
+  const ru = i1 === 1 ? r1 : r2, rl = i1 === 1 ? r2 : r1;
+  if (ru === rl) return 'corr';
+  const pair = ru + rl;
+  if (pair === 'LLUR' || pair === 'LRUL') return 'alt';
+  if (pair === 'LLUL' || pair === 'LRUR') return 'coint';
+  if (pair === 'ULLR' || pair === 'URLL') return 'altx';
+  if (pair === 'ULLL' || pair === 'URLR') return 'cox';
+  return 'other';
+}
+const EQUAL_KEYS = ['vo', 'corr', 'alt', 'altx'];
+const LETTER_OF = { '1UL': 'a', '1UR': 'b', '1LL': 'c', '1LR': 'd', '2UL': 'e', '2UR': 'f', '2LL': 'g', '2LR': 'h' };
+
+// d1, d2: size of the upper-right angle at the upper and lower line (equal when the lines are parallel)
+function transScene(o) {
+  const d1 = o.d1, d2 = o.d2 === undefined ? o.d1 : o.d2, W = 900, H = 560, S = Scene(W, H), yU = 190, yL = 390;
+  const cot = Math.cos(d1 * DEG) / Math.sin(d1 * DEG), O1 = [450 + 100 * cot, yU], O2 = [450 - 100 * cot, yL], phi2 = d1 - d2;
+  S.line(addv(O1, vec(180, 250)), addv(O1, vec(0, 250)));
+  S.line(addv(O2, vec(phi2 + 180, 250)), addv(O2, vec(phi2, 250)));
+  S.line(addv(O1, vec(d1, 130)), addv(O2, vec(d1 + 180, 130)));
+  S.dot(O1, { r: 7 }); S.dot(O2, { r: 7 });
+  if (o.parallel) { S.chev(addv(O1, vec(180, 165)), 0, 1); S.chev(addv(O2, vec(180, 165)), 0, 1); }
+  if (o.names) {
+    const [A, B, C, Dd] = o.names;
+    [[A, addv(O1, vec(180, 280))], [B, addv(O1, vec(0, 280))], [C, addv(O2, vec(phi2 + 180, 280))], [Dd, addv(O2, vec(phi2, 280))]].forEach(x => S.text(x[1][0], x[1][1], x[0], { size: 34, bold: true }));
+  }
+  const phis = { 1: 0, 2: phi2 }, cen = { 1: O1, 2: O2 };
+  const ext = (i, r) => { const p = phis[i]; return { UR: [p, d1], UL: [d1, p + 180], LL: [p + 180, d1 + 180], LR: [d1 + 180, p + 360] }[r]; };
+  (o.marks || []).forEach(m => { const e = ext(m.i, m.r); S.angle(cen[m.i], e[0], e[1], m.label || '', { r: m.r_ || 52, color: m.color || 'currentColor', role: m.role || '', g: m.g, fill: m.fill, lr: m.lr, noArc: m.noArc }); });
+  S.meta({ d1, d2, parallel: !!o.parallel });
+  return S;
+}
+const markGiven = (i, r, val) => ({ i, r, label: D(val), g: String(val), role: 'given', color: 'currentColor' });
+const markTarget = (i, r) => ({ i, r, label: unknownLabel, g: 'x', role: 'target', color: ORANGE, lr: 100 });
+function thetaPick() { return randChoice([randInt(40, 78), randInt(102, 140)]); }
+function allAngles() { const out = []; [1, 2].forEach(i => REGS.forEach(r => out.push([i, r]))); return out; }
+
+const isDirect = (k) => k === 'corr' || k === 'alt' || k === 'coint';
+const isSame = (k) => k === 'vo' || k === 'straight';
+const usable = (k) => isDirect(k) || isSame(k);
+const FARKEYS = ['altx', 'cox', 'other'];
+function stepFor(key, vIn, vOut, final) {
+  const x = V('x');
+  const t = {
+    vo: final ? `${x} is vertically opposite the ${vIn}° angle, so ${x} = ${vOut}° (vertically opposite angles are equal).` : `The angle vertically opposite ${vIn}° is also ${vOut}° (vertically opposite angles are equal).`,
+    straight: final ? `${x} is next to the ${vIn}° angle on a straight line, so ${x} = 180° ${MINUS} ${vIn}° = ${vOut}° (angles on a straight line add to 180°).` : `The angle next to ${vIn}° on a straight line is 180° ${MINUS} ${vIn}° = ${vOut}° (angles on a straight line add to 180°).`,
+    corr: final ? `${x} and the ${vIn}° angle are corresponding angles on parallel lines, so ${x} = ${vOut}° (corresponding angles are equal).` : `The angle corresponding to ${vIn}° is ${vOut}° (corresponding angles on parallel lines are equal).`,
+    alt: final ? `${x} and the ${vIn}° angle are alternate angles on parallel lines, so ${x} = ${vOut}° (alternate angles are equal).` : `The alternate angle to ${vIn}° is ${vOut}° (alternate angles on parallel lines are equal).`,
+    coint: final ? `${x} and the ${vIn}° angle are co-interior angles on parallel lines, so ${x} = 180° ${MINUS} ${vIn}° = ${vOut}° (co-interior angles add to 180°).` : `The co-interior angle to ${vIn}° is 180° ${MINUS} ${vIn}° = ${vOut}° (co-interior angles on parallel lines add to 180°).`,
+  };
+  return t[key];
+}
+// every valid way to get from g to t: one step, or two steps (one on a line through a point, one across the parallels)
+function chainsFor(g, t) {
+  const out = [], k = relKey(g[0], g[1], t[0], t[1]);
+  if (usable(k)) out.push([{ key: k, from: g, to: t }]);
+  allAngles().forEach(m => {
+    if ((m[0] === g[0] && m[1] === g[1]) || (m[0] === t[0] && m[1] === t[1])) return;
+    const k1 = relKey(g[0], g[1], m[0], m[1]), k2 = relKey(m[0], m[1], t[0], t[1]);
+    if (usable(k1) && usable(k2) && ((isSame(k1) && isDirect(k2)) || (isDirect(k1) && isSame(k2)))) out.push([{ key: k1, from: g, to: m }, { key: k2, from: m, to: t }]);
+  });
+  return out;
+}
+function chainSteps(chain, th) {
+  const steps = []; let cur = regVal(chain[0].from[1], th);
+  chain.forEach((s, i) => { const out = regVal(s.to[1], th); steps.push(stepFor(s.key, cur, out, i === chain.length - 1)); cur = out; });
+  return { steps, answer: cur };
+}
+// builds a "find x" parallel-lines question; forceTwo: only angles needing two reasons
+function parallelQuestion(g, t, th, forceTwo) {
+  const chains = chainsFor(g, t).filter(c => (forceTwo ? c.length === 2 : c.length === 1 || !chainsFor(g, t).some(d => d.length === 1)));
+  if (!chains.length) return null;
+  const chain = randChoice(chains), given = regVal(g[1], th);
+  const S = transScene({ d1: th, parallel: true, names: ['A', 'B', 'C', 'D'], marks: [markGiven(g[0], g[1], given), markTarget(t[0], t[1])] });
+  const cs = chainSteps(chain, th);
+  const validSeqs = [...new Set(chainsFor(g, t).filter(c => c.length === chain.length).map(c => c.map(s => s.key).join(',')))];
+  return { S, chain, given, ans: cs.answer, validSeqs, steps: cs.steps, th, g, t };
+}
+function buildParallel(T, q, prompt) {
+  return buildNumeric(T, { prompt: prompt || 'Find the size of angle x.', context: 'AB ∥ CD', body: q.S.svg('Parallel lines cut by a transversal'), answer: q.ans,
+    wrong: [180 - q.ans, q.given, 180 - q.given, 90 - q.ans > 0 ? 90 - q.ans : q.ans + 20], steps: q.steps.concat([`Answer: ${q.ans}°`]),
+    meta: { th: q.th, g: q.g, t: q.t, chain: q.chain.map(c => c.key), given: q.given, ans: q.ans } });
+}
+
+// =========================================================================
+// 8. Transversals and angle pairs
+// =========================================================================
+const PAIR_NAME = { corr: 'Corresponding angles', alt: 'Alternate angles', coint: 'Co-interior angles', vo: 'Vertically opposite angles' };
+const PAIR_RX = { corr: 'correspond', alt: 'altern', coint: 'co.?int', vo: 'vertical' };
+const PAIR_WHY = {
+  corr: `Corresponding angles are in matching positions at the two lines (an F shape).`,
+  alt: `Alternate angles are between the lines, on opposite sides of the transversal (a Z shape).`,
+  coint: `Co-interior angles are between the lines, on the same side of the transversal (a C or U shape).`,
+  vo: `Vertically opposite angles are directly across from each other where two lines cross (an X shape).`,
+};
+function findPair(key) {
+  const all = allAngles(), opts = [];
+  all.forEach(a => all.forEach(b => { if (a !== b && relKey(a[0], a[1], b[0], b[1]) === key && (a[0] < b[0] || (a[0] === b[0] && REGS.indexOf(a[1]) < REGS.indexOf(b[1])))) opts.push([a, b]); }));
+  const p = randChoice(opts); return Math.random() < 0.5 ? p : [p[1], p[0]];
+}
+const pairMarks = (pr) => [{ i: pr[0][0], r: pr[0][1], color: PURPLE, fill: 'rgba(108,92,231,0.22)', g: '', role: 'mark1' }, { i: pr[1][0], r: pr[1][1], color: ORANGE, fill: 'rgba(225,112,85,0.25)', g: '', role: 'mark2' }];
+function genAnglePairs(level) {
+  const T = 'Transversals and Angle Pairs';
+  const th = thetaPick();
+  if (level <= 1) {
+    const key = randChoice(level === 0 ? ['corr', 'alt'] : ['corr', 'alt', 'coint', 'vo']), pr = findPair(key);
+    const S = transScene({ d1: th, parallel: true, marks: pairMarks(pr) });
+    S.meta({ key, pair: pr });
+    return buildRegex(T, { prompt: 'The two parallel lines are cut by a transversal. What are the two marked angles called?', body: S.svg('Marked angle pair'), answerHtml: PAIR_NAME[key], rx: PAIR_RX[key],
+      wrongHtml: Object.keys(PAIR_NAME).filter(k => k !== key).map(k => PAIR_NAME[k]),
+      steps: [`The line that crosses the parallel lines is called the transversal.`, PAIR_WHY[key], `The marked angles are ${PAIR_NAME[key].toLowerCase()}.`, `Answer: ${PAIR_NAME[key]}`], meta: { key, pair: pr, th } });
+  }
+  if (level === 2) {
+    const key = randChoice(['corr', 'alt', 'coint', 'vo']);
+    let g; do { g = randChoice(allAngles()); } while ((key === 'alt' || key === 'coint') && !((g[0] === 1 && (g[1] === 'LL' || g[1] === 'LR')) || (g[0] === 2 && (g[1] === 'UL' || g[1] === 'UR'))));
+    const partners = allAngles().filter(b => relKey(g[0], g[1], b[0], b[1]) === key); if (partners.length !== 1) return genAnglePairs(2);
+    const tgt = partners[0], marks = [];
+    allAngles().forEach(a => {
+      const L = LETTER_OF[a[0] + a[1]], isG = a[0] === g[0] && a[1] === g[1];
+      marks.push({ i: a[0], r: a[1], label: `<tspan font-style="italic">${L}</tspan>`, g: L, color: isG ? PURPLE : 'currentColor', fill: isG ? 'rgba(108,92,231,0.2)' : undefined, role: isG ? 'given' : '', r_: 38, lr: 82, noArc: !isG });
+    });
+    const S = transScene({ d1: th, parallel: true, marks });
+    const gl = LETTER_OF[g[0] + g[1]], tl = LETTER_OF[tgt[0] + tgt[1]], others = 'abcdefgh'.split('').filter(l => l !== gl && l !== tl);
+    const kn = { corr: 'corresponding', alt: 'alternate', coint: 'co-interior', vo: 'vertically opposite' }[key];
+    return buildName(T, { prompt: `Which angle is ${kn} to angle ${gl}?`, body: S.svg('Eight angles'), answerHtml: V(tl), accept: [nn(tl)], wrongHtml: shuffle(others).slice(0, 3).map(V),
+      steps: [`Angle ${gl} is marked in colour.`, PAIR_WHY[key], `The angle in that position to angle ${gl} is angle ${tl}.`, `Answer: ${tl}`], meta: { g, tgt, key, gl, tl, th } });
+  }
+  const all = allAngles(); let pr, key;
+  do { pr = shuffle(all).slice(0, 2); key = relKey(pr[0][0], pr[0][1], pr[1][0], pr[1][1]); } while (!key || key === 'other');
+  const equal = EQUAL_KEYS.includes(key), nameOf = { vo: 'vertically opposite angles', corr: 'corresponding angles', alt: 'alternate angles', altx: 'alternate angles', coint: 'co-interior angles', cox: 'co-interior angles', straight: 'angles on a straight line' }[key];
+  const S = transScene({ d1: th, parallel: true, marks: pairMarks(pr) });
+  S.meta({ key, pair: pr });
+  const eq = 'The angles are equal', sup = 'The angles add to 180°';
+  const cap = nameOf.replace(/^./, c => c.toUpperCase());
+  const rule = equal ? `${cap} ${key === 'vo' ? 'are equal.' : 'on parallel lines are equal.'}` : `${cap} ${key === 'straight' ? 'add to 180°.' : 'on parallel lines add to 180°.'}`;
+  return buildRegex(T, { prompt: 'The two lines are parallel. How are the two marked angles related?', body: S.svg('Marked angle pair'), answerHtml: equal ? eq : sup, rx: equal ? 'equal' : '(180|supplement)',
+    wrongHtml: [equal ? sup : eq, 'The angles add to 90°', 'The angles add to 360°'],
+    steps: [`The marked angles are ${nameOf}.`, rule, `Answer: ${equal ? eq : sup}`], meta: { key, pair: pr, th, equal } });
+}
+
+// =========================================================================
+// 9. Angles on parallel lines
+// =========================================================================
+function genParallelAngles(level) {
+  const T = 'Angles on Parallel Lines';
+  for (let tries = 0; tries < 300; tries++) {
+    const th = thetaPick(), all = allAngles();
+    let g, t, forceTwo = false;
+    if (level <= 2) {
+      const key = ['corr', 'alt', 'coint'][level], opts = [];
+      all.forEach(a => all.forEach(b => { if (relKey(a[0], a[1], b[0], b[1]) === key) opts.push([a, b]); }));
+      [g, t] = randChoice(opts);
+    } else {
+      [g, t] = shuffle(all).slice(0, 2);
+      const k = relKey(g[0], g[1], t[0], t[1]);
+      forceTwo = FARKEYS.includes(k);
+      if (!forceTwo && !usable(k)) continue;
+    }
+    const q = parallelQuestion(g, t, th, forceTwo);
+    if (q) return buildParallel(T, q);
+  }
+  throw new Error('no parallel question');
+}
+
+// =========================================================================
+// 10. Are the lines parallel?
+// =========================================================================
+const J_REASON = {
+  corr: ['corresponding angles are equal', 'corresponding angles are not equal'],
+  alt: ['alternate angles are equal', 'alternate angles are not equal'],
+  coint: ['co-interior angles add to 180°', 'co-interior angles do not add to 180°'],
+};
+function genJustify(level) {
+  const T = 'Are the Lines Parallel?';
+  const key = level === 3 ? randChoice(['corr', 'alt', 'coint']) : ['corr', 'alt', 'coint'][level];
+  const parallel = Math.random() < 0.5, th = thetaPick();
+  let d2 = th;
+  if (!parallel) { const d = randInt(8, 18) * randChoice([-1, 1]); d2 = th + d; if (d2 < 30 || d2 > 150 || (d2 > 82 && d2 < 98)) d2 = th - d; if (d2 < 30 || d2 > 150 || (d2 > 82 && d2 < 98)) return genJustify(level); }
+  const opts = []; allAngles().forEach(a => allAngles().forEach(b => { if (a[0] === 1 && b[0] === 2 && relKey(a[0], a[1], b[0], b[1]) === key) opts.push([a, b]); }));
+  const pr = randChoice(opts), v1 = regVal(pr[0][1], th), v2 = regVal(pr[1][1], d2);
+  const S = transScene({ d1: th, d2, parallel: false, names: ['A', 'B', 'C', 'D'], marks: [markGiven(1, pr[0][1], v1), markGiven(2, pr[1][1], v2)] });
+  S.meta({ key, parallel, v1, v2 });
+  const verdictYes = key === 'coint' ? v1 + v2 === 180 : v1 === v2;
+  if (verdictYes !== parallel) throw new Error('verdict mismatch');
+  const ya = (yes, k) => `${yes ? 'Yes' : 'No'}: ${J_REASON[k][yes ? 0 : 1]}`;
+  const ans = ya(parallel, key), others = ['corr', 'alt', 'coint'].filter(k => k !== key);
+  const wrong = [ya(!parallel, key), ya(parallel, others[0]), ya(!parallel, others[1])];
+  const steps = [`The marked angles are ${PAIR_NAME[key].toLowerCase()}.`,
+    key === 'coint' ? `If the lines are parallel, co-interior angles add to 180°. Here ${v1}° + ${v2}° = ${v1 + v2}°.` : `If the lines are parallel, ${key === 'corr' ? 'corresponding' : 'alternate'} angles are equal. Here the angles are ${v1}° and ${v2}°.`,
+    parallel ? `They ${key === 'coint' ? 'add to 180°' : 'are equal'}, so the lines are parallel.` : `They ${key === 'coint' ? 'do not add to 180°' : 'are not equal'}, so the lines are not parallel.`, `Answer: ${ans}`];
+  return buildVerdict(T, { prompt: 'Are lines AB and CD parallel? Give a reason.', body: S.svg('Two lines cut by a transversal'), answerHtml: ans, verdict: [parallel ? 'yes' : 'no', key], wrongHtml: wrong, steps, meta: { key, parallel, v1, v2, th, d2, pr } });
+}
+
+// =========================================================================
+// 11. Reasons for angle facts
+// =========================================================================
+const RS = {
+  straight: { name: 'Angles on a straight line', rx: 'straight' },
+  point: { name: 'Angles at a point', rx: '(at a point|around a point|revolution)' },
+  right: { name: 'Angles in a right angle', rx: '(right angle|complement)' },
+  vo: { name: 'Vertically opposite angles', rx: 'vertical' },
+  corr: { name: 'Corresponding angles', rx: 'correspond' },
+  alt: { name: 'Alternate angles', rx: 'altern' },
+  coint: { name: 'Co-interior angles', rx: 'co.?int' },
+};
+const RS_FACT = {
+  straight: `Angles on a straight line add to 180°.`, point: `Angles at a point add to 360°.`, right: `Angles in a right angle add to 90°.`, vo: `Vertically opposite angles are equal.`,
+  corr: `Corresponding angles on parallel lines are equal.`, alt: `Alternate angles on parallel lines are equal.`, coint: `Co-interior angles on parallel lines add to 180°.`,
+};
+const rsNames = (ks) => ks.map((k, i) => (i ? RS[k].name.replace(/^./, c => c.toLowerCase()) : RS[k].name)).join(', then ');
+function mkReason(T, body, keys, valid, q, steps0, context) {
+  const all = Object.keys(RS), ans = rsNames(keys);
+  let wrongKeys;
+  if (keys.length === 1) {
+    const pool = q ? ['corr', 'alt', 'coint', 'vo', 'straight'] : all;
+    wrongKeys = shuffle(pool.filter(k => k !== keys[0])).slice(0, 3).map(k => [k]);
+  } else {
+    const rel = ['vo', 'straight', 'corr', 'alt', 'coint'], combos = [];
+    rel.forEach(a => rel.forEach(b => { if (a !== b && !valid.includes(`${a},${b}`)) combos.push([a, b]); }));
+    const near = combos.filter(c => c[0] === keys[0] || c[1] === keys[1] || c[0] === keys[1] || c[1] === keys[0]);
+    wrongKeys = shuffle(near).slice(0, 3);
+  }
+  const prompt = keys.length === 1 ? 'Which reason is used to find the size of angle x?' : 'Which two reasons are used, in order, to find the size of angle x?';
+  const steps = steps0.concat([keys.length === 1 ? RS_FACT[keys[0]] : keys.map(k => RS_FACT[k]).join(' '), `Answer: ${ans}`]);
+  return buildReason(T, { prompt, body, context: context || '', answerHtml: ans, keys, valid, wrongHtml: wrongKeys.map(rsNames), steps, meta: { keys, valid } });
+}
+function genReasons(level) {
+  const T = 'Reasons for Angle Facts';
+  if (level === 0) {
+    const key = randChoice(['straight', 'point', 'right']);
+    let body, steps0;
+    if (key === 'straight') { const a = randInt(30, 150); body = straightScene(a, [GIV(a), UNK]).svg('Angle diagram'); steps0 = [`The two angles make a straight line, so ${V('x')} = 180° ${MINUS} ${a}° = ${180 - a}°.`]; }
+    else if (key === 'right') { const a = randInt(15, 75); body = rightScene(a, [GIV(a), UNK]).svg('Angle diagram'); steps0 = [`The small square shows a right angle, so ${V('x')} = 90° ${MINUS} ${a}° = ${90 - a}°.`]; }
+    else { const parts = splitInto(360, 3, 60), dirs = [20, 20 + parts[0], 20 + parts[0] + parts[1]]; body = rebuildPoint(dirs, parts, 2); steps0 = [`The three angles go all the way around a point, so ${V('x')} = 360° ${MINUS} ${parts[0]}° ${MINUS} ${parts[1]}° = ${parts[2]}°.`]; }
+    return mkReason(T, body, [key], [key], null, steps0);
+  }
+  if (level === 1) {
+    const th = thetaPick(), vals = reg4(th), given = randInt(0, 3), rel = randChoice([1, 2]), tgt = (given + rel) % 4, key = rel === 2 ? 'vo' : 'straight';
+    const labs = [0, 1, 2, 3].map(i => i === given ? { t: D(vals[i]), g: String(vals[i]), role: 'given' } : i === tgt ? { t: unknownLabel, c: ORANGE, g: 'x', role: 'target', lr: 98 } : null);
+    const S = crossScene(th, labs);
+    return mkReason(T, S.svg('Two crossing lines'), [key], [key], null, [stepFor(key, vals[given], vals[tgt], true)]);
+  }
+  for (let tries = 0; tries < 400; tries++) {
+    const th = thetaPick(), all = allAngles(), [g, t] = shuffle(all).slice(0, 2), k = relKey(g[0], g[1], t[0], t[1]);
+    if (level === 2 && !isDirect(k)) continue;
+    if (level === 3 && !FARKEYS.includes(k)) continue;
+    const q = parallelQuestion(g, t, th, level === 3);
+    if (!q) continue;
+    return mkReason(T, q.S.svg('Parallel lines cut by a transversal'), q.chain.map(c => c.key), level === 2 ? [q.chain[0].key] : q.validSeqs, q, q.steps, 'AB ∥ CD');
+  }
+  throw new Error('no reason question');
+}
+
+// =========================================================================
+// 12. Multi-step angle problems
+// =========================================================================
+function genMulti(level) {
+  const T = 'Multi-Step Angle Problems';
+  if (level === 0) {
+    const delta = randInt(15, 75), S = Scene(900, 520), O = [450, 430];
+    S.line(addv(O, vec(180, 400)), addv(O, vec(0, 400))); S.line(O, addv(O, vec(90, 350))); S.line(O, addv(O, vec(90 - delta, 360))); S.dot(O, { r: 7 });
+    S.angle(O, 0, 90, '', { box: true, boxSize: 34, g: '90°', role: 'box' });
+    S.angle(O, 90 - delta, 90, D(delta), { r: 150, g: String(delta), role: 'given', lr: 195 });
+    S.angle(O, 90 - delta, 180, '', { r: 105, color: ORANGE, g: 'x', role: 'target' });
+    const tp = addv(O, vec(135, 135)); S.text(tp[0], tp[1], unknownLabel, { color: ORANGE, bold: true });
+    [['A', addv(O, vec(180, 432))], ['B', addv(O, vec(0, 432))], ['D', addv(O, vec(90, 382))], ['C', addv(O, vec(90 - delta, 392))]].forEach(x => S.text(x[1][0], x[1][1], x[0], { size: 34, bold: true }));
+    const ans = 90 + delta;
+    return buildNumeric(T, { prompt: 'AOB is a straight line. Find the size of angle AOC (angle x).', context: 'OD ⊥ AB', body: S.svg('Perpendicular line and a ray'), answer: ans, wrong: [90 - delta, 180 - delta, delta, 180 - delta + 10],
+      steps: [`OD ⊥ AB, so ∠AOD is a right angle: ∠AOD = 90°.`, `∠DOC = ${delta}°, and ∠AOC is made up of ∠AOD and ∠DOC.`, `${V('x')} = 90° + ${delta}° = ${ans}°`, `Answer: ${ans}°`], meta: { delta, ans } });
+  }
+  if (level === 1) {
+    const parts = splitInto(180, 3, 30), s1 = parts[0], s2 = parts[1], S = Scene(900, 560), O = [450, 280];
+    [[0, 300], [s1, 250], [s1 + s2, 250]].forEach(l => S.line(addv(O, vec(l[0] + 180, l[1])), addv(O, vec(l[0], l[1])))); S.dot(O, { r: 7 });
+    const bounds = [0, s1, s1 + s2, 180, 180 + s1, 180 + s1 + s2, 360], vals = [parts[0], parts[1], parts[2], parts[0], parts[1], parts[2]];
+    const third = randInt(0, 2), tgt = third + (Math.random() < 0.5 ? 0 : 3), givens = [0, 1, 2].filter(i => i !== third);
+    for (let i = 0; i < 6; i++) {
+      if (givens.includes(i)) S.angle(O, bounds[i], bounds[i + 1], D(vals[i]), { r: 56, g: String(vals[i]), role: 'given' });
+      else if (i === tgt) S.angle(O, bounds[i], bounds[i + 1], unknownLabel, { r: 56, color: ORANGE, g: 'x', role: 'target' });
+    }
+    S.meta({ parts });
+    const sum = vals[givens[0]] + vals[givens[1]], ans = vals[tgt], opp = tgt >= 3;
+    const steps = [`Three angles lie along each straight line, and they add to 180°.`, `${vals[givens[0]]}° + ${vals[givens[1]]}° = ${sum}°`,
+      opp ? `The angle next to them on the straight line is 180° ${MINUS} ${sum}° = ${180 - sum}°.` : `${V('x')} = 180° ${MINUS} ${sum}° = ${ans}°`];
+    if (opp) steps.push(`${V('x')} is vertically opposite that angle, so ${V('x')} = ${ans}° (vertically opposite angles are equal).`);
+    steps.push(`Answer: ${ans}°`);
+    return buildNumeric(T, { prompt: 'Three straight lines cross at a point. Find the size of angle x.', body: S.svg('Three lines through a point'), answer: ans, wrong: [sum, 360 - sum > 0 && 360 - sum < 360 ? 360 - sum : ans + 20, vals[givens[0]], ans + 10, 90 - ans > 0 ? 90 - ans : ans + 30], steps, meta: { parts, third, tgt, givens } });
+  }
+  if (level === 2 || Math.random() < 0.5) {
+    const [p, q, r, s] = letters(4), v = randChoice([randInt(52, 80), randInt(100, 128)]), nm = [p, q, r, s];
+    const gi = randInt(0, 3), adj = level === 2, ti = adj ? (gi + randChoice([1, 3])) % 4 : (gi + 2) % 4;
+    const S = paraScene(nm, v, [{ vi: gi, label: D(paraVal(gi, v)), g: String(paraVal(gi, v)), role: 'given' }, { vi: ti, label: unknownLabel, g: 'x', role: 'target', color: ORANGE }]);
+    const ans = paraVal(ti, v), given = paraVal(gi, v);
+    let steps;
+    if (adj) {
+      const u = nm[gi], w = nm[ti], nu = nm[(gi + 4 - (ti === (gi + 1) % 4 ? 1 : -1)) % 4], nw = nm[(ti + (ti === (gi + 1) % 4 ? 1 : 3)) % 4];
+      steps = [`Opposite sides of a parallelogram are parallel: ${u}${nu} ∥ ${w}${nw}.`, `${u}${w} crosses these parallel sides, so ∠${u} and ∠${w} are co-interior angles.`, `Co-interior angles on parallel lines add to 180°.`, `${V('x')} = 180° ${MINUS} ${given}° = ${ans}°`];
+    } else {
+      const mid = nm[(gi + 1) % 4], mv = 180 - given;
+      steps = [`Opposite sides of a parallelogram are parallel, so angles next to each other are co-interior angles.`, `∠${nm[gi]} and ∠${mid} are co-interior: ∠${mid} = 180° ${MINUS} ${given}° = ${mv}°.`, `∠${mid} and ∠${nm[ti]} are co-interior: ${V('x')} = 180° ${MINUS} ${mv}° = ${ans}°.`];
+    }
+    steps.push(`Answer: ${ans}°`);
+    return buildNumeric(T, { prompt: `${p}${q}${r}${s} is a parallelogram. Find the size of angle x.`, body: S.svg('Parallelogram'), answer: ans, wrong: [180 - ans, given === ans ? ans + 10 : given, 360 - given - ans > 0 && 360 - given - ans < 360 ? 360 - given - ans : ans + 15, 90 - ans > 0 ? 90 - ans : ans + 20], steps, meta: { nm, v, gi, ti, adj, given, ans } });
+  }
+  for (let tries = 0; tries < 300; tries++) {
+    const th = thetaPick(), [g, t] = shuffle(allAngles()).slice(0, 2);
+    if (!FARKEYS.includes(relKey(g[0], g[1], t[0], t[1]))) continue;
+    const q = parallelQuestion(g, t, th, true);
+    if (q) return buildParallel(T, q);
+  }
+  throw new Error('no multi question');
+}
+
+// =========================================================================
+// Registry + API
+// =========================================================================
+const TOPIC_CONFIG = {
+  points:      { label: 'Points, Lines and Rays', blurb: 'Intervals, rays and lines', build: genPoints },
+  naming:      { label: 'Naming Angles', blurb: 'Vertex, arms and ∠ABC', build: genNamingAngles },
+  types:       { label: 'Types of Angles', blurb: 'Right, straight, revolution', build: genAngleTypes },
+  compsupp:    { label: 'Complementary and Supplementary', blurb: 'Pairs adding to 90° or 180°', build: genCompSupp },
+  adjvo:       { label: 'Adjacent and Vertically Opposite', blurb: 'Angles where lines meet', build: genAdjVO },
+  atpoint:     { label: 'Angles at a Point', blurb: '90°, 180° and 360°', build: genAtPoint },
+  parperp:     { label: 'Parallel and Perpendicular Lines', blurb: 'The symbols ∥ and ⊥', build: genParPerp },
+  pairs:       { label: 'Transversals and Angle Pairs', blurb: 'Corresponding, alternate, co-interior', build: genAnglePairs },
+  parallel:    { label: 'Angles on Parallel Lines', blurb: 'Find unknown angles', build: genParallelAngles },
+  justify:     { label: 'Are the Lines Parallel?', blurb: 'Prove lines are parallel', build: genJustify },
+  reasons:     { label: 'Reasons for Angle Facts', blurb: 'Give the reason', build: genReasons },
+  multi:       { label: 'Multi-Step Angle Problems', blurb: 'Several reasons in a row', build: genMulti },
+};
+const TOPIC_ORDER = ['points', 'naming', 'types', 'compsupp', 'adjvo', 'atpoint', 'parperp', 'pairs', 'parallel', 'justify', 'reasons', 'multi'];
+
+function generateQuestion(topicKey, level) {
+  const q = TOPIC_CONFIG[topicKey].build(clampLevel(level));
+  if (q.fixedChoices) return Object.assign({}, q, { choices: q.fixedChoices });
+  const objs = [{ html: q.correct.display, correct: true }].concat(q.distractorsHtml.slice(0, 3).map(h => ({ html: h, correct: false })));
+  return Object.assign({}, q, { choices: shuffle(objs) });
+}
+
+// ---------- typed answers ----------
+function parseRel(s) {
+  s = String(s).toLowerCase().replace(/line\s+/g, '').replace(/is\s+perpendicular\s+to|perpendicular\s+to|perpendicular|⟂|_\|_/g, '⊥').replace(/is\s+parallel\s+to|parallel\s+to|parallel|\|\||\/\//g, '∥').replace(/\s+/g, '');
+  const m = s.match(/^([a-z]{2})(∥|⊥)([a-z]{2})$/);
+  return m ? [m[2] === '∥' ? 'par' : 'perp', m[1], m[3]] : null;
+}
+const lineKey = (l) => l.toLowerCase().split('').sort().join('');
+function reasonKeys(s) {
+  const found = [];
+  Object.keys(RS).forEach(k => { const m = new RegExp(RS[k].rx, 'i').exec(s); if (m) found.push([m.index, k]); });
+  found.sort((a, b) => a[0] - b[0]);
+  return found.map(f => f[1]);
+}
+function checkTypedAnswer(userInput, q) {
+  const raw = String(userInput || '').trim();
+  if (!raw) return false;
+  const s = raw.toLowerCase().replace(/[−–]/g, '-').replace(/\s+/g, ' ');
+  const k = q.answerKind;
+  if (k === 'numeric') {
+    const t = s.replace(/degrees?|deg|°/g, '').replace(/\s+/g, '');
+    const m = t.match(/^(?:[a-z]=)?(\d+)$/);
+    return !!m && parseInt(m[1], 10) === q.correct.numeric;
+  }
+  if (k === 'choice') { const m = s.match(/^(?:(?:diagram|option|graph)\s*)?([a-e])$/); return !!m && m[1].toUpperCase() === q.correct.checkStr; }
+  if (k === 'name') return q.correct.accept.includes(nn(raw));
+  if (k === 'regex') { const re = new RegExp(q.correct.rx, 'i'); return re.test(s) && !(q.correct.no && new RegExp(q.correct.no, 'i').test(s)); }
+  if (k === 'rel') {
+    const a = parseRel(raw), b = q.correct.rel;
+    if (!a) return false;
+    if (a[0] !== b[0]) return false;
+    const l1 = lineKey(a[1]), l2 = lineKey(a[2]), c1 = lineKey(b[1]), c2 = lineKey(b[2]);
+    return (l1 === c1 && l2 === c2) || (l1 === c2 && l2 === c1);
+  }
+  if (k === 'verdict') {
+    const neg = /\b(no|not|isn't|aren't|non)\b/.test(s), yes = /\b(yes|parallel)\b/.test(s);
+    const verdict = neg ? 'no' : yes ? 'yes' : null;
+    const types = ['corr', 'alt', 'coint'].filter(t => new RegExp(PAIR_RX[t], 'i').test(s));
+    return verdict === q.correct.verdict[0] && types.length === 1 && types[0] === q.correct.verdict[1];
+  }
+  if (k === 'reason') { const got = reasonKeys(s).join(','); return got === q.correct.keys.join(',') || (q.correct.valid || []).includes(got); }
+  return false;
+}
+
+</script>
+<script>
+// =========================================================================
+// UI GLUE
+// =========================================================================
+
+const TOPIC_ORDER_UI = TOPIC_ORDER;
+
+let setup = { topic: ['points'], answer: 'mc', timer: 'none' };
+
+const STEP_ORDER = ['topic', 'answer', 'timer'];
+const STEP_META = {
+  topic: {
+    title: 'Choose Topics', multi: true,
+    options: TOPIC_ORDER_UI.map(k => ({ key: k, title: TOPIC_CONFIG[k].label, desc: TOPIC_CONFIG[k].blurb })),
+  },
+  answer: {
+    title: 'Answer Method', multi: false,
+    options: [
+      { key: 'mc', title: 'Multiple Choice', desc: 'Pick from 4 options' },
+      { key: 'type', title: 'Typed Answer', desc: 'Type your own answer' },
+    ],
+  },
+  timer: {
+    title: 'Timer', multi: false,
+    options: [
+      { key: 'none', title: 'No Timer', desc: 'Untimed practice' },
+      { key: 'm2', title: '2 Minutes', desc: 'Quick sprint' },
+      { key: 'm5', title: '5 Minutes', desc: 'Standard round' },
+      { key: 'm10', title: '10 Minutes', desc: 'Longer session' },
+    ],
+  },
+};
+const TIMER_SECONDS = { none: null, m2: 120, m5: 300, m10: 600 };
+
+let stepIndex = 0;
+
+function activeSteps() { return STEP_ORDER; }
+
+function isStepValid(stepName) {
+  const meta = STEP_META[stepName];
+  if (meta.multi) return setup[stepName].length >= 1;
+  return !!setup[stepName];
+}
+
+function selectOption(stepName, key) {
+  const meta = STEP_META[stepName];
+  if (meta.multi) {
+    const arr = setup[stepName];
+    const idx = arr.indexOf(key);
+    if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+    if (stepName === 'topic') arr.sort((a, b) => TOPIC_ORDER.indexOf(a) - TOPIC_ORDER.indexOf(b));
+  } else {
+    setup[stepName] = key;
+  }
+  renderWizard();
+}
+
+function stepContinue() {
+  const steps = activeSteps();
+  const stepName = steps[stepIndex];
+  if (!isStepValid(stepName)) return;
+  stepIndex++; // may reach steps.length, which renderWizard treats as the review screen
+  renderWizard();
+}
+function stepBack() {
+  if (stepIndex > 0) { stepIndex--; renderWizard(); }
+}
+
+function optLabel(stepName, key) {
+  if (stepName === 'topic') return TOPIC_CONFIG[key].label;
+  const opt = STEP_META[stepName].options.find(o => o.key === key);
+  return opt ? opt.title : key;
+}
+
+function renderWizard() {
+  const steps = activeSteps();
+  const body = document.getElementById('wiz-body');
+  const dotsEl = document.getElementById('wiz-dots');
+  const crumbEl = document.getElementById('wiz-crumb');
+  const backBtn = document.getElementById('wiz-back');
+  const continueBtn = document.getElementById('wiz-continue');
+  const reviewBlock = document.getElementById('review-block');
+
+  const atReview = stepIndex >= steps.length;
+
+  dotsEl.innerHTML = steps.map((s, i) => {
+    let cls = 'wiz-dot';
+    if (i < stepIndex || atReview) cls += ' done';
+    else if (i === stepIndex) cls += ' current';
+    return `<span class="${cls}"></span>`;
+  }).join('') + `<span class="wiz-dot${atReview ? ' current' : ''}"></span>`;
+
+  if (atReview) {
+    crumbEl.textContent = 'Review your setup';
+    body.innerHTML = '';
+    backBtn.classList.remove('hidden');
+    continueBtn.classList.add('hidden');
+    reviewBlock.classList.remove('hidden');
+    const rows = [
+      ['Topics', setup.topic.map(k => `${TOPIC_ORDER.indexOf(k) + 1}. ${optLabel('topic', k)}`).join('<br>')],
+      ['Answer Method', optLabel('answer', setup.answer)],
+      ['Timer', optLabel('timer', setup.timer)],
+    ];
+    document.getElementById('wiz-review').innerHTML = rows.map(([label, value]) =>
+      `<div class="review-row"><span class="rlabel">${label}</span><span class="rvalue">${value}</span></div>`
+    ).join('');
+    return;
+  }
+
+  reviewBlock.classList.add('hidden');
+  const stepName = steps[stepIndex];
+  const meta = STEP_META[stepName];
+  crumbEl.textContent = `Step ${stepIndex + 1} of ${steps.length}: ${meta.title}`;
+
+  const isSel = (key) => meta.multi ? setup[stepName].includes(key) : setup[stepName] === key;
+  const gridClass = meta.options.length <= 2 || stepName === 'answer' || stepName === 'topic' ? 'opt-grid single' : 'opt-grid';
+  body.innerHTML = `
+    <div class="setup-sec">
+      <div class="setup-label"><span class="step-num">${stepIndex + 1}</span>${meta.title}</div>
+      <div class="${gridClass}">
+        ${stepName === 'topic' ? meta.options.map(o => {
+          const on = isSel(o.key);
+          const n = TOPIC_ORDER.indexOf(o.key) + 1;
+          return `
+          <div class="tog-row${on ? ' on' : ''}" role="switch" aria-checked="${on}" tabindex="0" onclick="selectOption('topic','${o.key}')" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();selectOption('topic','${o.key}')}">
+            <span class="tog-num">${n}.</span>
+            <div class="tog-text"><div class="opt-title">${o.title}</div></div>
+          </div>`;
+        }).join('') : meta.options.map(o => {
+          const selected = isSel(o.key);
+          const orderNum = (stepName === 'topic' && selected) ? setup.topic.indexOf(o.key) + 1 : null;
+          return `
+          <div class="opt-card${selected ? ' sel' : ''}" onclick="selectOption('${stepName}','${o.key}')">
+            ${orderNum ? `<span class="opt-badge">${orderNum}</span>` : ''}
+            <div class="opt-title">${orderNum ? `<span class="opt-num">${orderNum}.</span> ` : ''}${o.title}</div>
+            <div class="opt-desc">${o.desc}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="setup-note">${meta.multi ? 'Select one or more. Questions go through your chosen topics in number order.' : ''}</div>
+    </div>
+  `;
+
+  backBtn.classList.toggle('hidden', stepIndex === 0);
+  continueBtn.classList.remove('hidden');
+  continueBtn.disabled = !isStepValid(stepName);
+}
+
+// ---------------- Quiz state & flow ----------------
+let sessionStats = { total: 0, correct: 0, bestStreak: 0, streak: 0 };
+let timerHandle = null;
+let timeRemaining = 0;
+let currentQ = null;
+let answered = false;
+let frozenSetup = null;
+
+function clearTimerIfRunning() {
+  if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+}
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
+function tickTimer() {
+  timeRemaining--;
+  document.getElementById('stat-timer').textContent = formatTime(Math.max(0, timeRemaining));
+  if (timeRemaining <= 0) { clearTimerIfRunning(); endQuiz(true); }
+}
+
+function setupSummaryText() {
+  const topicNames = frozenSetup.topic.map(k => `${TOPIC_ORDER.indexOf(k) + 1}. ${TOPIC_CONFIG[k].label}`).join(', ');
+  return `${topicNames}<br>${optLabel('answer', frozenSetup.answer)}`;
+}
+
+// ---- Adaptive difficulty ----
+// Every topic has its own level, 0 (easiest) to 3 (hardest), following the
+// worksheet's order. Three correct answers in a row on a topic move it up one
+// level; a wrong answer moves it back down one, so a student who keeps
+// missing easier questions stays at the easier level.
+const MAX_LEVEL = 3;
+const LEVEL_UP_STREAK = 3;
+let topicLevels = {};
+let topicStreaks = {};
+let currentTopicKey = null;
+let currentLevel = 0;   // level of the topic just asked
+function levelFor(topicKey) { return topicLevels[topicKey] || 0; }
+function adjustLevelAfterAnswer(ok) {
+  const k = currentTopicKey;
+  if (!k) return;
+  let lvl = levelFor(k), st = topicStreaks[k] || 0;
+  if (ok) {
+    st++;
+    if (st >= LEVEL_UP_STREAK) { lvl = Math.min(lvl + 1, MAX_LEVEL); st = 0; }
+  } else {
+    lvl = Math.max(lvl - 1, 0); st = 0;
+  }
+  topicLevels[k] = lvl; topicStreaks[k] = st; currentLevel = lvl;
+}
+
+// ---- Topic rotation ----
+// Questions cycle through the selected topics in the order they were
+// selected (topic "1" asked first), looping back to the start.
+let topicRotationIndex = 0;
+function nextTopicForQuestion() {
+  const t = frozenSetup.topic;
+  const topic = t[topicRotationIndex % t.length];
+  topicRotationIndex++;
+  return topic;
+}
+
+function startQuiz() {
+  cancelAutoAdvance();
+  frozenSetup = JSON.parse(JSON.stringify(setup));
+  sessionStats = { total: 0, correct: 0, bestStreak: 0, streak: 0 };
+  currentLevel = 0;
+  topicLevels = {}; topicStreaks = {}; currentTopicKey = null;
+  topicRotationIndex = 0;
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('quiz-screen').classList.remove('hidden');
+  document.getElementById('setup-summary').innerHTML = setupSummaryText();
+
+  const timerStatWrap = document.getElementById('stat-timer-wrap');
+  clearTimerIfRunning();
+  const secs = TIMER_SECONDS[frozenSetup.timer];
+  if (secs) {
+    timeRemaining = secs;
+    timerStatWrap.classList.remove('hidden');
+    document.getElementById('stat-timer').textContent = formatTime(timeRemaining);
+    timerHandle = setInterval(tickTimer, 1000);
+  } else {
+    timerStatWrap.classList.add('hidden');
+  }
+  document.getElementById('stat-streak-wrap').classList.remove('hidden');
+  document.getElementById('stat-streak').textContent = '0';
+
+  nextQuestion();
+}
+
+function nextQuestion() {
+  cancelAutoAdvance();
+  answered = false;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+
+  const topicKey = nextTopicForQuestion();
+  currentTopicKey = topicKey;
+  currentLevel = levelFor(topicKey);
+  currentQ = generateQuestion(topicKey, currentLevel);
+
+  document.getElementById('q-topic-label').textContent = currentQ.topicLabel;
+
+  const contextEl = document.getElementById('q-context');
+  if (currentQ.context) { contextEl.innerHTML = currentQ.context; contextEl.classList.remove('hidden'); }
+  else contextEl.classList.add('hidden');
+
+  const formulaEl = document.getElementById('q-formula');
+  if (currentQ.formula) { formulaEl.innerHTML = currentQ.formula; formulaEl.classList.remove('hidden'); }
+  else formulaEl.classList.add('hidden');
+
+  document.getElementById('q-prompt').textContent = currentQ.promptText;
+
+  const exprEl = document.getElementById('q-expr');
+  const wordsEl = document.getElementById('q-words');
+  if (currentQ.topicLabel === 'Words to Expressions') {
+    wordsEl.innerHTML = currentQ.bodyHtml;
+    wordsEl.classList.remove('hidden');
+    exprEl.classList.add('hidden');
+  } else if (currentQ.bodyHtml) {
+    exprEl.innerHTML = currentQ.bodyHtml;
+    exprEl.classList.remove('hidden');
+    wordsEl.classList.add('hidden');
+  } else {
+    exprEl.classList.add('hidden');
+    wordsEl.classList.add('hidden');
+  }
+
+  renderAnswerArea();
+}
+
+function renderAnswerArea() {
+  const choiceGrid = document.getElementById('choice-grid');
+  const typeRow = document.getElementById('type-row');
+  const typeHint = document.getElementById('type-hint');
+  const typeInput = document.getElementById('type-input');
+
+  if (frozenSetup.answer === 'mc') {
+    typeRow.classList.add('hidden');
+    typeHint.classList.add('hidden');
+    choiceGrid.classList.remove('hidden');
+    choiceGrid.innerHTML = currentQ.choices.map((c, i) =>
+      `<button class="choice-btn" id="choice-${i}" onclick="submitChoice(${i})">${c.html}</button>`
+    ).join('');
+  } else {
+    choiceGrid.classList.add('hidden');
+    choiceGrid.innerHTML = '';
+    typeRow.classList.remove('hidden');
+    typeHint.classList.remove('hidden');
+    typeInput.value = '';
+    typeInput.disabled = false;
+    document.getElementById('type-submit').disabled = false;
+    setTimeout(() => typeInput.focus(), 0);
+  }
+}
+
+function registerResult(ok) {
+  sessionStats.total++;
+  if (ok) {
+    sessionStats.correct++;
+    sessionStats.streak++;
+    sessionStats.bestStreak = Math.max(sessionStats.bestStreak, sessionStats.streak);
+  } else {
+    sessionStats.streak = 0;
+  }
+  document.getElementById('stat-streak').textContent = String(sessionStats.streak);
+  adjustLevelAfterAnswer(ok);
+}
+
+// A correct answer moves straight on to the next question after a short pause
+// (so the green "Correct!" can be seen); a wrong answer waits for the student
+// to read the worked solution and press Next.
+const AUTO_ADVANCE_MS = 800;
+let autoAdvanceHandle = null;
+function cancelAutoAdvance() { if (autoAdvanceHandle) { clearTimeout(autoAdvanceHandle); autoAdvanceHandle = null; } }
+
+function showFeedback(ok) {
+  const fb = document.getElementById('feedback');
+  const banner = document.getElementById('fb-banner');
+  const answerEl = document.getElementById('fb-answer');
+  const stepsEl = document.getElementById('fb-steps');
+  fb.style.display = 'block';
+  banner.className = 'fb-banner ' + (ok ? 'ok' : 'err');
+  banner.textContent = ok ? 'Correct!' : 'Not quite.';
+  answerEl.innerHTML = 'Correct answer: ' + currentQ.correct.display;
+  if (!ok && currentQ.steps && currentQ.steps.length) {
+    stepsEl.innerHTML = '<div class="fb-steps-title">Worked solution:</div>' +
+      '<ol class="fb-steps-list">' + currentQ.steps.map(s => `<li>${s}</li>`).join('') + '</ol>';
+    stepsEl.classList.remove('hidden');
+  } else {
+    stepsEl.classList.add('hidden');
+    stepsEl.innerHTML = '';
+  }
+  if (ok) {
+    document.getElementById('next-btn').style.display = 'none';
+    answerEl.innerHTML = '';
+    cancelAutoAdvance();
+    autoAdvanceHandle = setTimeout(() => {
+      autoAdvanceHandle = null;
+      if (answered && !document.getElementById('quiz-screen').classList.contains('hidden')) nextQuestion();
+    }, AUTO_ADVANCE_MS);
+  } else {
+    document.getElementById('next-btn').style.display = 'block';
+  }
+}
+
+function submitChoice(i) {
+  if (answered) return;
+  answered = true;
+  const ok = currentQ.choices[i].correct;
+  currentQ.choices.forEach((c, idx) => {
+    const btn = document.getElementById('choice-' + idx);
+    btn.disabled = true;
+    if (c.correct) btn.classList.add('ok');
+    else if (idx === i) btn.classList.add('bad');
+  });
+  registerResult(ok);
+  showFeedback(ok);
+}
+
+function submitTyped() {
+  if (answered) return;
+  const input = document.getElementById('type-input');
+  const val = input.value;
+  if (!val.trim()) return;
+  answered = true;
+  input.disabled = true;
+  document.getElementById('type-submit').disabled = true;
+  const ok = checkTypedAnswer(val, currentQ);
+  registerResult(ok);
+  showFeedback(ok);
+}
+
+document.getElementById('type-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') submitTyped();
+});
+
+function endQuiz(timeUp) {
+  cancelAutoAdvance();
+  clearTimerIfRunning();
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('results-screen').classList.remove('hidden');
+  document.getElementById('results-title').textContent = timeUp ? "Time's Up!" : 'Quiz Complete!';
+  document.getElementById('results-sub').innerHTML = setupSummaryText().replace(/<br>/g, ' &middot; ');
+  const total = sessionStats.total;
+  const correct = sessionStats.correct;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('res-score').textContent = `${correct} / ${total} (${accuracy}%)`;
+  document.getElementById('res-beststreak').textContent = String(sessionStats.bestStreak);
+}
+
+function restartSameSetup() {
+  startQuiz();
+}
+
+function goToSetupFromResults() {
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  stepIndex = 0;
+  renderWizard();
+}
+function goToSetupFromQuiz() {
+  cancelAutoAdvance();
+  clearTimerIfRunning();
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  stepIndex = 0;
+  renderWizard();
+}
+
+// Introspection helper (used by the automated test harness; harmless to ship).
+function __testState() {
+  return { setup, stepIndex, frozenSetup, sessionStats, timeRemaining, timerHandle, currentQ, answered, currentLevel, topicLevels, topicRotationIndex };
+}
+
+renderWizard();
+</script>
+</body>
+</html>
